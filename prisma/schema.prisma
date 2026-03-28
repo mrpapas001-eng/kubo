@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Listing {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  phone           String?
+  price           Float
+  currency        String
+  city            String
+  categorySlug    String
+  subcategorySlug String
+  template        String
+  sellerType      String
+  isVerified      Boolean
+  imageUrl        String?
+  details         Json?
+  featured        Boolean  @default(false)
+  views           Int      @default(0)
+
+  ownerEmail      String?
+  ownerName       String?
+  ownerImage      String?
+
+  createdAt       DateTime @default(now())
+}
+
+model SponsorAd {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String?
+  ctaText   String?
+  ctaUrl    String?
+  type      String
+  placement String
+  priority  Int      @default(0)
+  startAt   DateTime
+  endAt     DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+model Favorite {
+  id          String   @id @default(cuid())
+  userEmail   String
+  listingId   String
+  createdAt   DateTime @default(now())
+
+  @@unique([userEmail, listingId])
+}

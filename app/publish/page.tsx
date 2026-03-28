@@ -1,0 +1,1329 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+
+type CategoryKey =
+  | "motor"
+  | "inmobiliaria"
+  | "celulares"
+  | "empleo"
+  | "servicios"
+  | "negocios"
+  | "informatica"
+  | "imagen-sonido"
+  | "juegos"
+  | "formacion"
+  | "deportes"
+  | "mascotas"
+  | "bebes"
+  | "moda";
+
+type DealType = "venta" | "arriendo";
+
+type Step = 1 | 2 | 3 | 4 | 5;
+
+const CAR_BRANDS = [
+  "AUDI",
+  "BMW",
+  "CHEVROLET",
+  "CITROEN",
+  "DAEWOO",
+  "DODGE",
+  "FORD",
+  "HONDA",
+  "HYUNDAI",
+  "JEEP",
+  "KIA",
+  "LAMBORGHINI",
+  "LAND ROVER",
+  "MAZDA",
+  "MERCEDES",
+  "MG",
+  "MINI",
+  "NISSAN",
+  "PEUGEOT",
+  "RENAULT",
+  "SUBARU",
+  "SUZUKI",
+  "TOYOTA",
+  "VOLKSWAGEN",
+  "VOLVO",
+  "ELÉCTRICOS",
+  "OTRA",
+];
+
+const MOTO_BRANDS = [
+  "YAMAHA",
+  "BMW",
+  "HONDA",
+  "CRYPTON",
+  "VESPA",
+  "SUZUKI",
+  "AKT",
+  "DUCATI",
+  "KAWASAKI",
+  "BAJAJ",
+  "TVS",
+  "KTM",
+  "DYNAMO",
+  "AUTECO",
+  "APRILIA",
+  "ELÉCTRICAS",
+  "OTRA",
+];
+
+const CELLPHONE_BRANDS = [
+  "SAMSUNG",
+  "APPLE",
+  "XIAOMI",
+  "MOTOROLA",
+  "HUAWEI",
+  "OPPO",
+  "VIVO",
+  "REALME",
+  "NOKIA",
+  "LG",
+  "OTRA",
+];
+
+const CITIES = [
+  "Pereira",
+  "Dosquebradas",
+  "Santa Rosa de Cabal",
+  "La Virginia",
+  "Cartago",
+  "Armenia",
+  "Bogotá",
+  "Medellín",
+  "Cali",
+  "Barranquilla",
+  "Cartagena",
+  "Bucaramanga",
+  "Manizales",
+  "Madrid, Cundinamarca",
+  "Otra",
+];
+
+const CATEGORY_OPTIONS: Array<{
+  key: CategoryKey;
+  label: string;
+  subs: Array<{ slug: string; label: string }>;
+}> = [
+  {
+    key: "motor",
+    label: "Motor",
+    subs: [
+      { slug: "carros", label: "Carros" },
+      { slug: "motos", label: "Motos" },
+      { slug: "repuestos", label: "Repuestos" },
+    ],
+  },
+  {
+    key: "inmobiliaria",
+    label: "Inmobiliaria",
+    subs: [
+      { slug: "casa", label: "Casa" },
+      { slug: "apartamento", label: "Apartamento" },
+      { slug: "apartaestudio", label: "Apartaestudio" },
+      { slug: "local-comercial", label: "Local comercial" },
+      { slug: "finca", label: "Finca" },
+      { slug: "lote", label: "Lote" },
+      { slug: "casa-campestre", label: "Casa campestre" },
+      { slug: "bodega", label: "Bodega" },
+      { slug: "otros-inmuebles", label: "Otros inmuebles" },
+    ],
+  },
+  {
+    key: "celulares",
+    label: "Celulares",
+    subs: [
+      { slug: "celulares", label: "Celulares" },
+      { slug: "repuestos", label: "Repuestos" },
+      { slug: "telefono-fijo", label: "Teléfono fijo" },
+    ],
+  },
+  {
+    key: "empleo",
+    label: "Empleo",
+    subs: [
+      { slug: "ofrezco-empleo", label: "Ofrezco empleo" },
+      { slug: "busco-empleo", label: "Busco empleo" },
+    ],
+  },
+  {
+    key: "servicios",
+    label: "Servicios",
+    subs: [
+      { slug: "hogar", label: "Para hogar" },
+      { slug: "personas", label: "Para personas" },
+      { slug: "empresas", label: "Para empresas" },
+      { slug: "electricos", label: "Servicios eléctricos" },
+      { slug: "motor", label: "Para motor" },
+      { slug: "bicicleta", label: "Para bicicleta" },
+      { slug: "otros", label: "Otros servicios" },
+    ],
+  },
+  {
+    key: "negocios",
+    label: "Negocios",
+    subs: [
+      { slug: "venta-de-negocios", label: "Venta de negocios" },
+      { slug: "traspasos", label: "Traspasos" },
+      { slug: "franquicias", label: "Franquicias" },
+      { slug: "arriendo-de-negocio", label: "Arriendo de negocio" },
+      { slug: "financiacion", label: "Financiación" },
+    ],
+  },
+  {
+    key: "informatica",
+    label: "Informática",
+    subs: [
+      { slug: "portatiles", label: "Portátiles" },
+      { slug: "todo-en-uno", label: "Todo en uno" },
+      { slug: "escritorio", label: "Escritorio" },
+      { slug: "tablets", label: "Tablets" },
+      { slug: "mac", label: "Mac" },
+      { slug: "accesorios", label: "Accesorios" },
+      { slug: "software", label: "Software" },
+      { slug: "gaming", label: "Gaming" },
+    ],
+  },
+  {
+    key: "imagen-sonido",
+    label: "Imagen y sonido",
+    subs: [
+      { slug: "fotografia", label: "Fotografía" },
+      { slug: "imagen", label: "Imagen" },
+      { slug: "sonido", label: "Sonido" },
+      { slug: "musica", label: "Música" },
+    ],
+  },
+  {
+    key: "juegos",
+    label: "Juegos",
+    subs: [
+      { slug: "consolas", label: "Consolas" },
+      { slug: "videojuegos", label: "Videojuegos" },
+      { slug: "accesorios", label: "Accesorios" },
+    ],
+  },
+  {
+    key: "formacion",
+    label: "Formación y libros",
+    subs: [
+      { slug: "clases-particulares", label: "Clases particulares" },
+      { slug: "libros", label: "Libros" },
+      { slug: "idiomas", label: "Idiomas" },
+      { slug: "cursos", label: "Cursos" },
+      { slug: "autoescuelas", label: "Autoescuelas" },
+    ],
+  },
+  {
+    key: "deportes",
+    label: "Deportes",
+    subs: [
+      { slug: "bicicletas", label: "Bicicletas" },
+      { slug: "futbol", label: "Fútbol" },
+      { slug: "gimnasio", label: "Gimnasio" },
+      { slug: "running", label: "Running" },
+      { slug: "camping", label: "Camping" },
+      { slug: "natacion", label: "Natación" },
+      { slug: "otros", label: "Otros deportes" },
+    ],
+  },
+  {
+    key: "mascotas",
+    label: "Mascotas",
+    subs: [
+      { slug: "perros", label: "Perros" },
+      { slug: "gatos", label: "Gatos" },
+      { slug: "caballos", label: "Caballos" },
+      { slug: "adopciones", label: "Adopciones" },
+      { slug: "peces", label: "Peces" },
+      { slug: "varios", label: "Varios" },
+    ],
+  },
+  {
+    key: "bebes",
+    label: "Bebés",
+    subs: [
+      { slug: "habitacion-bebes", label: "Habitación de bebés" },
+      { slug: "camaras-de-vigilancia", label: "Cámaras de vigilancia" },
+      { slug: "coches-de-bebe", label: "Coches de bebé" },
+      { slug: "juguetes", label: "Juguetes" },
+      { slug: "higiene-y-cuidado", label: "Higiene y cuidado" },
+      { slug: "varios", label: "Varios" },
+    ],
+  },
+  {
+    key: "moda",
+    label: "Moda y complementos",
+    subs: [
+      { slug: "moda-hombre", label: "Moda hombre" },
+      { slug: "moda-mujer", label: "Moda mujer" },
+      { slug: "perfumes", label: "Perfumes" },
+      { slug: "calzado", label: "Calzado" },
+      { slug: "disfraces", label: "Disfraces" },
+      { slug: "joyeria-bisuteria", label: "Joyería y bisutería" },
+      { slug: "sex-shop", label: "Sex shop" },
+      { slug: "otros-articulos-de-moda", label: "Otros artículos de moda" },
+    ],
+  },
+];
+
+function toTitleCase(s: string) {
+  const x = String(s || "").trim();
+  if (!x) return "";
+  return x
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function formatCOP(value: string) {
+  const numeric = Number(String(value || "").replace(/\D/g, ""));
+  if (!numeric) return "";
+  return new Intl.NumberFormat("es-CO").format(numeric);
+}
+
+function StepBadge({
+  step,
+  current,
+  label,
+}: {
+  step: Step;
+  current: Step;
+  label: string;
+}) {
+  const isActive = current === step;
+  const isDone = current > step;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={[
+          "flex h-9 w-9 items-center justify-center rounded-full border text-sm font-black",
+          isDone
+            ? "border-[#0f3c8c] bg-[#0f3c8c] text-white"
+            : isActive
+            ? "border-[#0f3c8c] bg-[#e8f0ff] text-[#0f3c8c]"
+            : "border-slate-200 bg-white text-slate-500",
+        ].join(" ")}
+      >
+        {isDone ? <CheckCircle2 className="h-4 w-4" /> : step}
+      </div>
+
+      <div className="min-w-0">
+        <div
+          className={[
+            "text-sm font-black",
+            isActive || isDone ? "text-slate-900" : "text-slate-500",
+          ].join(" ")}
+        >
+          {label}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PublishPage() {
+  const PUBLISH_DRAFT_KEY = "kubo_publish_draft_v1";
+
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  const [step, setStep] = useState<Step>(1);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState<string>("Pereira");
+  const [manualCity, setManualCity] = useState("");
+
+  const [category, setCategory] = useState<CategoryKey>("motor");
+  const [subcategory, setSubcategory] = useState<string>("carros");
+  const [price, setPrice] = useState<string>("");
+
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const [carBrand, setCarBrand] = useState<string>(CAR_BRANDS[0]);
+  const [carModel, setCarModel] = useState<string>("");
+  const [carYear, setCarYear] = useState<string>("");
+  const [carKm, setCarKm] = useState<string>("");
+
+  const [motoBrand, setMotoBrand] = useState<string>(MOTO_BRANDS[0]);
+  const [motoModel, setMotoModel] = useState<string>("");
+  const [motoYear, setMotoYear] = useState<string>("");
+  const [motoKm, setMotoKm] = useState<string>("");
+
+  const [cellBrand, setCellBrand] = useState<string>(CELLPHONE_BRANDS[0]);
+  const [cellModel, setCellModel] = useState<string>("");
+
+  const [deal, setDeal] = useState<DealType>("venta");
+  const [rooms, setRooms] = useState<string>("");
+  const [baths, setBaths] = useState<string>("");
+  const [sqm, setSqm] = useState<string>("");
+  const [parking, setParking] = useState<boolean>(false);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // cargar borrador una sola vez al montar
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PUBLISH_DRAFT_KEY);
+      if (!raw) return;
+
+      const draft = JSON.parse(raw);
+
+      if (draft.step) setStep(draft.step);
+      if (draft.title !== undefined) setTitle(draft.title);
+      if (draft.description !== undefined) setDescription(draft.description);
+      if (draft.phone !== undefined) setPhone(draft.phone);
+      if (draft.city !== undefined) setCity(draft.city);
+      if (draft.manualCity !== undefined) setManualCity(draft.manualCity);
+      if (draft.category !== undefined) setCategory(draft.category);
+      if (draft.subcategory !== undefined) setSubcategory(draft.subcategory);
+      if (draft.price !== undefined) setPrice(draft.price);
+
+      if (draft.carBrand !== undefined) setCarBrand(draft.carBrand);
+      if (draft.carModel !== undefined) setCarModel(draft.carModel);
+      if (draft.carYear !== undefined) setCarYear(draft.carYear);
+      if (draft.carKm !== undefined) setCarKm(draft.carKm);
+
+      if (draft.motoBrand !== undefined) setMotoBrand(draft.motoBrand);
+      if (draft.motoModel !== undefined) setMotoModel(draft.motoModel);
+      if (draft.motoYear !== undefined) setMotoYear(draft.motoYear);
+      if (draft.motoKm !== undefined) setMotoKm(draft.motoKm);
+
+      if (draft.cellBrand !== undefined) setCellBrand(draft.cellBrand);
+      if (draft.cellModel !== undefined) setCellModel(draft.cellModel);
+
+      if (draft.deal !== undefined) setDeal(draft.deal);
+      if (draft.rooms !== undefined) setRooms(draft.rooms);
+      if (draft.baths !== undefined) setBaths(draft.baths);
+      if (draft.sqm !== undefined) setSqm(draft.sqm);
+      if (draft.parking !== undefined) setParking(draft.parking);
+    } catch {
+      localStorage.removeItem(PUBLISH_DRAFT_KEY);
+    }
+  }, []);
+
+  // guardar borrador cuando cambian campos relevantes
+  useEffect(() => {
+    const draft = {
+      step,
+      title,
+      description,
+      phone,
+      city,
+      manualCity,
+      category,
+      subcategory,
+      price,
+      carBrand,
+      carModel,
+      carYear,
+      carKm,
+      motoBrand,
+      motoModel,
+      motoYear,
+      motoKm,
+      cellBrand,
+      cellModel,
+      deal,
+      rooms,
+      baths,
+      sqm,
+      parking,
+    };
+
+    try {
+      localStorage.setItem(PUBLISH_DRAFT_KEY, JSON.stringify(draft));
+    } catch {}
+  }, [
+    step,
+    title,
+    description,
+    phone,
+    city,
+    manualCity,
+    category,
+    subcategory,
+    price,
+    carBrand,
+    carModel,
+    carYear,
+    carKm,
+    motoBrand,
+    motoModel,
+    motoYear,
+    motoKm,
+    cellBrand,
+    cellModel,
+    deal,
+    rooms,
+    baths,
+    sqm,
+    parking,
+  ]);
+
+  // limpiar URLs de preview al desmontar
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [previewUrls]);
+
+  const subsForCategory = useMemo(() => {
+    return CATEGORY_OPTIONS.find((c) => c.key === category)?.subs ?? [];
+  }, [category]);
+
+  function onPickCategory(next: CategoryKey) {
+    setCategory(next);
+    const firstSub =
+      CATEGORY_OPTIONS.find((c) => c.key === next)?.subs?.[0]?.slug ?? "general";
+    setSubcategory(firstSub);
+  }
+
+  const isCar = category === "motor" && subcategory === "carros";
+  const isMoto = category === "motor" && subcategory === "motos";
+  const isRealEstate = category === "inmobiliaria";
+  const isCellPhone = category === "celulares" && subcategory === "celulares";
+
+  const requiresPrice = !["empleo", "servicios"].includes(category);
+
+  const finalCity = city === "Otra" ? manualCity.trim() : city;
+
+  const suggestedTitle = useMemo(() => {
+    if (isCar) {
+      const brand = toTitleCase(carBrand.replace("ELÉCTRICOS", "Eléctrico"));
+      const model = toTitleCase(carModel);
+      const year = String(carYear || "").trim();
+      return [brand, model, year].filter(Boolean).join(" ") || "Carro en excelente estado";
+    }
+
+    if (isMoto) {
+      const brand = toTitleCase(motoBrand.replace("ELÉCTRICAS", "Eléctrica"));
+      const model = toTitleCase(motoModel);
+      const year = String(motoYear || "").trim();
+      return [brand, model, year].filter(Boolean).join(" ") || "Moto en excelente estado";
+    }
+
+    if (isRealEstate) {
+      const sub =
+        subsForCategory.find((s) => s.slug === subcategory)?.label ?? "Inmueble";
+      const dealText = deal === "arriendo" ? "en arriendo" : "en venta";
+      const roomsText = rooms ? `${rooms} alcobas` : "";
+      return [sub, dealText, roomsText].filter(Boolean).join(" ");
+    }
+
+    if (isCellPhone) {
+      const brand = toTitleCase(cellBrand);
+      const model = toTitleCase(cellModel);
+      return [brand, model].filter(Boolean).join(" ") || "Celular en venta";
+    }
+
+    const catLabel =
+      CATEGORY_OPTIONS.find((c) => c.key === category)?.label ?? "Anuncio";
+
+    const subLabel =
+      subsForCategory.find((s) => s.slug === subcategory)?.label ??
+      toTitleCase(subcategory);
+
+    return `${catLabel}: ${subLabel || "Nuevo"}`;
+  }, [
+    isCar,
+    isMoto,
+    isRealEstate,
+    isCellPhone,
+    carBrand,
+    carModel,
+    carYear,
+    motoBrand,
+    motoModel,
+    motoYear,
+    cellBrand,
+    cellModel,
+    subcategory,
+    deal,
+    rooms,
+    category,
+    subsForCategory,
+  ]);
+
+  useEffect(() => {
+    if (!title.trim()) {
+      setTitle(suggestedTitle);
+    }
+  }, [suggestedTitle]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      signIn("google", { callbackUrl: "/publish" });
+    }
+  }, [status]);
+
+  function validateStep(nextStep?: Step) {
+    setError(null);
+
+    if (step === 1 || nextStep === 1) {
+      if (!category) return "Selecciona una categoría.";
+      if (!subcategory) return "Selecciona una subcategoría.";
+      if (!finalCity) return "Selecciona una ciudad.";
+    }
+
+    if (step === 2 || nextStep === 2) {
+      if (isCar && !carBrand) return "Selecciona la marca del carro.";
+      if (isMoto && !motoBrand) return "Selecciona la marca de la moto.";
+      if (isCellPhone && !cellBrand) return "Selecciona la marca del celular.";
+    }
+
+    if (step === 3 || nextStep === 3) {
+      if (!title.trim()) return "Escribe un título para el anuncio.";
+      if (!description.trim()) return "Escribe una descripción.";
+      if (requiresPrice && !String(price).trim()) {
+        return "Ingresa el precio del anuncio.";
+      }
+    }
+
+    if (step === 4 || nextStep === 4) {
+      if (!phone.trim()) return "Ingresa un teléfono de contacto.";
+
+      const cleanPhone = phone.replace(/\D/g, "");
+      if (cleanPhone.length < 7 || cleanPhone.length > 10) {
+        return "El teléfono debe tener entre 7 y 10 dígitos.";
+      }
+    }
+
+    return null;
+  }
+
+  function goNext() {
+    const message = validateStep();
+    if (message) {
+      setError(message);
+      return;
+    }
+    setError(null);
+    setStep((prev) => (prev < 5 ? ((prev + 1) as Step) : prev));
+  }
+
+  function goBack() {
+    setError(null);
+    setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    const message = validateStep(4);
+    if (message) {
+      setError(message);
+      setStep(4);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      let uploadedUrls: string[] = [];
+
+      if (imageFiles.length) {
+        const fd = new FormData();
+        imageFiles.slice(0, 10).forEach((f) => fd.append("files", f));
+
+        const up = await fetch("/api/upload", {
+          method: "POST",
+          body: fd,
+        });
+
+        const upData = await up.json();
+
+        if (!up.ok || !upData?.ok) {
+          throw new Error(upData?.error ?? "No se pudo subir imágenes");
+        }
+
+        uploadedUrls = Array.isArray(upData.urls) ? upData.urls : [];
+      }
+
+      const details: any = {
+        images: uploadedUrls,
+      };
+
+      if (isCar) {
+        details.motor = {
+          type: "carro",
+          brand: carBrand,
+          model: carModel || null,
+          year: carYear ? Number(carYear) : null,
+          km: carKm ? Number(carKm) : null,
+        };
+      }
+
+      if (isMoto) {
+        details.motor = {
+          type: "moto",
+          brand: motoBrand,
+          model: motoModel || null,
+          year: motoYear ? Number(motoYear) : null,
+          km: motoKm ? Number(motoKm) : null,
+        };
+      }
+
+      if (isRealEstate) {
+        details.realEstate = {
+          deal,
+          rooms: rooms ? Number(rooms) : null,
+          baths: baths ? Number(baths) : null,
+          sqm: sqm ? Number(sqm) : null,
+          parking,
+        };
+      }
+
+      if (isCellPhone) {
+        details.cellphone = {
+          brand: cellBrand,
+          model: cellModel || null,
+        };
+      }
+
+      const normalizedPrice = String(price).replace(/\D/g, "");
+
+      const res = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          phone: phone.replace(/\D/g, ""),
+          price: normalizedPrice ? Number(normalizedPrice) : null,
+          currency: "COP",
+          city: finalCity,
+          categorySlug: category,
+          subcategorySlug: subcategory,
+          template: "GENERAL",
+          sellerType: "PARTICULAR",
+          isVerified: false,
+          imageUrl: uploadedUrls[0] ?? null,
+          details,
+          // normalizamos el email para evitar problemas de mayúsculas/espacios
+          ownerEmail: session?.user?.email?.toLowerCase().trim() ?? null,
+        }),
+      });
+
+      const data = await res.json();
+      alert(JSON.stringify(data, null, 2));
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error ?? "No se pudo publicar");
+      }
+
+      localStorage.removeItem(PUBLISH_DRAFT_KEY);
+      router.push(`/listing/${data.listing.id}`);
+    } catch (err: any) {
+      setError(err?.message ?? "Error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
+        <div className="mx-auto max-w-[980px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h1 className="text-2xl font-black text-slate-900">Cargando sesión...</h1>
+          <p className="mt-2 text-slate-500">
+            Estamos comprobando tu acceso para publicar.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
+        <div className="mx-auto max-w-[980px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h1 className="text-2xl font-black text-slate-900">Iniciando sesión...</h1>
+          <p className="mt-2 text-slate-500">Te estamos redirigiendo a Google.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
+      <div className="mx-auto grid max-w-[1200px] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="self-start lg:sticky lg:top-24">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+              Publicar en KUBO
+            </div>
+            <h2 className="mt-2 text-xl font-black text-slate-900">
+              Completa tu anuncio paso a paso
+            </h2>
+
+            <div className="mt-6 space-y-5">
+              <StepBadge step={1} current={step} label="Categoría y ciudad" />
+              <StepBadge step={2} current={step} label="Detalles del producto" />
+              <StepBadge step={3} current={step} label="Contenido del anuncio" />
+              <StepBadge step={4} current={step} label="Fotos y contacto" />
+              <StepBadge step={5} current={step} label="Revisión final" />
+            </div>
+          </div>
+        </aside>
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-slate-900">
+                Publicar anuncio
+              </h1>
+              <p className="mt-2 font-medium text-slate-500">
+                Crea tu anuncio con una experiencia más guiada.
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">
+              Paso {step} de 5
+            </div>
+          </div>
+
+          <form onSubmit={onSubmit} className="mt-8">
+            {step === 1 ? (
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-bold text-slate-700">
+                      Categoría
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => onPickCategory(e.target.value as CategoryKey)}
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                    >
+                      {CATEGORY_OPTIONS.map((c) => (
+                        <option key={c.key} value={c.key}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-bold text-slate-700">
+                      Subcategoría
+                    </label>
+                    <select
+                      value={subcategory}
+                      onChange={(e) => setSubcategory(e.target.value)}
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                    >
+                      {subsForCategory.map((s) => (
+                        <option key={s.slug} value={s.slug}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700">Ciudad</label>
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                  >
+                    {CITIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {city === "Otra" ? (
+                  <div>
+                    <label className="text-sm font-bold text-slate-700">
+                      Escribe tu ciudad
+                    </label>
+                    <input
+                      value={manualCity}
+                      onChange={(e) => setManualCity(e.target.value)}
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+                      placeholder="Ej: Chía, Cundinamarca"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {step === 2 ? (
+              <div className="space-y-5">
+                {isCar ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="font-black text-slate-900">Datos del carro</div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">
+                          Marca
+                        </label>
+                        <select
+                          value={carBrand}
+                          onChange={(e) => setCarBrand(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                        >
+                          {CAR_BRANDS.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Modelo</label>
+                        <input
+                          value={carModel}
+                          onChange={(e) => setCarModel(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: Q3, Duster, Mazda 3..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Año</label>
+                        <input
+                          value={carYear}
+                          onChange={(e) => setCarYear(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 2020"
+                          inputMode="numeric"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Km</label>
+                        <input
+                          value={carKm}
+                          onChange={(e) => setCarKm(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 45000"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isMoto ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="font-black text-slate-900">Datos de la moto</div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Marca</label>
+                        <select
+                          value={motoBrand}
+                          onChange={(e) => setMotoBrand(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                        >
+                          {MOTO_BRANDS.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Modelo</label>
+                        <input
+                          value={motoModel}
+                          onChange={(e) => setMotoModel(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: FZ, NKD, Pulsar..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Año</label>
+                        <input
+                          value={motoYear}
+                          onChange={(e) => setMotoYear(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 2022"
+                          inputMode="numeric"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Km</label>
+                        <input
+                          value={motoKm}
+                          onChange={(e) => setMotoKm(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 12000"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isRealEstate ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="font-black text-slate-900">Datos del inmueble</div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">
+                          Venta / Arriendo
+                        </label>
+                        <select
+                          value={deal}
+                          onChange={(e) => setDeal(e.target.value as DealType)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                        >
+                          <option value="venta">Venta</option>
+                          <option value="arriendo">Arriendo</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-end gap-3">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={parking}
+                            onChange={(e) => setParking(e.target.checked)}
+                            className="h-4 w-4"
+                          />
+                          Parqueadero
+                        </label>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Alcobas</label>
+                        <input
+                          value={rooms}
+                          onChange={(e) => setRooms(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 3"
+                          inputMode="numeric"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Baños</label>
+                        <input
+                          value={baths}
+                          onChange={(e) => setBaths(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 2"
+                          inputMode="numeric"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Metros²</label>
+                        <input
+                          value={sqm}
+                          onChange={(e) => setSqm(e.target.value.replace(/\D/g, ""))}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: 85"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isCellPhone ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="font-black text-slate-900">Datos del celular</div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Marca</label>
+                        <select
+                          value={cellBrand}
+                          onChange={(e) => setCellBrand(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                        >
+                          {CELLPHONE_BRANDS.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-bold text-slate-700">Modelo</label>
+                        <input
+                          value={cellModel}
+                          onChange={(e) => setCellModel(e.target.value)}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+                          placeholder="Ej: iPhone 13, Galaxy S23..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {!isCar && !isMoto && !isRealEstate && !isCellPhone ? (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-medium text-slate-600">
+                    Esta categoría no necesita datos técnicos extra por ahora. Puedes continuar al siguiente paso.
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {/* Paso 3, 4, 5 y resto del formulario: (mantengo tu código original para estos pasos) */}
+            {step === 3 ? (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-sm font-bold text-slate-700">Título</label>
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+                    placeholder="Ej: Chevrolet Onix 2020"
+                    required
+                  />
+
+                  <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="text-[11px] font-extrabold uppercase text-slate-500">
+                      Título sugerido
+                    </div>
+                    <div className="mt-1 text-sm font-black text-slate-900">
+                      {suggestedTitle}
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTitle(suggestedTitle)}
+                        className="h-9 rounded-xl bg-slate-900 px-4 text-sm font-black text-white"
+                      >
+                        Usar sugerido
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setTitle("")}
+                        className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700"
+                      >
+                        Restablecer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700">Descripción</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="mt-2 min-h-[140px] w-full rounded-xl border border-slate-200 p-4"
+                    placeholder="Cuenta detalles importantes del producto o servicio..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700">
+                    Precio {requiresPrice ? "(COP)" : "(opcional)"}
+                  </label>
+                  <input
+                    value={price}
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\D/g, "");
+                      setPrice(clean);
+                    }}
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+                    placeholder="Ej: 85000000"
+                    inputMode="numeric"
+                  />
+                  {price ? (
+                    <p className="mt-2 text-sm font-medium text-slate-500">
+                      COP {formatCOP(price)}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            {step === 4 ? (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-sm font-bold text-slate-700">
+                    Fotos (hasta 10)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="mt-2 block w-full text-sm"
+                    onChange={(e) => {
+                      previewUrls.forEach((u) => URL.revokeObjectURL(u));
+                      const list = Array.from(e.target.files ?? []).slice(0, 10);
+                      setImageFiles(list);
+                      const urls = list.map((f) => URL.createObjectURL(f));
+                      setPreviewUrls(urls);
+                    }}
+                  />
+
+                  {imageFiles.length ? (
+                    <p className="mt-2 text-xs font-medium text-slate-500">
+                      {imageFiles.length} archivo(s) seleccionados
+                    </p>
+                  ) : null}
+
+                  {previewUrls.length ? (
+                    <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-5">
+                      {previewUrls.map((u, i) => (
+                        <img
+                          key={`${u}-${i}`}
+                          src={u}
+                          alt={`preview-${i}`}
+                          className="aspect-square w-full rounded-xl border border-slate-200 object-cover"
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700">Teléfono</label>
+                  <input
+                    value={phone}
+                    onChange={(e) =>
+                      setPhone(e.target.value.replace(/[^\d]/g, "").slice(0, 10))
+                    }
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+                    placeholder="Ej: 3001234567"
+                    inputMode="numeric"
+                    required
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {step === 5 ? (
+              <div className="space-y-6">
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                    Vista previa
+                  </div>
+
+                  <div className="mt-3 text-2xl font-black text-slate-900">
+                    {title || suggestedTitle}
+                  </div>
+
+                  <div className="mt-2 text-sm font-medium text-slate-500">
+                    {finalCity || "Sin ciudad"} ·{" "}
+                    {
+                      CATEGORY_OPTIONS.find((c) => c.key === category)?.label
+                    }{" "}
+                    /{" "}
+                    {subsForCategory.find((s) => s.slug === subcategory)?.label ??
+                      subcategory}
+                  </div>
+
+                  <div className="mt-4 text-3xl font-black text-[#0f3c8c]">
+                    {price ? `COP ${formatCOP(price)}` : "Precio a convenir"}
+                  </div>
+
+                  <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                    {description || "Sin descripción"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+                      Contacto
+                    </div>
+                    <div className="mt-1 text-sm font-black text-slate-900">
+                      {phone || "No definido"}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+                      Fotos
+                    </div>
+                    <div className="mt-1 text-sm font-black text-slate-900">
+                      {imageFiles.length} seleccionada(s)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">
+                {error}
+              </div>
+            ) : null}
+
+            <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex gap-3">
+                {step > 1 ? (
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 hover:bg-slate-50"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Atrás
+                  </button>
+                ) : null}
+
+                <Link
+                  href="/"
+                  className="flex h-11 items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancelar
+                </Link>
+              </div>
+
+              <div className="flex gap-3">
+                {step < 5 ? (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#0f3c8c] px-6 text-sm font-black text-white hover:bg-[#0c2f6d]"
+                  >
+                    Siguiente
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-black text-white disabled:opacity-60"
+                  >
+                    {loading ? "Publicando..." : "Publicar anuncio"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
