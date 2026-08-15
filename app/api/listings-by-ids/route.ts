@@ -16,6 +16,7 @@ export async function GET(req: Request) {
       id: {
         in: idArray,
       },
+      status: "active",
     },
   });
 

@@ -10,6 +10,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: true, isFavorite: false });
     }
 
+    const userEmail = session.user.email.toLowerCase().trim();
+
     const url = new URL(req.url);
     const listingId = url.searchParams.get("listingId");
 
@@ -23,7 +25,7 @@ export async function GET(req: Request) {
     const existing = await prisma.favorite.findUnique({
       where: {
         userEmail_listingId: {
-          userEmail: session.user.email,
+          userEmail,
           listingId,
         },
       },

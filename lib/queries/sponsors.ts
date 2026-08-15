@@ -5,8 +5,5 @@ export async function getHomeSponsors() {
     orderBy: { createdAt: "desc" },
   });
 
-  console.log("HOME SPONSORS COUNT:", sponsors.length);
-  console.log("FIRST SPONSOR:", sponsors[0]);
-
   return sponsors;
 }

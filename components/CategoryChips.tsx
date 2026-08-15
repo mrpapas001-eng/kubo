@@ -30,7 +30,7 @@ const categories = [
   { label: "Imagen y sonido", href: "/categoria/imagen-sonido", icon: Camera },
   { label: "Juegos", href: "/categoria/juegos", icon: Gamepad2 },
 
-  { label: "Formación y libros", href: "/categoria/formacion", icon: BookOpen },
+  { label: "Formación", href: "/categoria/formacion", icon: BookOpen },
   { label: "Deportes", href: "/categoria/deportes", icon: Bike },
   { label: "Mascotas", href: "/categoria/mascotas", icon: Dog },
   { label: "Bebés", href: "/categoria/bebes", icon: Baby },
@@ -39,23 +39,48 @@ const categories = [
 
 export default function CategoryChips() {
   return (
-    <div className="overflow-x-auto">
-      <div className="flex min-w-max items-center gap-2 pb-2">
-        {categories.map((category) => {
-          const Icon = category.icon;
+    <div className="relative mt-[-10px]">
+      {/* contenedor estilo "bloque integrado" */}
+      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex min-w-max items-center gap-3">
+            {categories.map((category) => {
+              const Icon = category.icon;
 
-          return (
-            <Link
-              key={category.label}
-              href={category.href}
-              className="flex h-11 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white px-5 text-[15px] font-bold text-slate-700 shadow-sm whitespace-nowrap hover:bg-slate-50"
-            >
-              {Icon ? <Icon className="h-4 w-4" /> : null}
-              {category.label}
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={category.label}
+                  href={category.href}
+                  className={`
+                    group flex items-center gap-2 rounded-full px-4 py-2
+                    text-[14px] font-semibold whitespace-nowrap transition-all
+                    ${
+                      category.active
+                        ? "bg-[#0f3c8c] text-white shadow"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }
+                  `}
+                >
+                  {Icon ? (
+                    <Icon
+                      className={`h-4 w-4 ${
+                        category.active
+                          ? "text-white"
+                          : "text-slate-500 group-hover:text-slate-700"
+                      }`}
+                    />
+                  ) : null}
+
+                  {category.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {/* fade lateral */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#F8F9FB] to-transparent" />
     </div>
   );
 }

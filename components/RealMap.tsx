@@ -1,14 +1,8 @@
-// components/RealMap.tsx
 "use client";
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-
-// Importar imágenes de marker (el bundler las resolverá en cliente)
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
-import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { useEffect, useMemo, useState } from "react";
+import { MapContainer, TileLayer, CircleMarker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 type ListingItem = {
   id: string;
@@ -25,71 +19,86 @@ type Props = {
   zoom?: number;
 };
 
+function MapUpdater({
+  center,
+  zoom,
+}: {
+  center: [number, number];
+  zoom: number;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, zoom, { animate: false });
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 0);
+  }, [map, center, zoom]);
+
+  return null;
+}
+
 export default function RealMap({
   listings = [],
   center = [4.8143, -75.6946],
   zoom = 12,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    // importar CSS sólo en cliente
-    import("leaflet/dist/leaflet.css");
-
-    // Fix iconos por defecto de Leaflet (necesario en bundlers modernos)
-    // eliminamos _getIconUrl para forzar mergeOptions a funcionar
-    try {
-      // @ts-ignore
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl,
-        iconUrl,
-        shadowUrl,
-      });
-    } catch (e) {
-      // no hacer nada si falla — esto sólo es un fallback
-      // console.warn("Leaflet icon merge failed", e);
-    }
+    setMounted(true);
   }, []);
+
+  const safeListings = useMemo(() => {
+    return Array.isArray(listings) ? listings : [];
+  }, [listings]);
+
+  const safeCenter = useMemo<[number, number]>(() => {
+    const lat = Number(center?.[0] ?? 4.8143);
+    const lng = Number(center?.[1] ?? -75.6946);
+    return [lat, lng];
+  }, [center]);
+
+  if (!mounted) {
+    return <div className="h-full w-full bg-slate-100" />;
+  }
 
   return (
     <div className="h-full w-full">
       <MapContainer
-        center={center}
+        key={`${safeCenter[0]}-${safeCenter[1]}-${zoom}`}
+        center={safeCenter}
         zoom={zoom}
         scrollWheelZoom={false}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {Array.isArray(listings) &&
-          listings.map((l) => {
-            const lat = Number(l.lat ?? 0);
-            const lng = Number(l.lng ?? 0);
-            if (!lat || !lng) return null;
+        <MapUpdater center={safeCenter} zoom={zoom} />
 
-            const priceText =
-              typeof l.price === "number"
-                ? new Intl.NumberFormat("es-CO", {
-                    style: "currency",
-                    currency: l.currency ?? "COP",
-                    maximumFractionDigits: 0,
-                  }).format(l.price)
-                : l.price ?? "";
+        {safeListings.map((l) => {
+          const lat = Number(l.lat ?? 0);
+          const lng = Number(l.lng ?? 0);
 
-            return (
-              <Marker key={l.id} position={[lat, lng]}>
-                <Popup>
-                  <div className="max-w-xs">
-                    <div className="font-bold">{l.title ?? "Anuncio"}</div>
-                    {priceText ? <div className="mt-1">{priceText}</div> : null}
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+          if (!lat || !lng) return null;
+
+          return (
+            <CircleMarker
+              key={l.id}
+              center={[lat, lng]}
+              radius={7}
+              pathOptions={{
+                color: "#ffffff",
+                weight: 3,
+                fillColor: "#2563eb",
+                fillOpacity: 1,
+              }}
+            />
+          );
+        })}
       </MapContainer>
     </div>
   );

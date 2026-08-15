@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -345,6 +345,7 @@ export default function PublishPage() {
   const [description, setDescription] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState<string>("Pereira");
+  const [location, setLocation] = useState<string>("");
   const [manualCity, setManualCity] = useState("");
 
   const [category, setCategory] = useState<CategoryKey>("motor");
@@ -358,11 +359,15 @@ export default function PublishPage() {
   const [carModel, setCarModel] = useState<string>("");
   const [carYear, setCarYear] = useState<string>("");
   const [carKm, setCarKm] = useState<string>("");
+  const [carFuel, setCarFuel] = useState<string>("Gasolina");
+  const [carTransmission, setCarTransmission] = useState<string>("Mecánica");
 
   const [motoBrand, setMotoBrand] = useState<string>(MOTO_BRANDS[0]);
   const [motoModel, setMotoModel] = useState<string>("");
   const [motoYear, setMotoYear] = useState<string>("");
   const [motoKm, setMotoKm] = useState<string>("");
+  const [motoFuel, setMotoFuel] = useState<string>("Gasolina");
+  const [motoTransmission, setMotoTransmission] = useState<string>("Mecánica");
 
   const [cellBrand, setCellBrand] = useState<string>(CELLPHONE_BRANDS[0]);
   const [cellModel, setCellModel] = useState<string>("");
@@ -372,6 +377,18 @@ export default function PublishPage() {
   const [baths, setBaths] = useState<string>("");
   const [sqm, setSqm] = useState<string>("");
   const [parking, setParking] = useState<boolean>(false);
+const [reelUrl, setReelUrl] = useState("");
+
+const [sellerType, setSellerType] = useState<"PARTICULAR" | "EMPRESA">(
+  "PARTICULAR"
+);
+
+const [businessName, setBusinessName] = useState("");
+const [businessDescription, setBusinessDescription] = useState("");
+const [businessWebsite, setBusinessWebsite] = useState("");
+const [businessInstagram, setBusinessInstagram] = useState("");
+const [businessFacebook, setBusinessFacebook] = useState("");
+const [businessWhatsapp, setBusinessWhatsapp] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -398,11 +415,15 @@ export default function PublishPage() {
       if (draft.carModel !== undefined) setCarModel(draft.carModel);
       if (draft.carYear !== undefined) setCarYear(draft.carYear);
       if (draft.carKm !== undefined) setCarKm(draft.carKm);
+      if (draft.carFuel !== undefined) setCarFuel(draft.carFuel);
+      if (draft.carTransmission !== undefined) setCarTransmission(draft.carTransmission);
 
       if (draft.motoBrand !== undefined) setMotoBrand(draft.motoBrand);
       if (draft.motoModel !== undefined) setMotoModel(draft.motoModel);
       if (draft.motoYear !== undefined) setMotoYear(draft.motoYear);
       if (draft.motoKm !== undefined) setMotoKm(draft.motoKm);
+      if (draft.motoFuel !== undefined) setMotoFuel(draft.motoFuel);
+      if (draft.motoTransmission !== undefined) setMotoTransmission(draft.motoTransmission);
 
       if (draft.cellBrand !== undefined) setCellBrand(draft.cellBrand);
       if (draft.cellModel !== undefined) setCellModel(draft.cellModel);
@@ -412,6 +433,7 @@ export default function PublishPage() {
       if (draft.baths !== undefined) setBaths(draft.baths);
       if (draft.sqm !== undefined) setSqm(draft.sqm);
       if (draft.parking !== undefined) setParking(draft.parking);
+      if (draft.reelUrl !== undefined) setReelUrl(draft.reelUrl);
     } catch {
       localStorage.removeItem(PUBLISH_DRAFT_KEY);
     }
@@ -433,10 +455,14 @@ export default function PublishPage() {
       carModel,
       carYear,
       carKm,
+      carFuel,
+      carTransmission,
       motoBrand,
       motoModel,
       motoYear,
       motoKm,
+      motoFuel,
+      motoTransmission,
       cellBrand,
       cellModel,
       deal,
@@ -444,6 +470,7 @@ export default function PublishPage() {
       baths,
       sqm,
       parking,
+      reelUrl,
     };
 
     try {
@@ -463,10 +490,14 @@ export default function PublishPage() {
     carModel,
     carYear,
     carKm,
+    carFuel,
+    carTransmission,
     motoBrand,
     motoModel,
     motoYear,
     motoKm,
+    motoFuel,
+    motoTransmission,
     cellBrand,
     cellModel,
     deal,
@@ -474,6 +505,7 @@ export default function PublishPage() {
     baths,
     sqm,
     parking,
+    reelUrl,
   ]);
 
   // limpiar URLs de preview al desmontar
@@ -566,11 +598,7 @@ export default function PublishPage() {
     }
   }, [suggestedTitle]);
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      signIn("google", { callbackUrl: "/publish" });
-    }
-  }, [status]);
+
 
   function validateStep(nextStep?: Step) {
     setError(null);
@@ -595,14 +623,18 @@ export default function PublishPage() {
       }
     }
 
-    if (step === 4 || nextStep === 4) {
-      if (!phone.trim()) return "Ingresa un teléfono de contacto.";
+if (step === 4 || nextStep === 4) {
+  if (imageFiles.length === 0) {
+    return "Debes subir al menos una foto.";
+  }
 
-      const cleanPhone = phone.replace(/\D/g, "");
-      if (cleanPhone.length < 7 || cleanPhone.length > 10) {
-        return "El teléfono debe tener entre 7 y 10 dígitos.";
-      }
-    }
+  if (!phone.trim()) return "Ingresa un teléfono de contacto.";
+
+  const cleanPhone = phone.replace(/\D/g, "");
+  if (cleanPhone.length < 7 || cleanPhone.length > 10) {
+    return "El teléfono debe tener entre 7 y 10 dígitos.";
+  }
+}
 
     return null;
   }
@@ -656,28 +688,39 @@ export default function PublishPage() {
         uploadedUrls = Array.isArray(upData.urls) ? upData.urls : [];
       }
 
-      const details: any = {
-        images: uploadedUrls,
-      };
+const details: any = {
+  images: uploadedUrls,
+};
 
-      if (isCar) {
-        details.motor = {
-          type: "carro",
-          brand: carBrand,
-          model: carModel || null,
-          year: carYear ? Number(carYear) : null,
-          km: carKm ? Number(carKm) : null,
-        };
+if (reelUrl && reelUrl.trim() !== "") {
+  details.reelUrl = reelUrl.trim();
+}
+
+if (isCar) {
+details.motor = {
+  type: "carro",
+  brand: carBrand,
+  model: carModel || null,
+  year: carYear ? Number(carYear) : null,
+  km: carKm ? Number(carKm) : null,
+  fuel: carFuel,
+  transmission: carTransmission,
+};
       }
+if (isMoto) {
+  details.motor = {
+    type: "moto",
+    brand: motoBrand,
+    model: motoModel || null,
+    year: motoYear ? Number(motoYear) : null,
+    km: motoKm ? Number(motoKm) : null,
+    fuel: motoFuel,
+    transmission: motoTransmission,
+  };
+}
 
       if (isMoto) {
-        details.motor = {
-          type: "moto",
-          brand: motoBrand,
-          model: motoModel || null,
-          year: motoYear ? Number(motoYear) : null,
-          km: motoKm ? Number(motoKm) : null,
-        };
+
       }
 
       if (isRealEstate) {
@@ -709,23 +752,31 @@ export default function PublishPage() {
           price: normalizedPrice ? Number(normalizedPrice) : null,
           currency: "COP",
           city: finalCity,
+          location: location.trim(),
           categorySlug: category,
           subcategorySlug: subcategory,
           template: "GENERAL",
-          sellerType: "PARTICULAR",
+          sellerType,
           isVerified: false,
           imageUrl: uploadedUrls[0] ?? null,
           details,
           // normalizamos el email para evitar problemas de mayúsculas/espacios
           ownerEmail: session?.user?.email?.toLowerCase().trim() ?? null,
+          businessName: businessName.trim(),
+businessDescription: businessDescription.trim(),
+businessWebsite: businessWebsite.trim(),
+businessInstagram: businessInstagram.trim(),
+businessFacebook: businessFacebook.trim(),
+businessWhatsapp: businessWhatsapp.trim(),
         }),
       });
 
-      const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error ?? "No se pudo publicar");
-      }
+const data = await res.json();
+
+if (!res.ok || !data?.ok) {
+  throw new Error(data?.error ?? "No se pudo publicar");
+}
+
 
       localStorage.removeItem(PUBLISH_DRAFT_KEY);
       router.push(`/listing/${data.listing.id}`);
@@ -738,7 +789,7 @@ export default function PublishPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
+      <div className="min-h-screen bg-[#F8F9FB] px-6 pb-36 pt-10 md:py-10">
         <div className="mx-auto max-w-[980px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
           <h1 className="text-2xl font-black text-slate-900">Cargando sesión...</h1>
           <p className="mt-2 text-slate-500">
@@ -749,21 +800,34 @@ export default function PublishPage() {
     );
   }
 
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
-        <div className="mx-auto max-w-[980px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-black text-slate-900">Iniciando sesión...</h1>
-          <p className="mt-2 text-slate-500">Te estamos redirigiendo a Google.</p>
-        </div>
+if (!session) {
+  return (
+    <div className="min-h-screen bg-[#F8F9FB] px-6 pb-36 pt-10 md:py-10">
+      <div className="mx-auto max-w-[980px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-black text-slate-900">
+          Inicia sesión para publicar
+        </h1>
+
+        <p className="mt-2 text-slate-500">
+          Necesitas entrar con tu cuenta para crear un anuncio.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/publish" })}
+          className="mt-6 rounded-xl bg-[#0f3c8c] px-6 py-3 font-bold text-white"
+        >
+          Entrar con Google
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] px-6 py-10">
+    <div className="min-h-screen bg-[#F8F9FB] px-4 pb-36 pt-6 md:px-6 md:py-10">
       <div className="mx-auto grid max-w-[1200px] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="self-start lg:sticky lg:top-24">
+        <aside className="hidden self-start lg:sticky lg:top-24 lg:block">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="text-xs font-black uppercase tracking-wide text-slate-500">
               Publicar en KUBO
@@ -782,8 +846,8 @@ export default function PublishPage() {
           </div>
         </aside>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="text-3xl font-black text-slate-900">
                 Publicar anuncio
@@ -795,6 +859,35 @@ export default function PublishPage() {
 
             <div className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">
               Paso {step} de 5
+            </div>
+          </div>
+
+          <div className="mt-5 lg:hidden">
+            <div className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-wide text-slate-500">
+              <span>Progreso</span>
+              <span>{Math.round((step / 5) * 100)}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full rounded-full bg-[#0f3c8c] transition-all"
+                style={{ width: `${(step / 5) * 100}%` }}
+              />
+            </div>
+            <div className="mt-3 grid grid-cols-5 gap-1">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div
+                  key={item}
+                  className={`h-9 rounded-xl text-center text-xs font-black leading-9 ${
+                    step === item
+                      ? "bg-[#0f3c8c] text-white"
+                      : step > item
+                        ? "bg-blue-50 text-[#0f3c8c]"
+                        : "bg-slate-100 text-slate-400"
+                  }`}
+                >
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -818,6 +911,18 @@ export default function PublishPage() {
                       ))}
                     </select>
                   </div>
+<div>
+  <label className="text-sm font-bold text-slate-700">
+    Ubicación exacta
+  </label>
+
+  <input
+    value={location}
+    onChange={(e) => setLocation(e.target.value)}
+    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+    placeholder="Ej: Centro, Av. 30 de Agosto, cerca del Éxito"
+  />
+</div>
 
                   <div>
                     <label className="text-sm font-bold text-slate-700">
@@ -870,117 +975,167 @@ export default function PublishPage() {
 
             {step === 2 ? (
               <div className="space-y-5">
-                {isCar ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="font-black text-slate-900">Datos del carro</div>
+{isCar ? (
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="font-black text-slate-900">Datos del carro</div>
 
-                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">
-                          Marca
-                        </label>
-                        <select
-                          value={carBrand}
-                          onChange={(e) => setCarBrand(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                        >
-                          {CAR_BRANDS.map((b) => (
-                            <option key={b} value={b}>
-                              {b}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div>
+        <label className="text-sm font-bold text-slate-700">Marca</label>
+        <select
+          value={carBrand}
+          onChange={(e) => setCarBrand(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          {CAR_BRANDS.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      </div>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Modelo</label>
-                        <input
-                          value={carModel}
-                          onChange={(e) => setCarModel(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: Q3, Duster, Mazda 3..."
-                        />
-                      </div>
+      <div>
+        <label className="text-sm font-bold text-slate-700">Modelo</label>
+        <input
+          value={carModel}
+          onChange={(e) => setCarModel(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: Q3, Duster, Mazda 3..."
+        />
+      </div>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Año</label>
-                        <input
-                          value={carYear}
-                          onChange={(e) => setCarYear(e.target.value.replace(/\D/g, ""))}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: 2020"
-                          inputMode="numeric"
-                        />
-                      </div>
+      <div>
+        <label className="text-sm font-bold text-slate-700">Año</label>
+        <input
+          value={carYear}
+          onChange={(e) => setCarYear(e.target.value.replace(/\D/g, ""))}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: 2020"
+          inputMode="numeric"
+        />
+      </div>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Km</label>
-                        <input
-                          value={carKm}
-                          onChange={(e) => setCarKm(e.target.value.replace(/\D/g, ""))}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: 45000"
-                          inputMode="numeric"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
+      <div>
+        <label className="text-sm font-bold text-slate-700">Km</label>
+        <input
+          value={carKm}
+          onChange={(e) => setCarKm(e.target.value.replace(/\D/g, ""))}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: 45000"
+          inputMode="numeric"
+        />
+      </div>
 
-                {isMoto ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="font-black text-slate-900">Datos de la moto</div>
+      <div>
+        <label className="text-sm font-bold text-slate-700">Combustible</label>
+        <select
+          value={carFuel}
+          onChange={(e) => setCarFuel(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="Gasolina">Gasolina</option>
+          <option value="Diésel">Diésel</option>
+          <option value="Gas">Gas</option>
+          <option value="Híbrido">Híbrido</option>
+          <option value="Eléctrico">Eléctrico</option>
+        </select>
+      </div>
 
-                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Marca</label>
-                        <select
-                          value={motoBrand}
-                          onChange={(e) => setMotoBrand(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                        >
-                          {MOTO_BRANDS.map((b) => (
-                            <option key={b} value={b}>
-                              {b}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+      <div>
+        <label className="text-sm font-bold text-slate-700">Transmisión</label>
+        <select
+          value={carTransmission}
+          onChange={(e) => setCarTransmission(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="Mecánica">Mecánica</option>
+          <option value="Automática">Automática</option>
+        </select>
+      </div>
+    </div>
+  </div>
+) : null}
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Modelo</label>
-                        <input
-                          value={motoModel}
-                          onChange={(e) => setMotoModel(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: FZ, NKD, Pulsar..."
-                        />
-                      </div>
+{isMoto ? (
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="font-black text-slate-900">Datos de la moto</div>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Año</label>
-                        <input
-                          value={motoYear}
-                          onChange={(e) => setMotoYear(e.target.value.replace(/\D/g, ""))}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: 2022"
-                          inputMode="numeric"
-                        />
-                      </div>
+    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div>
+        <label className="text-sm font-bold text-slate-700">Marca</label>
+        <select
+          value={motoBrand}
+          onChange={(e) => setMotoBrand(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          {MOTO_BRANDS.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      </div>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Km</label>
-                        <input
-                          value={motoKm}
-                          onChange={(e) => setMotoKm(e.target.value.replace(/\D/g, ""))}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: 12000"
-                          inputMode="numeric"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
+      <div>
+        <label className="text-sm font-bold text-slate-700">Modelo</label>
+        <input
+          value={motoModel}
+          onChange={(e) => setMotoModel(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: FZ, NKD, Pulsar..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Año</label>
+        <input
+          value={motoYear}
+          onChange={(e) => setMotoYear(e.target.value.replace(/\D/g, ""))}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: 2022"
+          inputMode="numeric"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Km</label>
+        <input
+          value={motoKm}
+          onChange={(e) => setMotoKm(e.target.value.replace(/\D/g, ""))}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: 12000"
+          inputMode="numeric"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Combustible</label>
+        <select
+          value={motoFuel}
+          onChange={(e) => setMotoFuel(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="Gasolina">Gasolina</option>
+          <option value="Eléctrica">Eléctrica</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Transmisión</label>
+        <select
+          value={motoTransmission}
+          onChange={(e) => setMotoTransmission(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="Mecánica">Mecánica</option>
+          <option value="Automática">Automática</option>
+          <option value="Semiautomática">Semiautomática</option>
+        </select>
+      </div>
+    </div>
+  </div>
+) : null}
 
                 {isRealEstate ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -1175,7 +1330,7 @@ export default function PublishPage() {
                     type="file"
                     accept="image/*"
                     multiple
-                    className="mt-2 block w-full text-sm"
+                    className="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-[#0f3c8c] file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
                     onChange={(e) => {
                       previewUrls.forEach((u) => URL.revokeObjectURL(u));
                       const list = Array.from(e.target.files ?? []).slice(0, 10);
@@ -1206,7 +1361,142 @@ export default function PublishPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-bold text-slate-700">Teléfono</label>
+                  <div className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
+  <div className="text-sm font-black text-[#0f3c8c]">
+    Publicas como particular o empresa?
+  </div>
+
+  <p className="mt-1 text-sm font-medium text-slate-600">
+    Las empresas verificadas pueden tener perfil, redes sociales,
+    mayor visibilidad y branding profesional dentro de Kubo.
+  </p>
+
+  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <button
+      type="button"
+      onClick={() => setSellerType("PARTICULAR")}
+      className={`rounded-2xl border px-4 py-4 text-left transition ${
+        sellerType === "PARTICULAR"
+          ? "border-[#0f3c8c] bg-white text-[#0f3c8c]"
+          : "border-slate-200 bg-white text-slate-700"
+      }`}
+    >
+      <div className="font-black">Particular</div>
+
+      <div className="mt-1 text-xs font-medium">
+        Publico un anuncio personal.
+      </div>
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setSellerType("EMPRESA")}
+      className={`rounded-2xl border px-4 py-4 text-left transition ${
+        sellerType === "EMPRESA"
+          ? "border-[#0f3c8c] bg-white text-[#0f3c8c]"
+          : "border-slate-200 bg-white text-slate-700"
+      }`}
+    >
+      <div className="font-black">Empresa</div>
+
+      <div className="mt-1 text-xs font-medium">
+        Soy negocio, tienda, concesionario o empresa.
+      </div>
+    </button>
+  </div>
+</div>
+{sellerType === "EMPRESA" ? (
+  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+    <div className="text-sm font-black text-slate-900">
+      Informacion de empresa
+    </div>
+
+    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="md:col-span-2">
+        <label className="text-sm font-bold text-slate-700">
+          Nombre empresa
+        </label>
+
+        <input
+          value={businessName}
+          onChange={(e) => setBusinessName(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: Autos Pereira"
+        />
+      </div>
+
+      <div className="md:col-span-2">
+        <label className="text-sm font-bold text-slate-700">
+          Descripcion empresa
+        </label>
+
+        <textarea
+          value={businessDescription}
+          onChange={(e) => setBusinessDescription(e.target.value)}
+          className="mt-2 min-h-[120px] w-full rounded-xl border border-slate-200 bg-white p-4"
+          placeholder="Describe tu negocio, servicios y experiencia..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Sitio web
+        </label>
+
+        <input
+          value={businessWebsite}
+          onChange={(e) => setBusinessWebsite(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="https://..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Instagram
+        </label>
+
+        <input
+          value={businessInstagram}
+          onChange={(e) => setBusinessInstagram(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="https://instagram.com/..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Facebook
+        </label>
+
+        <input
+          value={businessFacebook}
+          onChange={(e) => setBusinessFacebook(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="https://facebook.com/..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          WhatsApp empresa
+        </label>
+
+        <input
+          value={businessWhatsapp}
+          onChange={(e) =>
+            setBusinessWhatsapp(
+              e.target.value.replace(/[^\d]/g, "").slice(0, 10)
+            )
+          }
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="3001234567"
+        />
+      </div>
+    </div>
+  </div>
+) : null}
+                  <label className="text-sm font-bold text-slate-700">Telefono</label>
                   <input
                     value={phone}
                     onChange={(e) =>
@@ -1218,6 +1508,20 @@ export default function PublishPage() {
                     required
                   />
                 </div>
+                <div>
+  <label className="text-sm font-bold text-slate-700">
+    Enlace del reel o video corto (opcional)
+  </label>
+  <input
+    value={reelUrl}
+    onChange={(e) => setReelUrl(e.target.value)}
+    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+    placeholder="Ej: https://www.instagram.com/reel/..."
+  />
+  <p className="mt-2 text-xs font-medium text-slate-500">
+    Puedes pegar un enlace de Instagram, TikTok, YouTube Shorts u otro video.
+  </p>
+</div>
               </div>
             ) : null}
 
@@ -1280,12 +1584,12 @@ export default function PublishPage() {
             ) : null}
 
             <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:flex">
                 {step > 1 ? (
                   <button
                     type="button"
                     onClick={goBack}
-                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 hover:bg-slate-50"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 hover:bg-slate-50"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Atrás
@@ -1294,7 +1598,9 @@ export default function PublishPage() {
 
                 <Link
                   href="/"
-                  className="flex h-11 items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-700 hover:bg-slate-50"
+                  className={`flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-700 hover:bg-slate-50 ${
+                    step === 1 ? "col-span-2 sm:col-span-1" : ""
+                  }`}
                 >
                   Cancelar
                 </Link>
@@ -1305,7 +1611,7 @@ export default function PublishPage() {
                   <button
                     type="button"
                     onClick={goNext}
-                    className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#0f3c8c] px-6 text-sm font-black text-white hover:bg-[#0c2f6d]"
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0f3c8c] px-6 text-sm font-black text-white hover:bg-[#0c2f6d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3c8c]/30 sm:w-auto"
                   >
                     Siguiente
                     <ChevronRight className="h-4 w-4" />
@@ -1314,7 +1620,7 @@ export default function PublishPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-black text-white disabled:opacity-60"
+                    className="h-12 w-full rounded-xl bg-slate-900 px-6 text-sm font-black text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 disabled:opacity-60 sm:w-auto"
                   >
                     {loading ? "Publicando..." : "Publicar anuncio"}
                   </button>

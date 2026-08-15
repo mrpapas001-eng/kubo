@@ -9,15 +9,15 @@ type Props = {
 
 export default function ListingGallery({ images }: Props) {
   const cleaned = useMemo(() => {
-    const uniq: string[] = [];
+    const unique: string[] = [];
 
-    for (const x of images ?? []) {
-      const s = String(x || "").trim();
-      if (!s) continue;
-      if (!uniq.includes(s)) uniq.push(s);
+    for (const value of images ?? []) {
+      const src = String(value ?? "").trim();
+      if (!src) continue;
+      if (!unique.includes(src)) unique.push(src);
     }
 
-    return uniq.length ? uniq : ["/placeholders/listing.jpg"];
+    return unique.length ? unique : ["/placeholders/listing.jpg"];
   }, [images]);
 
   const [active, setActive] = useState(0);
@@ -26,23 +26,37 @@ export default function ListingGallery({ images }: Props) {
     setActive(0);
   }, [cleaned]);
 
-  const safeActive = active >= cleaned.length ? 0 : active;
+  const safeActive = Math.min(active, cleaned.length - 1);
   const main = cleaned[safeActive] ?? cleaned[0];
 
-  const goPrev = () => {
+  function goPrev() {
     setActive((prev) => (prev === 0 ? cleaned.length - 1 : prev - 1));
-  };
+  }
 
-  const goNext = () => {
+  function goNext() {
     setActive((prev) => (prev === cleaned.length - 1 ? 0 : prev + 1));
-  };
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (cleaned.length <= 1) return;
+
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goPrev();
+    }
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goNext();
+    }
+  }
 
   return (
-    <div className="w-full">
+    <div className="w-full outline-none" onKeyDown={handleKeyDown} tabIndex={0}>
       <div className="relative h-[280px] w-full overflow-hidden bg-slate-100 md:h-[420px] lg:h-[480px]">
         <img
           src={main}
-          alt="Foto principal del anuncio"
+          alt={`Foto ${safeActive + 1} del anuncio`}
           className="block h-full w-full object-cover object-center"
           loading="eager"
         />
@@ -53,7 +67,7 @@ export default function ListingGallery({ images }: Props) {
               type="button"
               onClick={goPrev}
               aria-label="Foto anterior"
-              className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm backdrop-blur hover:bg-white"
+              className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm backdrop-blur transition hover:bg-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -62,7 +76,7 @@ export default function ListingGallery({ images }: Props) {
               type="button"
               onClick={goNext}
               aria-label="Foto siguiente"
-              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm backdrop-blur hover:bg-white"
+              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm backdrop-blur transition hover:bg-white"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -88,6 +102,7 @@ export default function ListingGallery({ images }: Props) {
                       : "border-slate-200 opacity-80 hover:border-slate-400 hover:opacity-100",
                   ].join(" ")}
                   aria-label={`Ver foto ${idx + 1}`}
+                  aria-pressed={isActive}
                 >
                   <img
                     src={src}

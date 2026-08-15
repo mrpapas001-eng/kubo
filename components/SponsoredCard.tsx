@@ -1,48 +1,69 @@
 import { ArrowRight } from "lucide-react";
 
-export default function SponsoredCard({ sponsor }: { sponsor: any }) {
-  const title = sponsor?.title ?? "Patrocinado";
-  const subtitle = sponsor?.subtitle ?? "";
+type Props = {
+  sponsors?: any[];
+  sponsor?: any;
+};
+
+export default function SponsoredCard({ sponsors, sponsor }: Props) {
+  const item = sponsor ?? (Array.isArray(sponsors) ? sponsors[0] : null);
+
+  const title = item?.title ?? "Patrocinado";
+  const subtitle = item?.subtitle ?? "";
   const imageUrl =
-    sponsor?.imageUrl ?? "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400";
-  const ctaText = sponsor?.ctaText ?? "Conocer más";
-  const ctaUrl = sponsor?.ctaUrl ?? "#";
+    item?.imageUrl ??
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400";
+  const ctaText = item?.ctaText ?? "Conocer más";
+  const ctaUrl = item?.ctaUrl ?? "#";
 
   return (
     <a
       href={ctaUrl}
       target="_blank"
       rel="noreferrer"
-      className="relative overflow-hidden rounded-3xl bg-[#E21219] flex flex-col h-full min-h-[420px] shadow-lg group cursor-pointer"
+      className="group block h-full overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
-      <div className="p-6 pb-2 text-white z-10">
-        <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Patrocinado</span>
-        <div className="mt-4">
-          <h3 className="text-3xl font-black leading-tight italic">{title}</h3>
-          {subtitle ? (
-            <p className="text-sm mt-3 font-medium opacity-90 leading-snug max-w-[200px]">{subtitle}</p>
-          ) : null}
+      <div className="relative flex h-full min-h-[420px] flex-col">
+        <div className="relative h-[220px] overflow-hidden bg-slate-100">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
+            PATROCINADO
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col p-5">
+          <div className="flex-1">
+            <h3 className="text-[22px] font-black leading-tight tracking-tight text-slate-900">
+              {title}
+            </h3>
+
+            {subtitle ? (
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">
+                {subtitle}
+              </p>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                Descubre esta recomendación destacada y accede a más información.
+              </p>
+            )}
+          </div>
+
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+            <span className="text-sm font-bold text-slate-900">{ctaText}</span>
+
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0f3c8c] text-white transition-transform duration-300 group-hover:translate-x-1">
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
         </div>
       </div>
-
-      <div className="px-6 z-10 mt-2">
-        <div className="bg-white text-slate-900 px-4 py-2 rounded-full font-bold text-xs inline-flex items-center gap-2 hover:scale-105 transition-transform">
-          {ctaText}
-          <ArrowRight className="w-3 h-3" />
-        </div>
-      </div>
-
-      <div className="absolute bottom-0 right-0 left-0 h-1/2 overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#E21219]/20 to-[#E21219]" />
-      </div>
-
-      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white opacity-10 rounded-full" />
-      <div className="absolute top-20 -left-5 w-20 h-20 bg-white opacity-5 rounded-full" />
     </a>
   );
 }

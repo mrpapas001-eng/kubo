@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kubo Anuncios
 
-## Getting Started
+Marketplace local construido con Next.js, Prisma y NextAuth.
 
-First, run the development server:
+## Desarrollo local
+
+1. Instala dependencias:
+
+```bash
+npm install
+```
+
+2. Crea `.env.local` usando `.env.example` como guia.
+
+3. Sincroniza la base local:
+
+```bash
+npx prisma db push
+```
+
+4. Inicia el proyecto:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables necesarias
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXTAUTH_URL`
+- `NEXTAUTH_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `NEXT_PUBLIC_SITE_URL`
+- `DATABASE_URL`
 
-## Learn More
+## Rutas importantes
 
-To learn more about Next.js, take a look at the following resources:
+- `/publish`: publicar anuncio
+- `/buscar`: busqueda
+- `/mis-anuncios`: gestion del vendedor
+- `/favoritos`: favoritos
+- `/chat`: conversaciones
+- `/verificar-identidad`: solicitud de identidad verificada
+- `/verificar-empresa`: solicitud de empresa verificada
+- `/admin/reports`: reportes
+- `/admin/identity-verifications`: revisar identidad
+- `/admin/business-verifications`: revisar empresas
+- `/privacidad`: politica de privacidad inicial
+- `/terminos`: terminos de uso iniciales
+- `/seguridad`: consejos de seguridad
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Lanzamiento
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Antes de publicar:
 
-## Deploy on Vercel
+- Seguir la guia `docs/FASE_1_DEPLOY.md`.
+- Revisar textos legales con asesoria adecuada.
+- Migrar de SQLite a una base de produccion si el trafico sera real.
+- Configurar almacenamiento persistente para archivos subidos.
+- Definir manejo de documentos de identidad/RUT: acceso, retencion y eliminacion.
+- Activar pagos reales si se van a cobrar planes premium o destacados.
+- Revisar que `NEXTAUTH_URL` y `NEXT_PUBLIC_SITE_URL` apunten al dominio real.
+- Confirmar que `.env` y `.env.local` no se suban al repositorio.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notas de producto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Verificacion significa confianza, no visibilidad.
+- Premium/destacado significa visibilidad, no verificacion.
+- La Home visual esta congelada salvo cambios solicitados explicitamente.

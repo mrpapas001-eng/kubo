@@ -1,6 +1,7 @@
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={nunito.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <MobileBottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -13,6 +13,8 @@ export async function POST(req: Request) {
       );
     }
 
+    const userEmail = session.user.email.toLowerCase().trim();
+
     const body = await req.json();
     const listingId = String(body.listingId ?? "");
 
@@ -23,10 +25,22 @@ export async function POST(req: Request) {
       );
     }
 
+    const listing = await prisma.listing.findUnique({
+      where: { id: listingId },
+      select: { status: true },
+    });
+
+    if (!listing || listing.status !== "active") {
+      return NextResponse.json(
+        { ok: false, error: "Anuncio no disponible" },
+        { status: 404 }
+      );
+    }
+
     const existing = await prisma.favorite.findUnique({
       where: {
         userEmail_listingId: {
-          userEmail: session.user.email,
+          userEmail,
           listingId,
         },
       },
@@ -36,7 +50,7 @@ export async function POST(req: Request) {
       await prisma.favorite.delete({
         where: {
           userEmail_listingId: {
-            userEmail: session.user.email,
+            userEmail,
             listingId,
           },
         },
@@ -47,7 +61,7 @@ export async function POST(req: Request) {
 
     await prisma.favorite.create({
       data: {
-        userEmail: session.user.email,
+        userEmail,
         listingId,
       },
     });

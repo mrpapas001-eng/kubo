@@ -1,36 +1,111 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { Building2, MapPin, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  MapPin,
+  ShieldCheck,
+  Clock3,
+  Gauge,
+  Fuel,
+  Settings,
+  CalendarDays,
+  Crown,
+  BadgeCheck,
+} from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
 
-export default function ListingCard({ item }: { item: any }) {
-  if (!item) return null;
+type ListingCardProps = {
+  item: any;
+};
 
-  const image = item?.imageUrl ?? "/placeholders/listing.jpg";
-
-  const formattedPrice =
-    typeof item?.price === "number"
-      ? new Intl.NumberFormat("es-CO", {
-          style: "currency",
-          currency: item?.currency ?? "COP",
-          maximumFractionDigits: 0,
-        }).format(item.price)
-      : "Consultar precio";
-
-  const href = item?.id ? `/listing/${item.id}` : "#";
-
-  let details: any = {};
+function parseDetails(details: unknown) {
   try {
-    details =
-      typeof item?.details === "string"
-        ? JSON.parse(item.details)
-        : item?.details ?? {};
+    if (!details) return {};
+    if (typeof details === "string") return JSON.parse(details);
+    if (typeof details === "object") return details;
+    return {};
   } catch {
-    details = item?.details ?? {};
+    return {};
+  }
+}
+
+function formatPrice(price: unknown, currency?: string) {
+  const numeric = Number(price);
+
+  if (!Number.isNaN(numeric) && numeric > 0) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: currency ?? "COP",
+      maximumFractionDigits: 0,
+    }).format(numeric);
   }
 
-  const city = item?.city ?? "Sin ciudad";
-  const distance = item?.distance ?? null;
+  return "Consultar precio";
+}
+
+function formatPublishedDate(value: unknown) {
+  if (!value) return null;
+
+  const date = new Date(value as string);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+  if (diffDays === 0) return "Publicado hoy";
+  if (diffDays === 1) return "Publicado hace 1 día";
+  if (diffDays < 30) return `Publicado hace ${diffDays} días`;
+
+  return `Publicado el ${date.toLocaleDateString("es-CO")}`;
+}
+
+export default function ListingCard({ item }: ListingCardProps) {
+  if (!item) return null;
+
+  const now = new Date();
+
+  const isPremium =
+    Boolean(item?.isPremium) &&
+    Boolean(item?.premiumUntil) &&
+    new Date(item.premiumUntil).getTime() > now.getTime();
+
+  const isFeatured =
+    Boolean(item?.isFeatured) &&
+    Boolean(item?.featuredUntil) &&
+    new Date(item.featuredUntil).getTime() > now.getTime();
+
+  const isBusiness = Boolean(item?.isBusiness);
+  const businessVerified = Boolean(item?.businessVerified);
+  const identityVerified = Boolean(item?.isVerified);
+
+  const image = item?.imageUrl || "/placeholders/listing.jpg";
+  const href = item?.id ? `/listing/${item.id}` : "#";
+  const formattedPrice = formatPrice(item?.price, item?.currency);
+
+  const details: any = parseDetails(item?.details);
+  const reelUrl = typeof details?.reelUrl === "string" ? details.reelUrl : "";
+
+  const motor = details?.motor || {};
+
+  const km =
+    motor?.km !== null && motor?.km !== undefined
+      ? `${new Intl.NumberFormat("es-CO").format(Number(motor.km))} km`
+      : null;
+
+  const fuel = motor?.fuel || motor?.fuelType || null;
+  const transmission = motor?.transmission || null;
+  const year = motor?.year || null;
+
+  const isMotor =
+    item?.categorySlug === "motor" &&
+    ["carros", "motos"].includes(item?.subcategorySlug);
+
+  const city = item?.city || "Sin ciudad";
+  const distance = item?.distance || null;
+  const publishedLabel = formatPublishedDate(item?.createdAt);
 
   let extraLine = "";
 
@@ -44,32 +119,30 @@ export default function ListingCard({ item }: { item: any }) {
     const km = details?.motor?.km;
 
     const parts: string[] = [];
+
     if (brand) parts.push(String(brand));
     if (model) parts.push(String(model));
     if (year) parts.push(String(year));
-    if (km) {
+    if (km !== null && km !== undefined && km !== "") {
       parts.push(`${new Intl.NumberFormat("es-CO").format(Number(km))} km`);
     }
 
     extraLine = parts.join(" · ");
-  }
-
-  if (item?.categorySlug === "inmobiliaria") {
+  } else if (item?.categorySlug === "inmobiliaria") {
     const rooms = details?.realEstate?.rooms;
     const baths = details?.realEstate?.baths;
     const sqm = details?.realEstate?.sqm;
     const deal = details?.realEstate?.deal;
 
     const parts: string[] = [];
+
     if (deal) parts.push(deal === "arriendo" ? "Arriendo" : "Venta");
     if (rooms) parts.push(`${rooms} hab.`);
     if (baths) parts.push(`${baths} baños`);
     if (sqm) parts.push(`${sqm} m²`);
 
     extraLine = parts.join(" · ");
-  }
-
-  if (
+  } else if (
     item?.categorySlug === "celulares" &&
     item?.subcategorySlug === "celulares"
   ) {
@@ -77,6 +150,7 @@ export default function ListingCard({ item }: { item: any }) {
     const model = details?.cellphone?.model;
 
     const parts: string[] = [];
+
     if (brand) parts.push(String(brand));
     if (model) parts.push(String(model));
 
@@ -84,89 +158,155 @@ export default function ListingCard({ item }: { item: any }) {
   }
 
   const sellerName =
-    item?.sellerName ??
-    (item?.sellerType === "PARTICULAR"
-      ? "Particular"
-      : "Empresa verificada");
+    item?.businessName?.trim() ||
+    item?.ownerName?.trim() ||
+    item?.sellerName?.trim() ||
+    (isBusiness ? "Empresa" : "Particular");
+
+  const sellerLabel = businessVerified
+    ? "Empresa verificada"
+    : isBusiness
+      ? "Empresa"
+      : identityVerified
+        ? "Identidad verificada"
+        : "Particular";
+
+  const trustText = businessVerified
+    ? "RUT revisado por Kubo"
+    : identityVerified
+      ? "Identidad revisada por Kubo"
+      : isBusiness
+        ? "Empresa sin verificar"
+        : "Vendedor particular";
 
   return (
     <Link
       href={href}
-      className="group block overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className={`group relative block overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 ${
+        isPremium
+          ? "border-2 border-yellow-400 bg-gradient-to-b from-yellow-50 via-white to-white shadow-[0_18px_60px_rgba(245,158,11,0.28)] hover:shadow-[0_26px_90px_rgba(245,158,11,0.38)]"
+          : isFeatured
+            ? "border border-[#0f3c8c]/30 bg-white shadow-[0_18px_55px_rgba(15,60,140,0.18)]"
+            : "border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+      }`}
     >
-      <div className="relative h-60 w-full overflow-hidden bg-slate-100">
-        <FavoriteButton listingId={item.id} />
+      {isPremium ? (
+        <div className="absolute left-0 top-0 z-30 rounded-br-[24px] bg-gradient-to-r from-yellow-300 to-yellow-500 px-5 py-3 text-sm font-black uppercase tracking-wide text-slate-950 shadow-[0_10px_30px_rgba(245,158,11,0.35)]">
+          <div className="flex items-center gap-2">
+            <Crown className="h-4 w-4" />
+            Premium
+          </div>
+        </div>
+      ) : null}
 
-        {item.featured && (
-          <div className="absolute left-3 top-3 z-20 rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-yellow-900 shadow">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
+        {item?.id ? <FavoriteButton listingId={item.id} /> : null}
+
+        {isFeatured && !isPremium ? (
+          <div className="absolute left-3 top-3 z-20 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
             DESTACADO
           </div>
-        )}
+        ) : null}
 
         <Image
           src={image}
-          alt={item?.title ?? "Anuncio"}
+          alt={item?.title || "Anuncio"}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className={`object-cover transition-transform duration-500 ${
+            isPremium ? "group-hover:scale-[1.06]" : "group-hover:scale-[1.03]"
+          }`}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
+        <div
+          className={
+            isPremium
+              ? "absolute inset-0 bg-gradient-to-t from-yellow-300/30 via-transparent to-transparent"
+              : "absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"
+          }
+        />
 
         {distance ? (
-          <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-[13px] font-bold text-slate-800 shadow-lg backdrop-blur-md ring-1 ring-black/5">
-            <MapPin className="h-4 w-4 text-[#0f3c8c]" />
+          <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm ring-1 ring-black/5 backdrop-blur">
+            <MapPin className="h-3.5 w-3.5 text-[#0f3c8c]" />
             {distance}
           </div>
         ) : null}
+
+        {reelUrl ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(reelUrl, "_blank", "noopener,noreferrer");
+            }}
+            className="absolute bottom-3 right-3 z-20 rounded-full bg-black/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-white shadow-md backdrop-blur hover:bg-black"
+          >
+            ▶ Ver reel
+          </button>
+        ) : null}
       </div>
 
-      <div className="p-4">
-        <h3 className="line-clamp-2 min-h-[56px] text-[18px] font-extrabold leading-tight text-slate-900">
-          {item?.title ?? "Sin título"}
-        </h3>
+      <div className="space-y-3 p-4">
+        <div className="space-y-1.5">
+          <h3
+            className={`line-clamp-2 min-h-[48px] text-[18px] font-extrabold leading-snug ${
+              isPremium ? "text-slate-950" : "text-slate-900"
+            }`}
+          >
+            {item?.title || "Sin título"}
+          </h3>
 
-        <div className="mt-2 flex items-start gap-2 text-[15px] font-medium text-slate-500">
-          <MapPin className="mt-[3px] h-4 w-4 text-slate-400" />
-          <div className="leading-tight">
-            <div>{city}</div>
-            {extraLine ? (
-              <div className="mt-1 text-[14px] text-slate-500">{extraLine}</div>
-            ) : null}
+          <div className="text-sm font-medium text-slate-500">
+            {extraLine || city}
           </div>
-        </div>
 
-        <div className="mt-3 flex items-center gap-2 text-[15px] font-medium text-slate-500">
-          <ShieldCheck className="h-4 w-4 text-[#0f3c8c]" />
-          <span>
-            {item?.sellerType === "PARTICULAR"
-              ? "Particular"
-              : "Empresa verificada"}
-          </span>
-        </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black shadow-sm ${
+                businessVerified
+                  ? "bg-[#0f3c8c] text-white"
+                  : identityVerified
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {businessVerified || identityVerified ? (
+                <BadgeCheck className="h-3.5 w-3.5" />
+              ) : (
+                <ShieldCheck className="h-3.5 w-3.5 text-[#0f3c8c]" />
+              )}
+              {sellerLabel}
+            </span>
 
-        <div className="mt-3 border-t border-slate-200 pt-3">
-          <div className="flex items-end justify-between gap-3">
-            <div className="text-[20px] font-extrabold tracking-tight text-slate-900 md:text-[24px]">
-              {formattedPrice}
-            </div>
+            <span className="text-[11px] font-semibold text-slate-400">
+              {trustText}
+            </span>
           </div>
+
+
+
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-2xl bg-[#0f3c8c] text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex min-w-0 items-center gap-2 px-4 py-3">
-              <Building2 className="h-4 w-4 shrink-0" />
-              <span className="truncate text-[15px] font-bold">
-                {sellerName}
-              </span>
-            </div>
+        <div
+          className={`flex items-end justify-between gap-3 border-t pt-3 ${
+            isPremium ? "border-yellow-200" : "border-slate-100"
+          }`}
+        >
+          <div
+            className={`text-[23px] font-black tracking-tight ${
+              isPremium
+                ? "bg-gradient-to-r from-violet-700 to-blue-600 bg-clip-text text-transparent"
+                : "text-slate-900"
+            }`}
+          >
+            {formattedPrice}
+          </div>
 
-            {distance ? (
-              <div className="border-l border-white/10 bg-[#0c2f6d] px-4 py-3 text-[14px] font-bold">
-                {distance}
-              </div>
-            ) : null}
+          <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500">
+            <MapPin className="h-4 w-4 text-slate-400" />
+            {city}
           </div>
         </div>
       </div>
