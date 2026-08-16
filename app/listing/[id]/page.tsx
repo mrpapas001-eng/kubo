@@ -283,6 +283,9 @@ export default async function ListingDetail({ params }: PageProps) {
         ? "Este vendedor aun no ha verificado su identidad."
         : "Esta empresa aun no ha verificado su RUT.";
 
+  const showBusinessVerificationCta =
+    Boolean(isOwner && listing.isBusiness && !listing.businessVerified);
+
   const cityCoords: Record<string, [number, number]> = {
     pereira: [4.8143, -75.6946],
     bogota: [4.711, -74.0721],
@@ -668,6 +671,23 @@ const visibilityDescription = isPremiumListing
       <div>👀 Más visibilidad en la plataforma</div>
       <div>📞 Recibe más contactos de compradores</div>
     </div>
+
+    {showBusinessVerificationCta ? (
+      <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4">
+        <div className="text-sm font-black text-slate-900">
+          ¿Quieres verificar tu empresa?
+        </div>
+        <p className="mt-1 text-xs font-medium text-slate-600">
+          Obtén el sello Empresa verificada enviando tu RUT.
+        </p>
+        <Link
+          href="/verificar-empresa"
+          className="mt-3 inline-flex h-10 items-center justify-center rounded-xl bg-[#0f3c8c] px-4 text-xs font-black text-white hover:bg-[#0c2f6d]"
+        >
+          Verificar mi empresa
+        </Link>
+      </div>
+    ) : null}
   </div>
   ) : null}
 

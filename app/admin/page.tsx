@@ -49,12 +49,14 @@ function AdminLink({
   description,
   icon: Icon,
   badge,
+  actionLabel,
 }: {
   href: string;
   title: string;
   description: string;
   icon: any;
   badge?: string | number;
+  actionLabel?: string;
 }) {
   return (
     <Link
@@ -76,6 +78,11 @@ function AdminLink({
         <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
           {description}
         </p>
+        {actionLabel ? (
+          <div className="mt-4 text-sm font-black text-[#0f3c8c]">
+            {actionLabel} →
+          </div>
+        ) : null}
       </div>
     </Link>
   );
@@ -173,7 +180,15 @@ export default async function AdminDashboardPage() {
           <StatCard label="Visitas" value={views.toLocaleString("es-CO")} />
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+        <div className="mt-8">
+          <div className="mb-3 flex items-center gap-3">
+            <ShieldCheck className="h-5 w-5 text-[#0f3c8c]" />
+            <h2 className="text-xl font-black text-slate-900">
+              Verificaciones
+            </h2>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
           <AdminLink
             href="/admin/reports"
             title="Reportes"
@@ -184,17 +199,20 @@ export default async function AdminDashboardPage() {
           <AdminLink
             href="/admin/identity-verifications"
             title="Identidades"
-            description="Aprueba o rechaza solicitudes de vendedor con identidad verificada."
+            description="Revisa documentos y verifica usuarios."
             icon={IdCard}
             badge={pendingIdentity}
+            actionLabel="Gestionar identidades"
           />
           <AdminLink
             href="/admin/business-verifications"
             title="Empresas"
-            description="Revisa RUT y aprueba empresas verificadas dentro de Kubo."
+            description="Revisa RUT y aprueba empresas."
             icon={Building2}
             badge={pendingBusiness}
+            actionLabel="Gestionar empresas"
           />
+          </div>
         </div>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">

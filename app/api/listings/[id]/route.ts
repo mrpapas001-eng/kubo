@@ -222,6 +222,17 @@ export async function PATCH(req: Request, context: RouteContext) {
       );
     }
 
+    if (existing.status === "hidden" && existing.hiddenReason === "moderation") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Este anuncio fue ocultado por moderación y no puede ser reactivado por el propietario.",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
 
     const status = String(body?.status ?? "").trim();

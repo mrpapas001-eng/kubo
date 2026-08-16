@@ -329,7 +329,13 @@ export default function HomeFeaturedSection({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)]">
+      <div
+        className={`mt-6 grid grid-cols-1 gap-6 ${
+          sponsors?.length > 0
+            ? "lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)]"
+            : "lg:grid-cols-1"
+        }`}
+      >
         {sponsors?.length > 0 ? (
           <div className="min-w-0 h-full">
             <SponsoredBanner sponsors={sponsors} />

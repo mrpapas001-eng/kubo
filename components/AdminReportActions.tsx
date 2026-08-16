@@ -7,6 +7,7 @@ type AdminReportActionsProps = {
   reportId: string;
   reportStatus?: string;
   listingStatus?: string;
+  hiddenReason?: string | null;
 };
 
 export default function AdminReportActions({
@@ -14,10 +15,13 @@ export default function AdminReportActions({
   reportId,
   reportStatus,
   listingStatus,
+  hiddenReason,
 }: AdminReportActionsProps) {
   const router = useRouter();
   const isResolved = reportStatus === "resolved";
   const isListingDeleted = listingStatus === "deleted";
+  const isModerationHidden =
+    listingStatus === "hidden" && hiddenReason === "moderation";
 
   async function hideListing() {
     const ok = confirm("¿Seguro que quieres ocultar este anuncio?");
@@ -87,9 +91,41 @@ export default function AdminReportActions({
     router.refresh();
   }
 
+  async function restoreListing() {
+    const ok = confirm("¿Seguro que quieres restaurar este anuncio?");
+
+    if (!ok) return;
+
+    const res = await fetch("/api/admin/restore-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ listingId }),
+    });
+
+    if (!res.ok) {
+      alert("No se pudo restaurar el anuncio");
+      return;
+    }
+
+    alert("Anuncio restaurado");
+    router.refresh();
+  }
+
   return (
     <>
-      {!isListingDeleted ? (
+      {isModerationHidden ? (
+        <button
+          type="button"
+          onClick={restoreListing}
+          className="flex h-11 items-center justify-center rounded-2xl bg-blue-600 px-5 text-sm font-black text-white hover:bg-blue-700"
+        >
+          Restaurar anuncio
+        </button>
+      ) : null}
+
+      {!isListingDeleted && !isModerationHidden ? (
         <button
           type="button"
           onClick={hideListing}

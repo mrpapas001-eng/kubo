@@ -34,6 +34,7 @@ if (!isAdmin) {
       },
       data: {
         status: "hidden",
+        hiddenReason: "moderation",
       },
     });
 

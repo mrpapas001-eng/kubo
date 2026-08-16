@@ -60,17 +60,20 @@ export default async function MiCuentaPage() {
 
   const myEmail = session.user.email?.toLowerCase().trim() ?? null;
 
-  const hasUnverifiedBusiness = myEmail
-    ? Boolean(
-        await prisma.listing.findFirst({
-          where: {
-            ownerEmail: myEmail,
-            isBusiness: true,
-            businessVerified: false,
-          },
-        })
-      )
-    : false;
+  const businessListings = myEmail
+    ? await prisma.listing.findMany({
+        where: {
+          ownerEmail: myEmail,
+          isBusiness: true,
+        },
+        select: { businessVerified: true },
+      })
+    : [];
+
+  const hasBusiness = businessListings.length > 0;
+  const hasVerifiedBusiness = businessListings.some(
+    (item) => item.businessVerified
+  );
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-28 pt-6 md:px-6 md:py-10">
@@ -119,7 +122,7 @@ export default async function MiCuentaPage() {
             </div>
           </Link>
 
-          {hasUnverifiedBusiness ? (
+          {hasBusiness && !hasVerifiedBusiness ? (
             <Link
               href="/verificar-empresa"
               className="mt-4 flex items-center gap-4 rounded-3xl border border-[#0f3c8c] bg-[#e8f0ff] px-5 py-5 text-[#0f3c8c] shadow-sm hover:bg-[#dbe8ff]"
@@ -136,10 +139,26 @@ export default async function MiCuentaPage() {
                 </p>
               </div>
             </Link>
+          ) : hasVerifiedBusiness ? (
+            <div className="mt-4 flex items-center gap-4 rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-5 text-emerald-800">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-lg font-black">Empresa verificada</div>
+                <p className="mt-1 text-sm font-medium text-emerald-700">
+                  RUT revisado por Kubo.
+                </p>
+              </div>
+            </div>
           ) : null}
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             {accountLinks.map((item) => {
+              if (item.href === "/verificar-empresa" && hasVerifiedBusiness) {
+                return null;
+              }
+
               const Icon = item.icon;
 
               return (

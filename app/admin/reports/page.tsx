@@ -146,6 +146,7 @@ export default async function AdminReportsPage() {
     reportId={report.id}
     reportStatus={report.status}
     listingStatus={report.listing.status}
+    hiddenReason={report.listing.hiddenReason}
   />
 ) : null}
                 </div>

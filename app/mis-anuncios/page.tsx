@@ -95,17 +95,23 @@ export default async function MisAnunciosPage() {
 
               const status = item.status || "active";
               const isHidden = status === "hidden";
+              const isModerationHidden =
+                isHidden && item.hiddenReason === "moderation";
               const isDeleted = status === "deleted";
 
               const statusLabel =
-                status === "hidden"
-                  ? "Oculto"
+                isModerationHidden
+                  ? "Ocultado por moderación"
+                  : status === "hidden"
+                    ? "Oculto"
                   : status === "deleted"
                     ? "Eliminado"
                     : "Activo";
 
               const statusClass =
-                status === "hidden"
+                isModerationHidden
+                  ? "bg-orange-50 text-orange-700 ring-orange-200"
+                  : status === "hidden"
                   ? "bg-yellow-50 text-yellow-700 ring-yellow-200"
                   : status === "deleted"
                     ? "bg-red-50 text-red-700 ring-red-200"
@@ -244,7 +250,9 @@ export default async function MisAnunciosPage() {
                         </>
                       ) : null}
 
-                      <DeleteListingButton listingId={item.id} status={item.status} />
+                      {isModerationHidden ? null : (
+                        <DeleteListingButton listingId={item.id} status={item.status} />
+                      )}
                     </div>
                   )}
                 </div>
