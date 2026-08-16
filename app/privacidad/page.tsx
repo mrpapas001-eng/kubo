@@ -2,24 +2,24 @@ import Link from "next/link";
 
 const sections = [
   {
-    title: "Datos que podemos pedir",
-    body: "Para usar Kubo podemos guardar datos de cuenta, anuncios publicados, mensajes, favoritos, reportes y archivos que el usuario suba. Si una persona pide verificar identidad o una empresa pide verificacion, tambien podemos recibir documento de identidad o RUT.",
+    title: "Responsable y marco aplicable",
+    body: "El responsable del tratamiento es JAVIER ALONSO COMESAÑA, persona natural, en Colombia. Kubo Anuncios trata los datos personales conforme al marco general de protección de datos personales aplicable en Colombia, incluyendo la Ley 1581 de 2012 y sus normas reglamentarias. Para consultas, solicitudes o reclamaciones sobre privacidad: contacto.kuboanuncios@gmail.com.",
   },
   {
-    title: "Para que usamos los datos",
-    body: "Usamos la informacion para operar la plataforma, mostrar anuncios, permitir contacto entre usuarios, prevenir abuso, revisar reportes y validar solicitudes de verificacion.",
+    title: "Información que podemos recopilar",
+    body: "Según el uso de Kubo, podemos recopilar nombre, correo electrónico, datos asociados al inicio de sesión, teléfono, ciudad o ubicación proporcionada, información de anuncios, fotografías y videos, chats y mensajes dentro de Kubo, favoritos e interacciones necesarias para el funcionamiento, información empresarial, RUT y documentos usados en verificaciones, además de información técnica necesaria para la seguridad y el funcionamiento de la plataforma cuando corresponda.",
   },
   {
-    title: "Documentos de verificacion",
-    body: "Los documentos de identidad y RUT se usan solo para revisar la solicitud de verificacion. No deben mostrarse publicamente en los anuncios.",
+    title: "Finalidades del tratamiento",
+    body: "Usamos la información para crear y administrar cuentas, publicar anuncios, facilitar el contacto entre usuarios, operar el chat, prevenir fraude y abuso, moderar contenido y revisar reportes, tramitar verificaciones, prestar soporte, proteger la seguridad de Kubo y cumplir obligaciones legales aplicables.",
   },
   {
-    title: "Derechos del usuario",
-    body: "El usuario puede solicitar correccion, actualizacion o eliminacion de sus datos. Las solicitudes deben revisarse antes de borrar informacion necesaria para seguridad, reportes o cumplimiento legal.",
+    title: "RUT y documentos de verificación",
+    body: "Los documentos de identidad y RUT no son públicos. Se almacenan de forma privada y solo pueden ser consultados por personal autorizado para revisar la solicitud de verificación. Se utilizan para esa finalidad y se conservan durante el tiempo necesario para ella y para las obligaciones aplicables. No se publica el contenido de estos documentos en los anuncios.",
   },
   {
-    title: "Aviso importante",
-    body: "Esta pagina es una base inicial para lanzamiento. Antes de operar publicamente con documentos reales, conviene revisarla con asesoria legal y ajustar la politica de tratamiento de datos.",
+    title: "Derechos del titular",
+    body: "El titular puede conocer, acceder y solicitar información sobre el tratamiento de sus datos; actualizar y rectificar información; presentar consultas o reclamos; solicitar la supresión cuando proceda; y revocar la autorización cuando legalmente sea posible. Las solicitudes pueden enviarse a contacto.kuboanuncios@gmail.com. Algunas supresiones pueden estar limitadas cuando la conservación sea necesaria para seguridad, reportes u obligaciones legales.",
   },
 ];
 
@@ -44,6 +44,9 @@ export default function PrivacyPage() {
           <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">
             Esta pagina explica de forma simple como Kubo trata los datos de
             usuarios, vendedores y empresas.
+          </p>
+          <p className="mt-3 text-xs font-bold text-slate-400">
+            Última actualización: 16 de agosto de 2026
           </p>
 
           <div className="mt-8 space-y-5">

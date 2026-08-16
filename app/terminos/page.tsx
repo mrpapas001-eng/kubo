@@ -2,24 +2,36 @@ import Link from "next/link";
 
 const sections = [
   {
-    title: "Uso de la plataforma",
-    body: "Kubo conecta personas y empresas que publican anuncios con usuarios interesados. Cada usuario es responsable de la informacion que publica y de cumplir las normas aplicables.",
+    title: "Aceptación y funcionamiento",
+    body: "Al usar Kubo Anuncios aceptas estos términos. Kubo es una plataforma de anuncios y marketplace que facilita el contacto entre usuarios. Kubo no es el vendedor ni el comprador de los productos o servicios publicados y, salvo que se indique expresamente otra cosa, no participa en la negociación, el pago, la entrega ni la ejecución de la operación entre usuarios.",
   },
   {
-    title: "Compras y acuerdos",
-    body: "Kubo no es parte directa de la compraventa entre usuarios. Los pagos, entregas, garantias y revisiones del producto deben acordarse entre comprador y vendedor.",
+    title: "Cuentas e información",
+    body: "Debes proporcionar información veraz, mantener la seguridad de tu cuenta y usar Kubo de forma legal y responsable. Cada usuario responde por sus anuncios, mensajes, acuerdos y actuaciones. No debes suplantar a otra persona, compartir credenciales ni usar la plataforma para engañar o perjudicar a otros.",
   },
   {
-    title: "Verificaciones",
-    body: "La verificacion de identidad o empresa ayuda a generar confianza, pero no garantiza la compra, la calidad del producto ni elimina la necesidad de revisar antes de pagar.",
+    title: "Publicaciones prohibidas",
+    body: "No se permite publicar información falsa o engañosa, estafas, contenido fraudulento u ofensivo, productos o servicios ilegales o prohibidos, bienes que infrinjan derechos de terceros, ni contenido que ponga en riesgo a otros usuarios. También está prohibido usar Kubo para spam, suplantación, manipulación de precios o actividades contrarias a la ley.",
   },
   {
-    title: "Contenido prohibido",
-    body: "No se permite publicar informacion falsa, productos ilegales, contenido fraudulento, ofensivo o que ponga en riesgo a otros usuarios.",
+    title: "Moderación y reportes",
+    body: "Kubo puede revisar reportes y moderar contenido. Cuando corresponda, puede ocultar o eliminar anuncios, restringir funciones o suspender cuentas, especialmente ante fraude, incumplimiento, riesgo para la comunidad o requerimientos legales. Ocultar un anuncio no resuelve automáticamente el reporte: las acciones de moderación y revisión del reporte son independientes.",
   },
   {
-    title: "Promociones",
-    body: "Los anuncios destacados o premium pagan por mayor visibilidad. Eso no significa que el vendedor este verificado ni que Kubo recomiende el producto.",
+    title: "Compras, chat y comportamiento",
+    body: "Los pagos, entregas, garantías, revisiones del producto y demás condiciones deben acordarse entre comprador y vendedor. El chat facilita la comunicación, pero cada usuario debe comportarse con respeto y prudencia, sin amenazas, acoso, fraude ni envío de enlaces o información engañosa.",
+  },
+  {
+    title: "Empresas y verificaciones",
+    body: "Una empresa puede publicar como empresa sin estar verificada. El sello Empresa verificada significa que Kubo revisó la documentación aportada para el proceso de verificación. No es garantía de solvencia, calidad, autenticidad de todos sus productos, cumplimiento futuro ni ausencia absoluta de fraude.",
+  },
+  {
+    title: "Premium y Destacado",
+    body: "Premium y Destacado son herramientas de visibilidad. Pueden ayudar a mostrar un anuncio en posiciones de mayor exposición, pero no garantizan ventas, contactos ni resultados. Tampoco equivalen a recomendación o verificación por parte de Kubo.",
+  },
+  {
+    title: "Responsabilidad y prudencia",
+    body: "Kubo procura mantener una plataforma útil y segura, pero no garantiza la identidad de todos los usuarios, la exactitud de cada anuncio, la disponibilidad de productos, el cumplimiento de acuerdos ni la ausencia de fraude. Debes revisar la información, verificar a la contraparte y actuar con prudencia antes de pagar, entregar bienes o compartir datos.",
   },
 ];
 
@@ -43,6 +55,9 @@ export default function TermsPage() {
           </h1>
           <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">
             Reglas basicas para publicar, buscar y contactar dentro de Kubo.
+          </p>
+          <p className="mt-3 text-xs font-bold text-slate-400">
+            Última actualización: 16 de agosto de 2026
           </p>
 
           <div className="mt-8 space-y-5">

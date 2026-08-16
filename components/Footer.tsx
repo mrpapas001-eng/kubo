@@ -62,6 +62,9 @@ export default function Footer() {
                 <Link href="/privacidad">Privacidad</Link>
               </li>
               <li>
+                <Link href="/seguridad">Seguridad</Link>
+              </li>
+              <li>
                 <Link href="/contacto">Contacto</Link>
               </li>
             </ul>

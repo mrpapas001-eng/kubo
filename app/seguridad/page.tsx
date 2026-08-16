@@ -1,11 +1,16 @@
 import Link from "next/link";
 
 const tips = [
-  "Revisa el producto en persona antes de pagar.",
-  "Evita enviar dinero por adelantado si no conoces al vendedor.",
-  "Usa el chat o WhatsApp para pedir mas informacion, fotos y ubicacion.",
-  "Desconfia de precios demasiado bajos o urgencias para pagar rapido.",
-  "Reporta anuncios sospechosos para que el equipo de Kubo los revise.",
+  "Evita enviar dinero por adelantado a personas que no conoces.",
+  "Revisa personalmente el producto cuando sea posible y comprueba su estado.",
+  "Comprueba la identidad y la documentación cuando corresponda.",
+  "Realiza encuentros en lugares públicos y seguros.",
+  "No compartas contraseñas, códigos SMS, WhatsApp ni códigos de autenticación.",
+  "Desconfía de enlaces externos sospechosos y no entregues datos bancarios innecesarios.",
+  "Verifica los precios demasiado buenos para ser ciertos.",
+  "No confíes solo en comprobantes de pago: confirma que el dinero esté realmente abonado antes de entregar un producto.",
+  "Utiliza el chat de Kubo cuando sea posible y conserva la información de la conversación.",
+  "Reporta anuncios sospechosos y cualquier comportamiento fraudulento.",
 ];
 
 export default function SafetyPage() {
@@ -40,6 +45,30 @@ export default function SafetyPage() {
                 {tip}
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+            <h2 className="text-lg font-black text-[#0f3c8c]">
+              Empresa y Empresa verificada
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              “Empresa” identifica a quien publica como negocio. “Empresa
+              verificada” significa que Kubo revisó la documentación aportada
+              para el proceso de verificación. El sello ayuda a generar
+              confianza, pero no garantiza la calidad, autenticidad, solvencia
+              o cumplimiento futuro de la empresa.
+            </p>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
+            <h2 className="text-lg font-black text-red-800">
+              ¿Detectaste algo sospechoso?
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-red-700">
+              Utiliza la opción Reportar del anuncio o escribe a
+              contacto.kuboanuncios@gmail.com para que podamos revisar la
+              situación.
+            </p>
           </div>
         </section>
       </div>
