@@ -233,11 +233,25 @@ export async function PATCH(req: Request, context: RouteContext) {
       );
     }
 
+    // Reactivar un anuncio eliminado limpia cualquier promoción anterior.
+    const isReactivatingDeleted =
+      status === "active" && existing.status === "deleted";
+
     const updated = await prisma.listing.update({
       where: { id: cleanId },
-      data: {
-        status,
-      },
+      data: isReactivatingDeleted
+        ? {
+            status,
+            isPremium: false,
+            premiumPlan: null,
+            premiumUntil: null,
+            isFeatured: false,
+            featuredUntil: null,
+            hiddenReason: null,
+          }
+        : {
+            status,
+          },
     });
 
     return NextResponse.json({

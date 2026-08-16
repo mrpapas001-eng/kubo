@@ -10,6 +10,117 @@ const SMART_ORDER = [
   { createdAt: "desc" as const },
 ];
 
+// Mismo catálogo de categorías/subcategorías usado por app/publish/page.tsx (CATEGORY_OPTIONS).
+const PUBLISH_CATEGORIES: Record<string, string[]> = {
+  motor: ["carros", "motos", "repuestos"],
+  inmobiliaria: [
+    "casa",
+    "apartamento",
+    "apartaestudio",
+    "local-comercial",
+    "finca",
+    "lote",
+    "casa-campestre",
+    "bodega",
+    "otros-inmuebles",
+  ],
+  celulares: ["celulares", "repuestos", "telefono-fijo"],
+  empleo: ["ofrezco-empleo", "busco-empleo"],
+  servicios: [
+    "hogar",
+    "personas",
+    "empresas",
+    "electricos",
+    "motor",
+    "bicicleta",
+    "otros",
+  ],
+  negocios: [
+    "venta-de-negocios",
+    "traspasos",
+    "franquicias",
+    "arriendo-de-negocio",
+    "financiacion",
+  ],
+  informatica: [
+    "portatiles",
+    "todo-en-uno",
+    "escritorio",
+    "tablets",
+    "mac",
+    "accesorios",
+    "software",
+    "gaming",
+  ],
+  "imagen-sonido": ["fotografia", "imagen", "sonido", "musica"],
+  juegos: ["consolas", "videojuegos", "accesorios"],
+  formacion: [
+    "clases-particulares",
+    "libros",
+    "idiomas",
+    "cursos",
+    "autoescuelas",
+  ],
+  deportes: [
+    "bicicletas",
+    "futbol",
+    "gimnasio",
+    "running",
+    "camping",
+    "natacion",
+    "otros",
+  ],
+  mascotas: ["perros", "gatos", "caballos", "adopciones", "peces", "varios"],
+  bebes: [
+    "habitacion-bebes",
+    "camaras-de-vigilancia",
+    "coches-de-bebe",
+    "juguetes",
+    "higiene-y-cuidado",
+    "varios",
+  ],
+  moda: [
+    "moda-hombre",
+    "moda-mujer",
+    "perfumes",
+    "calzado",
+    "disfraces",
+    "joyeria-bisuteria",
+    "sex-shop",
+    "otros-articulos-de-moda",
+  ],
+  "regalos-celebraciones": [
+    "velas-y-velones",
+    "regalos",
+    "flores-y-detalles",
+    "decoracion-para-fiestas",
+    "pinateria",
+    "desayunos-y-sorpresas",
+    "globos",
+    "invitaciones-y-papeleria",
+    "articulos-religiosos",
+    "otros",
+  ],
+  hogar: [
+    "muebles-de-hogar",
+    "decoracion",
+    "colchones",
+    "iluminacion",
+    "menaje",
+    "organizacion",
+    "jardin-y-terraza",
+    "otros",
+    "energia-solar",
+  ],
+};
+
+const REAL_ESTATE_SUBS_REQUIRING_ROOMS = [
+  "casa",
+  "apartamento",
+  "apartaestudio",
+  "finca",
+];
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -166,6 +277,142 @@ export async function POST(req: Request) {
         { ok: false, error: "El precio no es válido." },
         { status: 400 }
       );
+    }
+
+    const validSubcategories = PUBLISH_CATEGORIES[categorySlug];
+
+    if (!validSubcategories) {
+      return NextResponse.json(
+        { ok: false, error: "Selecciona una categoría válida." },
+        { status: 400 }
+      );
+    }
+
+    if (!validSubcategories.includes(subcategorySlug)) {
+      return NextResponse.json(
+        { ok: false, error: "Selecciona una subcategoría válida." },
+        { status: 400 }
+      );
+    }
+
+    if (!["PARTICULAR", "EMPRESA"].includes(sellerType)) {
+      return NextResponse.json(
+        { ok: false, error: "El tipo de vendedor no es válido." },
+        { status: 400 }
+      );
+    }
+
+    if (sellerType === "EMPRESA" && !businessName) {
+      return NextResponse.json(
+        { ok: false, error: "El nombre de la empresa es obligatorio." },
+        { status: 400 }
+      );
+    }
+
+    const detailImages = Array.isArray(details?.images) ? details.images : [];
+    const hasAtLeastOnePhoto = detailImages.length > 0 || Boolean(imageUrl);
+
+    if (!hasAtLeastOnePhoto) {
+      return NextResponse.json(
+        { ok: false, error: "Debes añadir al menos una foto." },
+        { status: 400 }
+      );
+    }
+
+    const requiresPrice = !["empleo", "servicios"].includes(categorySlug);
+
+    if (requiresPrice && parsedPrice === null) {
+      return NextResponse.json(
+        { ok: false, error: "El precio es obligatorio." },
+        { status: 400 }
+      );
+    }
+
+    const isVehicle =
+      categorySlug === "motor" &&
+      ["carros", "motos"].includes(subcategorySlug);
+
+    if (isVehicle) {
+      const motor = details?.motor && typeof details.motor === "object" ? details.motor : null;
+
+      if (!motor?.brand) {
+        return NextResponse.json(
+          { ok: false, error: "La marca del vehículo es obligatoria." },
+          { status: 400 }
+        );
+      }
+
+      if (!motor?.model) {
+        return NextResponse.json(
+          { ok: false, error: "El modelo del vehículo es obligatorio." },
+          { status: 400 }
+        );
+      }
+
+      if (!motor?.year) {
+        return NextResponse.json(
+          { ok: false, error: "El año del vehículo es obligatorio." },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (categorySlug === "celulares" && subcategorySlug === "celulares") {
+      const cellphone =
+        details?.cellphone && typeof details.cellphone === "object"
+          ? details.cellphone
+          : null;
+
+      if (!cellphone?.brand) {
+        return NextResponse.json(
+          { ok: false, error: "La marca del celular es obligatoria." },
+          { status: 400 }
+        );
+      }
+
+      if (!cellphone?.model) {
+        return NextResponse.json(
+          { ok: false, error: "El modelo del celular es obligatorio." },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (categorySlug === "inmobiliaria") {
+      const realEstate =
+        details?.realEstate && typeof details.realEstate === "object"
+          ? details.realEstate
+          : null;
+
+      if (!realEstate?.deal) {
+        return NextResponse.json(
+          { ok: false, error: "Selecciona si el inmueble es venta o arriendo." },
+          { status: 400 }
+        );
+      }
+
+      if (!realEstate?.sqm) {
+        return NextResponse.json(
+          { ok: false, error: "Los metros cuadrados del inmueble son obligatorios." },
+          { status: 400 }
+        );
+      }
+
+      if (REAL_ESTATE_SUBS_REQUIRING_ROOMS.includes(subcategorySlug)) {
+        if (!realEstate?.rooms) {
+          return NextResponse.json(
+            { ok: false, error: "El número de alcobas es obligatorio." },
+            { status: 400 }
+          );
+        }
+
+        if (!realEstate?.baths) {
+          return NextResponse.json(
+            { ok: false, error: "El número de baños es obligatorio." },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     const approvedBusiness =

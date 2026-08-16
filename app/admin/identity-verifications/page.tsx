@@ -124,7 +124,7 @@ export default async function AdminIdentityVerificationsPage() {
 
                   <div className="flex flex-col gap-3 sm:flex-row lg:items-center">
                     <a
-                      href={item.documentUrl}
+                      href={`/api/admin/verification-document?type=identity&requestId=${item.id}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 hover:bg-slate-50"

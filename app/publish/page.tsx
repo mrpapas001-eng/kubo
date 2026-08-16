@@ -20,7 +20,9 @@ type CategoryKey =
   | "deportes"
   | "mascotas"
   | "bebes"
-  | "moda";
+  | "moda"
+  | "hogar"
+  | "regalos-celebraciones";
 
 type DealType = "venta" | "arriendo";
 
@@ -271,6 +273,37 @@ const CATEGORY_OPTIONS: Array<{
       { slug: "joyeria-bisuteria", label: "Joyería y bisutería" },
       { slug: "sex-shop", label: "Sex shop" },
       { slug: "otros-articulos-de-moda", label: "Otros artículos de moda" },
+    ],
+  },
+  {
+    key: "regalos-celebraciones",
+    label: "Regalos y celebraciones",
+    subs: [
+      { slug: "velas-y-velones", label: "Velas y velones" },
+      { slug: "regalos", label: "Regalos" },
+      { slug: "flores-y-detalles", label: "Flores y detalles" },
+      { slug: "decoracion-para-fiestas", label: "Decoración para fiestas" },
+      { slug: "pinateria", label: "Piñatería" },
+      { slug: "desayunos-y-sorpresas", label: "Desayunos y sorpresas" },
+      { slug: "globos", label: "Globos" },
+      { slug: "invitaciones-y-papeleria", label: "Invitaciones y papelería" },
+      { slug: "articulos-religiosos", label: "Artículos religiosos" },
+      { slug: "otros", label: "Otros" },
+    ],
+  },
+  {
+    key: "hogar",
+    label: "Hogar",
+    subs: [
+      { slug: "muebles-de-hogar", label: "Muebles de hogar" },
+      { slug: "decoracion", label: "Decoración" },
+      { slug: "colchones", label: "Colchones" },
+      { slug: "iluminacion", label: "Iluminación" },
+      { slug: "menaje", label: "Menaje" },
+      { slug: "organizacion", label: "Organización" },
+      { slug: "jardin-y-terraza", label: "Jardín y terraza" },
+      { slug: "otros", label: "Otros" },
+      { slug: "energia-solar", label: "Energía solar" },
     ],
   },
 ];
@@ -611,8 +644,34 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
 
     if (step === 2 || nextStep === 2) {
       if (isCar && !carBrand) return "Selecciona la marca del carro.";
+      if (isCar && !carModel.trim()) return "Ingresa el modelo del carro.";
+      if (isCar && !carYear.trim()) return "Ingresa el año del carro.";
+
       if (isMoto && !motoBrand) return "Selecciona la marca de la moto.";
+      if (isMoto && !motoModel.trim()) return "Ingresa el modelo de la moto.";
+      if (isMoto && !motoYear.trim()) return "Ingresa el año de la moto.";
+
       if (isCellPhone && !cellBrand) return "Selecciona la marca del celular.";
+      if (isCellPhone && !cellModel.trim())
+        return "Ingresa el modelo del celular.";
+
+      if (isRealEstate) {
+        if (!deal) return "Selecciona si es venta o arriendo.";
+        if (!String(sqm).trim())
+          return "Ingresa los metros cuadrados del inmueble.";
+
+        const requiresRoomsAndBaths = [
+          "casa",
+          "apartamento",
+          "apartaestudio",
+          "finca",
+        ].includes(subcategory);
+
+        if (requiresRoomsAndBaths) {
+          if (!String(rooms).trim()) return "Ingresa el número de alcobas.";
+          if (!String(baths).trim()) return "Ingresa el número de baños.";
+        }
+      }
     }
 
     if (step === 3 || nextStep === 3) {
@@ -633,6 +692,10 @@ if (step === 4 || nextStep === 4) {
   const cleanPhone = phone.replace(/\D/g, "");
   if (cleanPhone.length < 7 || cleanPhone.length > 10) {
     return "El teléfono debe tener entre 7 y 10 dígitos.";
+  }
+
+  if (sellerType === "EMPRESA" && !businessName.trim()) {
+    return "Ingresa el nombre de la empresa.";
   }
 }
 
@@ -658,11 +721,13 @@ if (step === 4 || nextStep === 4) {
     e.preventDefault();
     setError(null);
 
-    const message = validateStep(4);
-    if (message) {
-      setError(message);
-      setStep(4);
-      return;
+    for (const s of [1, 2, 3, 4] as Step[]) {
+      const message = validateStep(s);
+      if (message) {
+        setError(message);
+        setStep(s);
+        return;
+      }
     }
 
     setLoading(true);

@@ -45,6 +45,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Only businesses can activate promotions
+    if (!listing.isBusiness) {
+      return NextResponse.json(
+        { ok: false, error: "Solo las empresas pueden activar Destacado/Premium." },
+        { status: 403 }
+      );
+    }
+
     if (listing.status !== "active") {
       return NextResponse.json(
         { ok: false, error: "Solo puedes promocionar anuncios activos." },

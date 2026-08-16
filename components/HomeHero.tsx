@@ -50,13 +50,13 @@ export default function HomeHero() {
     <section className="mt-4 w-full">
       <div className="relative w-full overflow-hidden rounded-[32px] border border-white/40 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
         <img
-          src="/hero-home.jpg"
+          src="/hero-pereira.png"
           alt="Kubo"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[center_65%] md:object-[center_62%]"
         />
 
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,31,74,0.88)_0%,rgba(11,49,112,0.70)_42%,rgba(8,31,74,0.28)_100%)]" />
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.28)_0%,rgba(15,23,42,0.16)_42%,rgba(15,23,42,0.08)_100%)]" />
+        <div className="absolute inset-0 bg-black/3" />
 
         <div className="relative px-6 py-5 text-white md:px-10 md:py-8 lg:px-12 lg:py-9">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">

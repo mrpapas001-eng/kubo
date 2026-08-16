@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Crown, Flame, CheckCircle2 } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 type Props = {
   searchParams?: Promise<{
@@ -10,6 +11,11 @@ type Props = {
 export default async function PremiumPage({ searchParams }: Props) {
   const params = (await searchParams) ?? {};
   const listingId = params.listingId;
+
+  let listing: any = null;
+  if (listingId) {
+    listing = await prisma.listing.findUnique({ where: { id: listingId } });
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FB] px-4 py-10">
@@ -36,10 +42,17 @@ export default async function PremiumPage({ searchParams }: Props) {
           </p>
         </div>
 
-        {!listingId ? (
+        {!listingId || !listing ? (
           <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-sm font-bold text-red-700">
             No se encontró el anuncio. Vuelve a “Mis anuncios” y pulsa
             “Promocionar este anuncio”.
+          </div>
+        ) : null}
+
+        {listingId && listing && !listing.isBusiness ? (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-sm font-bold text-red-700">
+            Destacado y Premium son beneficios disponibles para anuncios de
+            empresa. Si eres particular no puedes activar estas promociones.
           </div>
         ) : null}
 
@@ -74,38 +87,38 @@ export default async function PremiumPage({ searchParams }: Props) {
               </div>
             </div>
 
-            <div className="mt-7 space-y-3">
+              <div className="mt-7 space-y-3">
               <Link
                 href={`/api/promote/featured?listingId=${listingId}&days=7`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-slate-100 text-slate-900 hover:bg-slate-200"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                7 días — $5.000
+                7 días — Gratis (Oferta de lanzamiento)
               </Link>
 
               <Link
                 href={`/api/promote/featured?listingId=${listingId}&days=15`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-slate-100 text-slate-900 hover:bg-slate-200"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                15 días — $9.000
+                15 días — Gratis (Oferta de lanzamiento)
               </Link>
 
               <Link
                 href={`/api/promote/featured?listingId=${listingId}&days=30`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-slate-900 text-white hover:bg-slate-700"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                30 días — $15.000
+                30 días — Gratis (Oferta de lanzamiento)
               </Link>
             </div>
           </div>
@@ -149,42 +162,42 @@ export default async function PremiumPage({ searchParams }: Props) {
               <Link
                 href={`/api/promote/premium?listingId=${listingId}&days=7`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-yellow-100 text-slate-900 hover:bg-yellow-200"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                7 días — $15.000
+                7 días — Gratis (Oferta de lanzamiento)
               </Link>
 
               <Link
                 href={`/api/promote/premium?listingId=${listingId}&days=15`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-yellow-100 text-slate-900 hover:bg-yellow-200"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                15 días — $30.000
+                15 días — Gratis (Oferta de lanzamiento)
               </Link>
 
               <Link
                 href={`/api/promote/premium?listingId=${listingId}&days=30`}
                 className={`flex h-12 items-center justify-center rounded-2xl text-sm font-black ${
-                  listingId
+                  listingId && listing && listing.isBusiness
                     ? "bg-yellow-400 text-slate-900 hover:bg-yellow-500"
                     : "pointer-events-none bg-slate-200 text-slate-400"
                 }`}
               >
-                30 días — $50.000 ⭐ Mejor opción
+                30 días — Gratis (Oferta de lanzamiento) ⭐ Mejor opción
               </Link>
             </div>
           </div>
         </div>
 
-        <p className="mt-8 text-center text-sm text-slate-400">
-          Por ahora esta pantalla activa la promoción en modo prueba. Luego
-          conectaremos pago real.
+        <p className="mt-8 text-center text-sm text-slate-500 font-semibold">
+          Oferta de lanzamiento: Destacado y Premium gratis para empresas por
+          tiempo limitado.
         </p>
       </div>
     </div>

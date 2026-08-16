@@ -18,6 +18,7 @@ import FavoriteButton from "./FavoriteButton";
 
 type ListingCardProps = {
   item: any;
+  hideLocationBelowTitleOnMobile?: boolean;
 };
 
 function parseDetails(details: unknown) {
@@ -62,7 +63,10 @@ function formatPublishedDate(value: unknown) {
   return `Publicado el ${date.toLocaleDateString("es-CO")}`;
 }
 
-export default function ListingCard({ item }: ListingCardProps) {
+export default function ListingCard({
+  item,
+  hideLocationBelowTitleOnMobile = false,
+}: ListingCardProps) {
   if (!item) return null;
 
   const now = new Date();
@@ -258,7 +262,11 @@ export default function ListingCard({ item }: ListingCardProps) {
             {item?.title || "Sin título"}
           </h3>
 
-          <div className="text-sm font-medium text-slate-500">
+          <div
+            className={`text-sm font-medium text-slate-500 ${
+              hideLocationBelowTitleOnMobile ? "hidden md:block" : ""
+            }`}
+          >
             {extraLine || city}
           </div>
 

@@ -8,6 +8,14 @@ const nunito = Nunito({
   weight: ["400", "600", "700", "800", "900"],
 });
 
+export const metadata = {
+  icons: {
+    icon: "/brand/favicon.png",
+    shortcut: "/brand/favicon.png",
+    apple: "/brand/kubo-symbol.png",
+  },
+};
+
 export default function RootLayout({
   children,
 }: {

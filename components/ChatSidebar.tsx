@@ -49,7 +49,15 @@ export default async function ChatSidebar() {
 
 
       <div className="flex items-center justify-between">
-        <div className="text-4xl font-black text-slate-900">kubo</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+          <Image
+            src="/brand/kubo-symbol.png"
+            alt="Kubo anuncios"
+            width={24}
+            height={24}
+            className="h-6 w-6 object-contain"
+          />
+        </div>
 
         <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-200">
           {user?.image ? (

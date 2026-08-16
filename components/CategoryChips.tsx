@@ -14,6 +14,7 @@ import {
   Baby,
   Shirt,
   Camera,
+  Gift,
 } from "lucide-react";
 
 const categories = [
@@ -35,6 +36,7 @@ const categories = [
   { label: "Mascotas", href: "/categoria/mascotas", icon: Dog },
   { label: "Bebés", href: "/categoria/bebes", icon: Baby },
   { label: "Moda", href: "/categoria/moda", icon: Shirt },
+  { label: "Regalos y celebraciones", href: "/categoria/regalos-celebraciones", icon: Gift },
 ];
 
 export default function CategoryChips() {

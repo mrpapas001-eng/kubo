@@ -14,6 +14,7 @@ import {
   PawPrint,
   Monitor,
   Sofa,
+  Gift,
 } from "lucide-react";
 
 const categories = [
@@ -29,6 +30,7 @@ const categories = [
   { slug: "moda", name: "Moda", icon: Shirt },
   { slug: "bebes", name: "Bebés", icon: Baby },
   { slug: "mascotas", name: "Mascotas", icon: PawPrint },
+  { slug: "regalos-celebraciones", name: "Regalos y celebraciones", icon: Gift },
 ];
 
 export default function HomeCategories() {

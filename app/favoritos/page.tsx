@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
 import ListingCard from "@/components/ListingCard";
+import BackButton from "@/components/BackButton";
 
 export default async function FavoritosPage() {
   const session = await getServerSession();
@@ -10,6 +11,16 @@ export default async function FavoritosPage() {
     return (
       <div className="min-h-screen bg-[#F8F9FB] px-6 pb-28 pt-10 md:py-10">
         <div className="mx-auto max-w-[1100px] rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="mb-4 flex items-center gap-4">
+            <BackButton className="text-sm font-medium text-slate-700" />
+            <Link
+              href="/"
+              className="text-sm font-medium text-slate-700 hover:underline"
+            >
+              Inicio
+            </Link>
+          </div>
+
           <h1 className="text-3xl font-black text-slate-900">Mis favoritos</h1>
           <p className="mt-4 text-slate-500">
             Debes iniciar sesion para ver tus favoritos.
@@ -46,6 +57,16 @@ export default async function FavoritosPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-6 pb-28 pt-10 md:py-10">
       <div className="mx-auto max-w-[1100px]">
+        <div className="mb-4 flex items-center gap-4">
+          <BackButton className="text-sm font-medium text-slate-700" />
+          <Link
+            href="/"
+            className="text-sm font-medium text-slate-700 hover:underline"
+          >
+            Inicio
+          </Link>
+        </div>
+
         <h1 className="text-3xl font-black text-slate-900">Mis favoritos</h1>
         <p className="mt-2 text-sm font-medium text-slate-500">
           Guarda anuncios para revisarlos con calma mas tarde.
@@ -70,7 +91,11 @@ export default async function FavoritosPage() {
         ) : (
           <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {orderedListings.map((item: any) => (
-              <ListingCard key={item.id} item={item} />
+              <ListingCard
+                key={item.id}
+                item={item}
+                hideLocationBelowTitleOnMobile
+              />
             ))}
           </div>
         )}

@@ -14,7 +14,8 @@ export type CategoryKey =
   | "deportes"
   | "mascotas"
   | "bebes"
-  | "moda";
+  | "moda"
+  | "regalos_celebraciones";
 
 export type Category = {
   key: CategoryKey;
@@ -175,6 +176,22 @@ export const CATEGORIES: Category[] = [
       { key: "disfraces", label: "Disfraces" },
       { key: "joyas_bisuteria", label: "Joyas / bisutería" },
       { key: "sex_shop", label: "Sex shop" },
+      { key: "otros", label: "Otros" },
+    ],
+  },
+  {
+    key: "regalos_celebraciones",
+    label: "Regalos y celebraciones",
+    subcategories: [
+      { key: "velas_y_velones", label: "Velas y velones" },
+      { key: "regalos", label: "Regalos" },
+      { key: "flores_y_detalles", label: "Flores y detalles" },
+      { key: "decoracion_para_fiestas", label: "Decoración para fiestas" },
+      { key: "pinateria", label: "Piñatería" },
+      { key: "desayunos_y_sorpresas", label: "Desayunos y sorpresas" },
+      { key: "globos", label: "Globos" },
+      { key: "invitaciones_y_papeleria", label: "Invitaciones y papelería" },
+      { key: "articulos_religiosos", label: "Artículos religiosos" },
       { key: "otros", label: "Otros" },
     ],
   },

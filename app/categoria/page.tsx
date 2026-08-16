@@ -15,6 +15,7 @@ import {
   Tv,
   Gamepad2,
   ChevronRight,
+  Gift,
 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 
@@ -35,6 +36,7 @@ function getCategoryIcon(slug: string): IconType {
   if (slug === "moda") return Shirt;
   if (slug === "imagen-sonido") return Tv;
   if (slug === "juegos") return Gamepad2;
+  if (slug === "regalos-celebraciones") return Gift;
   return ChevronRight;
 }
 
@@ -95,6 +97,10 @@ function getCategoryDescription(slug: string, label: string) {
     return "Consolas, videojuegos, accesorios y productos gamer.";
   }
 
+  if (slug === "regalos-celebraciones") {
+    return "Velas, regalos, flores, globos y detalles para momentos especiales.";
+  }
+
   return `Explora anuncios en ${label.toLowerCase()} con una experiencia clara y visual.`;
 }
 
@@ -113,6 +119,7 @@ function getCategoryImage(slug: string) {
   if (slug === "mascotas") return "/mascotas-hero.jpg";
   if (slug === "bebes") return "/bebes-hero.jpg";
   if (slug === "moda") return "/moda-hero.jpg";
+  if (slug === "regalos-celebraciones") return "/regalos-hero.png";
   return "/hero-home.jpg";
 }
 

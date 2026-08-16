@@ -61,6 +61,7 @@ if (slug === "hogar") {
   if (subslug === "organizacion") return "/hogar-organizacion.jpg";
   if (subslug === "jardin-y-terraza") return "/hogar-jardin.jpg";
   if (subslug === "otros") return "/hogar-hero.jpg";
+  if (subslug === "energia-solar") return "/energia-solar.jpg";
   return "/hogar-hero.jpg";
 }
 
@@ -172,6 +173,11 @@ if (slug === "hogar") {
     if (subslug === "lujo") return "/moda-lujo.jpg";
     if (subslug === "otros") return "/moda-otros.jpg";
     return "/moda-hero.jpg";
+  }
+
+  if (slug === "regalos-celebraciones") {
+    // Prepared mapping for Regalos y celebraciones. Image file expected: /regalos-hero.png
+    return "/regalos-hero.png";
   }
 
   return null;

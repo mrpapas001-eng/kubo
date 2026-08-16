@@ -7,11 +7,11 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(79,70,229,0.10),_transparent_35%),linear-gradient(135deg,#fffaf0,#f8fafc,#eef2ff)] p-4 md:p-6">
-      <div className="mx-auto flex h-[calc(100vh-48px)] max-w-[1180px] overflow-hidden rounded-[40px] bg-white shadow-[0_40px_120px_rgba(15,23,42,0.18)]">
+    <div className="relative h-[100dvh] overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(79,70,229,0.10),_transparent_35%),linear-gradient(135deg,#fffaf0,#f8fafc,#eef2ff)] p-4 md:h-auto md:min-h-screen md:p-6">
+      <div className="mx-auto flex h-full max-w-[1180px] overflow-hidden rounded-[40px] bg-white shadow-[0_40px_120px_rgba(15,23,42,0.18)] md:h-[calc(100vh-48px)] md:flex-row">
         <ChatSidebar />
 
-        <main className="relative min-w-0 flex-1">
+        <main className="relative min-w-0 flex-1 overflow-hidden md:flex md:flex-col">
           <div className="absolute right-4 top-4 z-50">
             <Link
               href="/"
@@ -21,7 +21,7 @@ export default function ChatLayout({
             </Link>
           </div>
 
-          {children}
+          <div className="flex h-full min-h-0 flex-col">{children}</div>
         </main>
       </div>
     </div>

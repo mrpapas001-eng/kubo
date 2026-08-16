@@ -4,13 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, Menu, X, Play } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Header() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
 
   function closeMenu() {
     setMobileMenuOpen(false);
@@ -25,10 +26,39 @@ export default function Header() {
     }
   }
 
+  useEffect(() => {
+    if (!session?.user?.email) {
+      setUnreadTotal(0);
+      return;
+    }
+
+    let active = true;
+
+    async function loadUnread() {
+      try {
+        const res = await fetch("/api/chat/unread", { cache: "no-store" });
+        const data = await res.json();
+
+        if (!active || !res.ok || !data?.ok) return;
+        setUnreadTotal(Number(data.unreadTotal ?? 0));
+      } catch {
+        if (active) setUnreadTotal(0);
+      }
+    }
+
+    loadUnread();
+    const interval = window.setInterval(loadUnread, 5000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [session?.user?.email]);
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/92 backdrop-blur-xl">
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
-        <div className="flex items-center justify-between gap-4 py-4">
+        <div className="flex items-center justify-between gap-4 py-4 md:py-3">
           <Link href="/" className="shrink-0" onClick={handleLogoClick}>
             <Image
               src="/kubo-logo-nuevo.png"
@@ -36,7 +66,7 @@ export default function Header() {
               width={1078}
               height={178}
               priority
-              className="h-auto w-[170px] sm:w-[190px] md:w-[210px] lg:w-[220px]"
+              className="h-auto w-[200px] sm:w-[240px] md:w-[300px] lg:w-[360px]"
             />
           </Link>
 
@@ -92,6 +122,18 @@ export default function Header() {
               Mis anuncios
             </Link>
 
+            <Link
+              href="/chat"
+              className="relative inline-flex items-center gap-2 text-[15px] font-semibold text-slate-600 transition hover:text-slate-900"
+            >
+              Chats
+              {unreadTotal > 0 ? (
+                <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0f3c8c] px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
+                  {unreadTotal > 99 ? "99+" : unreadTotal}
+                </span>
+              ) : null}
+            </Link>
+
             {status === "loading" ? (
               <div className="text-sm font-semibold text-slate-500">
                 Cargando...
@@ -143,7 +185,7 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 lg:hidden"
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 lg:hidden"
             aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
           >
             {mobileMenuOpen ? (
@@ -151,6 +193,12 @@ export default function Header() {
             ) : (
               <Menu className="h-5 w-5" />
             )}
+
+            {unreadTotal > 0 ? (
+              <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0f3c8c] px-[6px] text-[10px] font-bold text-white">
+                {unreadTotal > 99 ? "99+" : unreadTotal}
+              </span>
+            ) : null}
           </button>
         </div>
 
@@ -211,6 +259,19 @@ export default function Header() {
                 className="rounded-xl px-3 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Mis anuncios
+              </Link>
+
+              <Link
+                href="/chat"
+                onClick={closeMenu}
+                className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <span>Chats</span>
+                {unreadTotal > 0 ? (
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0f3c8c] px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
+                    {unreadTotal > 99 ? "99+" : unreadTotal}
+                  </span>
+                ) : null}
               </Link>
 
               {status === "loading" ? (

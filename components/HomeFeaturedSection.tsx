@@ -315,7 +315,7 @@ export default function HomeFeaturedSection({
             <div className="rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-sm">
               <div className="flex flex-col items-center justify-center text-center">
                 <img
-                  src="/kubo-logo-nuevo.png"
+                  src="/brand/kubo-logo.png"
                   alt="Kubo anuncios"
                   className="h-auto w-[190px]"
                 />

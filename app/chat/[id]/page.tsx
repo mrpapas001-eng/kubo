@@ -75,7 +75,7 @@ export default async function ChatPage({ params }: PageProps) {
   });
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col bg-white">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
       <div className="flex items-center gap-3 border-b border-slate-100 bg-white px-5 py-4">
         <Link
           href="/chat"
@@ -146,11 +146,13 @@ export default async function ChatPage({ params }: PageProps) {
         </div>
       </div>
 
-      <ChatBox
-        conversationId={conversation.id}
-        initialMessages={conversation.messages}
-        currentUserEmail={currentUserEmail}
-      />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <ChatBox
+          conversationId={conversation.id}
+          initialMessages={conversation.messages}
+          currentUserEmail={currentUserEmail}
+        />
+      </div>
     </div>
   );
 }

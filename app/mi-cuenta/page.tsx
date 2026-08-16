@@ -10,6 +10,7 @@ import {
   Store,
   UserRound,
 } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 const accountLinks = [
   {
@@ -57,6 +58,20 @@ export default async function MiCuentaPage() {
     redirect("/api/auth/signin");
   }
 
+  const myEmail = session.user.email?.toLowerCase().trim() ?? null;
+
+  const hasUnverifiedBusiness = myEmail
+    ? Boolean(
+        await prisma.listing.findFirst({
+          where: {
+            ownerEmail: myEmail,
+            isBusiness: true,
+            businessVerified: false,
+          },
+        })
+      )
+    : false;
+
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-28 pt-6 md:px-6 md:py-10">
       <div className="mx-auto max-w-[980px]">
@@ -103,6 +118,25 @@ export default async function MiCuentaPage() {
               </p>
             </div>
           </Link>
+
+          {hasUnverifiedBusiness ? (
+            <Link
+              href="/verificar-empresa"
+              className="mt-4 flex items-center gap-4 rounded-3xl border border-[#0f3c8c] bg-[#e8f0ff] px-5 py-5 text-[#0f3c8c] shadow-sm hover:bg-[#dbe8ff]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-lg font-black">
+                  Verifica tu empresa y obtén el sello Empresa verificada.
+                </div>
+                <p className="mt-1 text-sm font-medium text-[#0f3c8c]/80">
+                  Envía tu RUT para que Kubo lo revise.
+                </p>
+              </div>
+            </Link>
+          ) : null}
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             {accountLinks.map((item) => {

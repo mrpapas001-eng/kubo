@@ -110,6 +110,7 @@ function getSubcategoryImage(categorySlug: string, subSlug: string) {
   if (categorySlug === "inmobiliaria") {
     if (subSlug === "casa") return "/inmo-casa.jpg";
     if (subSlug === "apartamento") return "/inmo-apartamento.jpg";
+    if (subSlug === "energia-solar") return "/energia-solar.jpg";
     if (subSlug === "apartaestudio") return "/inmo-apartaestudio.jpg";
     if (subSlug === "local-comercial") return "/inmo-local.jpg";
     if (subSlug === "finca") return "/inmo-finca.jpg";
@@ -148,6 +149,7 @@ if (categorySlug === "celulares") {
     if (subSlug === "organizacion") return "/hogar-organizacion.jpg";
     if (subSlug === "jardin-y-terraza") return "/hogar-jardin.jpg";
     if (subSlug === "otros") return "/hogar-hero.jpg";
+    if (subSlug === "energia-solar") return "/energia-solar.jpg";
   }
 
   if (categorySlug === "empleo") {
@@ -182,6 +184,19 @@ if (categorySlug === "celulares") {
     if (subSlug === "redes") return "/informatica-redes.jpg";
     if (subSlug === "impresoras") return "/informatica-impresoras.jpg";
     if (subSlug === "otros") return "/informatica-otros.jpg";
+  }
+
+  if (categorySlug === "regalos-celebraciones") {
+    if (subSlug === "velas-y-velones") return "/velas-velones.jpg";
+    if (subSlug === "regalos") return "/regalos.jpg";
+    if (subSlug === "flores-y-detalles") return "/flores-detalles.jpg";
+    if (subSlug === "decoracion-para-fiestas") return "/decoracion-fiestas.jpg";
+    if (subSlug === "pinateria") return "/pinateria.jpg";
+    if (subSlug === "desayunos-y-sorpresas") return "/desayunos-sorpresas.jpg";
+    if (subSlug === "globos") return "/globos.jpg";
+    if (subSlug === "invitaciones-y-papeleria") return "/invitaciones-papeleria.jpg";
+    if (subSlug === "articulos-religiosos") return "/articulos-religiosos.jpg";
+    if (subSlug === "otros") return "/otros-regalos.jpg";
   }
 
   if (categorySlug === "imagen-sonido") {
@@ -691,7 +706,7 @@ export default async function CategoryPage({ params }: PageProps) {
               </Link>
             ) : null}
 
-            {visibleListings.length === 0 ? (
+            {listings.length === 0 ? (
               <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
                 <div className="text-xl font-black text-slate-900">
                   Aún no hay anuncios en esta categoría

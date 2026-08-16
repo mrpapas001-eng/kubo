@@ -60,7 +60,12 @@ function buildSafeFilename(ext: string) {
 async function saveFile(file: File, subfolder: string) {
   const ext = MIME_TO_EXT[file.type] || "bin";
   const filename = buildSafeFilename(ext);
-  const uploadDir = path.join(process.cwd(), "public", "uploads", subfolder);
+
+  // Los documentos de verificación (RUT/identidad) no deben quedar públicos.
+  const isPrivateDocument = subfolder === "documents";
+  const uploadDir = isPrivateDocument
+    ? path.join(process.cwd(), "private-uploads", subfolder)
+    : path.join(process.cwd(), "public", "uploads", subfolder);
 
   await fs.mkdir(uploadDir, { recursive: true });
 
@@ -70,7 +75,10 @@ async function saveFile(file: File, subfolder: string) {
 
   await fs.writeFile(filePath, buffer);
 
-  return `/uploads/${subfolder}/${filename}`;
+  // Documentos privados guardan un identificador interno, no una URL pública.
+  return isPrivateDocument
+    ? `${subfolder}/${filename}`
+    : `/uploads/${subfolder}/${filename}`;
 }
 
 export async function POST(req: Request) {

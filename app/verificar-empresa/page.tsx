@@ -135,7 +135,7 @@ export default function VerificarEmpresaPage() {
                   Subir RUT
                 </div>
                 <p className="mt-1 text-xs font-medium text-slate-500">
-                  PDF, JPG, PNG o WEBP. Maximo 10MB.
+                  Sube tu RUT donde aparezca el NIT y los datos de la empresa.
                 </p>
                 <input
                   type="file"

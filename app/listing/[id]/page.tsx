@@ -162,8 +162,8 @@ function StatCard({
   if (value === null || value === undefined || value === "") return null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-      <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+    <div className="rounded-md px-3 py-2 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:px-4 md:py-4">
+      <div className="text-[10px] md:text-[11px] font-black uppercase tracking-wide text-slate-500">
         {label}
       </div>
       <div className="mt-1 text-sm font-black text-slate-900">{value}</div>
@@ -657,7 +657,7 @@ const visibilityDescription = isPremiumListing
 
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
   {/* 🔥 BLOQUE BENEFICIOS PREMIUM */}
-  {isOwner ? (
+  {isOwner && listing.isBusiness ? (
   <div className="mb-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-5">
     <div className="mb-3 text-sm font-black text-yellow-800">
       🚀 Destaca tu anuncio
@@ -696,7 +696,7 @@ const visibilityDescription = isPremiumListing
               </div>
             </div>
 
-            {isOwner ? (
+            {isOwner && listing.isBusiness ? (
             <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-[#0f3c8c] to-[#071a3e] p-5 text-white shadow-sm">
               <div className="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-wide">
                 Patrocinado
@@ -875,7 +875,7 @@ const visibilityDescription = isPremiumListing
 </div>
 
 {/* 🔥 BOTÓN PROMOCIONAR */}
-{isOwner && !isPremiumListing && (
+{isOwner && !isPremiumListing && listing.isBusiness && (
   <Link
     href={`/premium?listingId=${listing.id}`}
     className="mt-4 flex w-full items-center justify-center rounded-2xl bg-yellow-400 px-4 py-3 text-sm font-black text-slate-900 hover:bg-yellow-500"
@@ -889,13 +889,15 @@ const visibilityDescription = isPremiumListing
     Información del anuncio
   </h3>
 
-  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-2">
     <StatCard label="Categoría" value={listing.categorySlug ?? "—"} />
     <StatCard
       label="Subcategoría"
       value={listing.subcategorySlug ?? "—"}
     />
-    <StatCard label="Ciudad" value={listing.city ?? "—"} />
+    <div className="hidden sm:block">
+      <StatCard label="Ciudad" value={listing.city ?? "—"} />
+    </div>
     <StatCard label="Publicado" value={publishedDate} />
     <StatCard
       label="Tipo de vendedor"
@@ -905,7 +907,7 @@ const visibilityDescription = isPremiumListing
   </div>
 </div>
 
-            <div className="mt-8 border-t border-slate-100 pt-6">
+            <div className="mt-8 border-t border-slate-100 pt-6 hidden sm:block">
               <h3 className="text-lg font-black text-slate-900">
                 Contacto rápido
               </h3>
