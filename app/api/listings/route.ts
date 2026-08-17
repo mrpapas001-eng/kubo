@@ -31,6 +31,7 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "personas",
     "empresas",
     "electricos",
+    "energia-solar",
     "motor",
     "bicicleta",
     "otros",
@@ -110,7 +111,6 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "organizacion",
     "jardin-y-terraza",
     "otros",
-    "energia-solar",
   ],
 };
 
@@ -187,7 +187,9 @@ export async function POST(req: Request) {
     const location = String(body?.location ?? "").trim();
     const categorySlug = String(body?.categorySlug ?? "").trim();
     const subcategorySlug = String(body?.subcategorySlug ?? "").trim();
-    const template = String(body?.template ?? "GENERAL").trim();
+    const template = categorySlug === "servicios"
+      ? "SERVICE_JOB"
+      : String(body?.template ?? "GENERAL").trim();
     const sellerType = String(body?.sellerType ?? "PARTICULAR").trim();
     const currency = String(body?.currency ?? "COP").trim();
 

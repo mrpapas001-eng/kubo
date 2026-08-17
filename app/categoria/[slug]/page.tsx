@@ -110,7 +110,6 @@ function getSubcategoryImage(categorySlug: string, subSlug: string) {
   if (categorySlug === "inmobiliaria") {
     if (subSlug === "casa") return "/inmo-casa.jpg";
     if (subSlug === "apartamento") return "/inmo-apartamento.jpg";
-    if (subSlug === "energia-solar") return "/energia-solar.jpg";
     if (subSlug === "apartaestudio") return "/inmo-apartaestudio.jpg";
     if (subSlug === "local-comercial") return "/inmo-local.jpg";
     if (subSlug === "finca") return "/inmo-finca.jpg";
@@ -149,7 +148,6 @@ if (categorySlug === "celulares") {
     if (subSlug === "organizacion") return "/hogar-organizacion.jpg";
     if (subSlug === "jardin-y-terraza") return "/hogar-jardin.jpg";
     if (subSlug === "otros") return "/hogar-hero.jpg";
-    if (subSlug === "energia-solar") return "/energia-solar.jpg";
   }
 
   if (categorySlug === "empleo") {
@@ -161,6 +159,7 @@ if (categorySlug === "celulares") {
     if (subSlug === "hogar") return "/servicios-hogar.jpg";
     if (subSlug === "personas") return "/servicios-personas.jpg";
     if (subSlug === "empresas") return "/servicios-empresas.jpg";
+    if (subSlug === "energia-solar") return "/energia-solar.jpg";
     if (subSlug === "electricos") return "/servicios-electricos.jpg";
     if (subSlug === "motor") return "/servicios-motor.jpg";
     if (subSlug === "bicicleta") return "/servicios-bicicleta.jpg";

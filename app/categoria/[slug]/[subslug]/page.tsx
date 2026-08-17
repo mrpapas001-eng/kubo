@@ -61,7 +61,6 @@ if (slug === "hogar") {
   if (subslug === "organizacion") return "/hogar-organizacion.jpg";
   if (subslug === "jardin-y-terraza") return "/hogar-jardin.jpg";
   if (subslug === "otros") return "/hogar-hero.jpg";
-  if (subslug === "energia-solar") return "/energia-solar.jpg";
   return "/hogar-hero.jpg";
 }
 
@@ -76,6 +75,7 @@ if (slug === "hogar") {
     if (subslug === "personas") return "/servicios-personas.jpg";
     if (subslug === "empresas") return "/servicios-empresas.jpg";
     if (subslug === "electricos") return "/servicios-electricos.jpg";
+    if (subslug === "energia-solar") return "/energia-solar.jpg";
     if (subslug === "motor") return "/servicios-motor.jpg";
     if (subslug === "bicicleta") return "/servicios-bicicleta.jpg";
     if (subslug === "otros") return "/servicios-otros.jpg";

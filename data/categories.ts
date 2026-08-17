@@ -66,6 +66,7 @@ export const CATEGORIES: Category[] = [
       { slug: "personas", label: "Para personas", template: "SERVICE_JOB" },
       { slug: "empresas", label: "Para empresas", template: "SERVICE_JOB" },
       { slug: "electricos", label: "Servicios eléctricos", template: "SERVICE_JOB" },
+      { slug: "energia-solar", label: "Energía solar", template: "SERVICE_JOB" },
       { slug: "motor", label: "Para motor", template: "SERVICE_JOB" },
       { slug: "bicicleta", label: "Para bicicleta", template: "SERVICE_JOB" },
       { slug: "otros", label: "Otros servicios", template: "SERVICE_JOB" },
@@ -170,7 +171,6 @@ export const CATEGORIES: Category[] = [
       { slug: "organizacion", label: "Organización", template: "PRODUCT" },
       { slug: "jardin-y-terraza", label: "Jardín y terraza", template: "PRODUCT" },
       { slug: "otros", label: "Otros", template: "PRODUCT" },
-      { slug: "energia-solar", label: "Energía solar", template: "PRODUCT" },
     ],
   },
   {
