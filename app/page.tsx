@@ -4,6 +4,7 @@ import HomeCategories from "@/components/HomeCategories";
 import HomeFeaturedSection from "@/components/HomeFeaturedSection";
 import ReelsSection from "@/components/ReelsSection";
 import Footer from "@/components/Footer";
+import InstallKuboButton from "@/components/InstallKuboButton";
 import { getHomeListings, getHomeReels } from "@/lib/queries/home";
 import { getHomeSponsors } from "@/lib/queries/sponsors";
 
@@ -62,6 +63,7 @@ export default async function Home() {
         <main className="relative pb-10 pt-3 md:pt-4">
           <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-8">
             <HomeHero />
+            <InstallKuboButton />
 <HomeCategories />
 
 <HomeFeaturedSection
