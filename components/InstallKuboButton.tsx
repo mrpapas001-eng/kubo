@@ -12,6 +12,7 @@ export default function InstallKuboButton() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     function updateStandaloneMode() {
@@ -20,6 +21,14 @@ export default function InstallKuboButton() {
         Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 
       setIsStandalone(standalone);
+    }
+
+    function updateIOSMode() {
+      const iOSDevice =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+      setIsIOS(iOSDevice);
     }
 
     function handleBeforeInstallPrompt(event: Event) {
@@ -35,6 +44,7 @@ export default function InstallKuboButton() {
     }
 
     updateStandaloneMode();
+    updateIOSMode();
 
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
     const handleMediaChange = () => updateStandaloneMode();
@@ -44,7 +54,9 @@ export default function InstallKuboButton() {
       mediaQuery.addListener(handleMediaChange);
     }
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    if (!/iPad|iPhone|iPod/.test(navigator.userAgent) && !(navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    }
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
@@ -52,7 +64,9 @@ export default function InstallKuboButton() {
       if ("removeListener" in mediaQuery) {
         mediaQuery.removeListener(handleMediaChange);
       }
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      if (!/iPad|iPhone|iPod/.test(navigator.userAgent) && !(navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      }
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
@@ -97,7 +111,9 @@ export default function InstallKuboButton() {
 
         {showInstallInstructions && !installPrompt ? (
           <p className="mt-3 max-w-sm text-left text-sm text-slate-600 md:text-right">
-            Abre el menú ⋮ de Chrome y elige “Agregar a pantalla de inicio” o “Instalar aplicación”.
+            {isIOS
+              ? "En Safari, pulsa Compartir y selecciona ‘Añadir a pantalla de inicio’."
+              : "Abre el menú ⋮ de Chrome y elige “Agregar a pantalla de inicio” o “Instalar aplicación”."}
           </p>
         ) : null}
       </div>
