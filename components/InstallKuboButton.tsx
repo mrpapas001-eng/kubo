@@ -11,8 +11,17 @@ type BeforeInstallPromptEvent = Event & {
 export default function InstallKuboButton() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    function updateStandaloneMode() {
+      const standalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+
+      setIsStandalone(standalone);
+    }
+
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -22,12 +31,27 @@ export default function InstallKuboButton() {
     function handleAppInstalled() {
       setInstallPrompt(null);
       setShowInstallInstructions(false);
+      setIsStandalone(true);
+    }
+
+    updateStandaloneMode();
+
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    const handleMediaChange = () => updateStandaloneMode();
+
+    mediaQuery.addEventListener?.("change", handleMediaChange);
+    if ("addListener" in mediaQuery) {
+      mediaQuery.addListener(handleMediaChange);
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
+      mediaQuery.removeEventListener?.("change", handleMediaChange);
+      if ("removeListener" in mediaQuery) {
+        mediaQuery.removeListener(handleMediaChange);
+      }
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -41,6 +65,10 @@ export default function InstallKuboButton() {
 
     await installPrompt.prompt();
     await installPrompt.userChoice;
+  }
+
+  if (isStandalone) {
+    return null;
   }
 
   return (
