@@ -75,6 +75,22 @@ export default async function MiCuentaPage() {
     (item) => item.businessVerified
   );
 
+  const accountVerifications = myEmail
+    ? await prisma.accountVerification.findMany({
+        where: { email: myEmail },
+        orderBy: { submittedAt: "desc" },
+      })
+    : [];
+
+  const personalVerification = accountVerifications.find(
+    (item) => item.type === "PARTICULAR"
+  );
+  const businessVerification = accountVerifications.find(
+    (item) => item.type === "EMPRESA"
+  );
+
+  const verificationSummary = personalVerification ?? businessVerification;
+
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-28 pt-6 md:px-6 md:py-10">
       <div className="mx-auto max-w-[980px]">
@@ -121,6 +137,31 @@ export default async function MiCuentaPage() {
               </p>
             </div>
           </Link>
+
+          {verificationSummary ? (
+            <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-5 w-5 text-[#0f3c8c]" />
+                <div className="text-base font-black text-slate-900">
+                  {verificationSummary.status === "VERIFIED"
+                    ? "Tu cuenta ya está verificada."
+                    : verificationSummary.status === "PENDING"
+                      ? "Solicitud de verificación pendiente."
+                      : "Tu última verificación fue rechazada. Puedes volver a enviarla."}
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-slate-600">
+                {verificationSummary.type === "PARTICULAR"
+                  ? "Verificación de usuario."
+                  : "Verificación de empresa."}
+                {verificationSummary.status === "PENDING"
+                  ? " Estamos revisando tu información."
+                  : verificationSummary.status === "REJECTED"
+                    ? " Puedes enviar una nueva solicitud desde la opción correspondiente."
+                    : " Puedes seguir usando Kubo normalmente."}
+              </p>
+            </div>
+          ) : null}
 
           {hasBusiness && !hasVerifiedBusiness ? (
             <Link

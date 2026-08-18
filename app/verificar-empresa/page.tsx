@@ -7,6 +7,7 @@ import { Building2, FileCheck2, UploadCloud } from "lucide-react";
 export default function VerificarEmpresaPage() {
   const [businessName, setBusinessName] = useState("");
   const [businessDescription, setBusinessDescription] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [rutFile, setRutFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -15,6 +16,11 @@ export default function VerificarEmpresaPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
+
+    if (!whatsappNumber.trim()) {
+      setMessage("Ingresa tu numero de WhatsApp.");
+      return;
+    }
 
     if (!rutFile) {
       setMessage("Sube el RUT de la empresa.");
@@ -45,6 +51,7 @@ export default function VerificarEmpresaPage() {
         body: JSON.stringify({
           businessName,
           businessDescription,
+          whatsappNumber: whatsappNumber.trim(),
           rutUrl: uploadData.documentUrl,
         }),
       });
@@ -126,6 +133,19 @@ export default function VerificarEmpresaPage() {
                   }
                   className="mt-2 min-h-[120px] w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-[#0f3c8c]"
                   placeholder="Cuenta que vende o que servicios ofrece la empresa."
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700">
+                  WhatsApp
+                </label>
+                <input
+                  value={whatsappNumber}
+                  onChange={(event) => setWhatsappNumber(event.target.value)}
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-[#0f3c8c]"
+                  placeholder="Ej: 3001234567"
+                  required
                 />
               </div>
 

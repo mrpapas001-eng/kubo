@@ -6,6 +6,7 @@ import { FileCheck2, IdCard, UploadCloud } from "lucide-react";
 
 export default function VerificarIdentidadPage() {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -17,6 +18,11 @@ export default function VerificarIdentidadPage() {
 
     if (!documentFile) {
       setMessage("Sube una foto o PDF de tu documento.");
+      return;
+    }
+
+    if (!whatsappNumber.trim()) {
+      setMessage("Ingresa tu numero de WhatsApp.");
       return;
     }
 
@@ -48,6 +54,7 @@ export default function VerificarIdentidadPage() {
         },
         body: JSON.stringify({
           documentUrl: uploadData.documentUrl,
+          whatsappNumber: whatsappNumber.trim(),
           consent,
         }),
       });
@@ -104,6 +111,19 @@ export default function VerificarIdentidadPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-7 space-y-5">
+              <div>
+                <label className="text-sm font-bold text-slate-700">
+                  WhatsApp
+                </label>
+                <input
+                  value={whatsappNumber}
+                  onChange={(event) => setWhatsappNumber(event.target.value)}
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-[#0f3c8c]"
+                  placeholder="Ej: 3001234567"
+                  required
+                />
+              </div>
+
               <label className="block rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
                 <UploadCloud className="mx-auto h-8 w-8 text-[#0f3c8c]" />
                 <div className="mt-3 text-sm font-black text-slate-900">
