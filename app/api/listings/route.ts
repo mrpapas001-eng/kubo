@@ -471,9 +471,20 @@ export async function POST(req: Request) {
       },
     });
 
+    const accountVerification = await prisma.accountVerification.findUnique({
+      where: {
+        email_type: {
+          email: ownerEmail,
+          type: isBusiness ? "EMPRESA" : "PARTICULAR",
+        },
+      },
+      select: { status: true },
+    });
+
     return NextResponse.json({
       ok: true,
       listing,
+      verificationStatus: accountVerification?.status ?? null,
     });
   } catch (error: any) {
     console.error("POST /api/listings error:", error);

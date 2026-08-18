@@ -425,6 +425,8 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
 
   // cargar borrador una sola vez al montar
   useEffect(() => {
@@ -844,7 +846,8 @@ if (!res.ok || !data?.ok) {
 
 
       localStorage.removeItem(PUBLISH_DRAFT_KEY);
-      router.push(`/listing/${data.listing.id}`);
+      setPublishedListingId(data.listing.id);
+      setVerificationStatus(data.verificationStatus ?? null);
     } catch (err: any) {
       setError(err?.message ?? "Error");
     } finally {
@@ -888,6 +891,66 @@ if (!session) {
     </div>
   );
 }
+
+  if (publishedListingId) {
+    const verificationHref =
+      sellerType === "EMPRESA" ? "/verificar-empresa" : "/verificar-identidad";
+    const isVerified = verificationStatus === "VERIFIED";
+    const isPending = verificationStatus === "PENDING";
+
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] px-4 pb-36 pt-6 md:px-6 md:py-10">
+        <div className="mx-auto max-w-[680px] rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+          <div className="flex items-center gap-3 text-emerald-700">
+            <CheckCircle2 className="h-7 w-7" />
+            <h1 className="text-2xl font-black">Tu anuncio fue publicado</h1>
+          </div>
+
+          {isVerified ? (
+            <p className="mt-4 text-slate-600">
+              Tu cuenta ya está verificada.
+            </p>
+          ) : isPending ? (
+            <p className="mt-4 text-slate-600">
+              Verificación pendiente. Estamos revisando tu información.
+            </p>
+          ) : sellerType === "EMPRESA" ? (
+            <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+              <p className="font-bold text-slate-900">
+                Verifica tu empresa para conseguir la insignia Empresa verificada.
+              </p>
+              <Link
+                href={verificationHref}
+                className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#0f3c8c] px-5 text-sm font-black text-white hover:bg-[#0c2f6d]"
+              >
+                Verificar empresa
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+              <p className="font-bold text-slate-900">
+                Verifica tu cuenta para conseguir la insignia Usuario verificado en tus anuncios.
+              </p>
+              <Link
+                href={verificationHref}
+                className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#0f3c8c] px-5 text-sm font-black text-white hover:bg-[#0c2f6d]"
+              >
+                Verificar por WhatsApp
+              </Link>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => router.push(`/listing/${publishedListingId}`)}
+            className="mt-4 h-11 rounded-xl border border-slate-200 px-5 text-sm font-black text-slate-700 hover:bg-slate-50"
+          >
+            {isVerified || isPending ? "Ver anuncio" : "Ahora no"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-36 pt-6 md:px-6 md:py-10">
