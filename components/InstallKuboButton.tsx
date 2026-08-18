@@ -10,15 +10,18 @@ type BeforeInstallPromptEvent = Event & {
 
 export default function InstallKuboButton() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
 
   useEffect(() => {
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
+      setShowInstallInstructions(false);
     }
 
     function handleAppInstalled() {
       setInstallPrompt(null);
+      setShowInstallInstructions(false);
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -31,7 +34,10 @@ export default function InstallKuboButton() {
   }, []);
 
   async function handleInstall() {
-    if (!installPrompt) return;
+    if (!installPrompt) {
+      setShowInstallInstructions(true);
+      return;
+    }
 
     await installPrompt.prompt();
     await installPrompt.userChoice;
@@ -51,16 +57,22 @@ export default function InstallKuboButton() {
         </p>
       </div>
 
-      {installPrompt ? (
+      <div className="md:flex md:flex-col md:items-end">
         <button
           type="button"
           onClick={handleInstall}
           className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:mt-0"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
-          Instalar Kubo
+          {installPrompt ? "Instalar Kubo" : "Agregar a pantalla de inicio"}
         </button>
-      ) : null}
+
+        {showInstallInstructions && !installPrompt ? (
+          <p className="mt-3 max-w-sm text-left text-sm text-slate-600 md:text-right">
+            Abre el menú ⋮ de Chrome y elige “Agregar a pantalla de inicio” o “Instalar aplicación”.
+          </p>
+        ) : null}
+      </div>
     </section>
   );
 }
