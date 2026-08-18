@@ -8,6 +8,8 @@ import InstallKuboButton from "@/components/InstallKuboButton";
 import { getHomeListings, getHomeReels } from "@/lib/queries/home";
 import { getHomeSponsors } from "@/lib/queries/sponsors";
 
+export const revalidate = 60;
+
 const CITIES = [
   "Pereira",
   "Dosquebradas",
