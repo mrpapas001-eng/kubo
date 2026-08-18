@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
+import { put } from "@vercel/blob";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
@@ -60,6 +61,15 @@ function buildSafeFilename(ext: string) {
 async function saveFile(file: File, subfolder: string) {
   const ext = MIME_TO_EXT[file.type] || "bin";
   const filename = buildSafeFilename(ext);
+
+  if (subfolder === "images") {
+    const blob = await put(`${subfolder}/${filename}`, file, {
+      access: "public",
+      addRandomSuffix: false,
+    });
+
+    return blob.url;
+  }
 
   // Los documentos de verificación (RUT/identidad) no deben quedar públicos.
   const isPrivateDocument = subfolder === "documents";
