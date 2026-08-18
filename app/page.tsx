@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import HomeHero from "@/components/HomeHero";
 import HomeCategories from "@/components/HomeCategories";
+import HomeAyudaSection from "@/components/HomeAyudaSection";
 import HomeFeaturedSection from "@/components/HomeFeaturedSection";
 import ReelsSection from "@/components/ReelsSection";
 import Footer from "@/components/Footer";
@@ -67,6 +68,7 @@ export default async function Home() {
             <HomeHero />
             <InstallKuboButton />
 <HomeCategories />
+<HomeAyudaSection />
 
 <HomeFeaturedSection
   listings={initialListings}
