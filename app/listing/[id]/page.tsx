@@ -15,6 +15,7 @@ import {
   CalendarDays,
   Crown,
   Camera,
+  Heart,
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
@@ -234,10 +235,9 @@ export default async function ListingDetail({ params }: PageProps) {
   const pageUrl = `${baseUrl}/listing/${listing.id}`;
   const seoImage = listing.imageUrl || `${baseUrl}${fallback}`;
 
-    const details: any = parseDetails(listing.details);
+  const details: any = parseDetails(listing.details);
   const isDonation = details?.kuboAyuda?.type === "DONATION";
   const reelUrl = typeof details?.reelUrl === "string" ? details.reelUrl : "";
-
 
   const gallery: string[] = Array.isArray(details?.images) ? details.images : [];
   const images = [listing.imageUrl, ...gallery].filter(Boolean) as string[];
@@ -750,7 +750,7 @@ const visibilityDescription = isPremiumListing
           </div>
 
           <div className="order-2 h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:sticky lg:top-24">
-                        <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-2">
               {isDonation ? (
                 <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-900 shadow-sm">
                   💛 Kubo Ayuda - Donación
@@ -758,7 +758,6 @@ const visibilityDescription = isPremiumListing
               ) : null}
 
               {listing.categorySlug ? (
-
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700">
                   {listing.categorySlug}
                 </span>
@@ -840,7 +839,7 @@ const visibilityDescription = isPremiumListing
               </div>
             </div>
 
-                        <div className="mt-6 rounded-2xl bg-[#0b1736] px-5 py-5 text-white">
+            <div className="mt-6 rounded-2xl bg-[#0b1736] px-5 py-5 text-white">
               <div className="text-xs font-black uppercase tracking-wide text-slate-300">
                 {isDonation ? "Valor" : "Precio"}
               </div>
@@ -876,13 +875,12 @@ const visibilityDescription = isPremiumListing
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-amber-200 text-xs font-bold text-amber-800 leading-relaxed italic">
-                  "Este artículo se entrega gratuitamente a través de Kubo Ayuda."
+                  &ldquo;Este artículo se entrega gratuitamente a través de Kubo Ayuda.&rdquo;
                 </div>
               </div>
             ) : null}
 
             {isCar || isRealEstate ? (
-
               <div className="mt-6">
                 <div className="mb-3 text-sm font-black text-slate-900">
                   Características

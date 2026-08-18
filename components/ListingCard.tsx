@@ -201,8 +201,12 @@ export default function ListingCard({
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
         {item?.id ? <FavoriteButton listingId={item.id} /> : null}
 
-                {isDonation ? (
-          <div className="absolute left-3 top-3 z-30 rounded-full bg-amber-400 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
+        {isDonation ? (
+          <div
+            className={`absolute left-3 z-30 rounded-full bg-amber-400 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur ${
+              isPremium ? "top-14" : "top-3"
+            }`}
+          >
             💛 DONACIÓN
           </div>
         ) : isFeatured && !isPremium ? (
@@ -210,7 +214,6 @@ export default function ListingCard({
             DESTACADO
           </div>
         ) : null}
-
 
         <Image
           src={image}

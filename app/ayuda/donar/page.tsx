@@ -63,30 +63,17 @@ const CATEGORY_OPTIONS: Array<{
     ],
   },
   {
-    key: "electrodomesticos",
-    label: "Electrodomésticos",
-    subs: [
-      { slug: "aires", label: "Aires" },
-      { slug: "cocinas", label: "Cocinas" },
-      { slug: "hornos", label: "Hornos" },
-      { slug: "lavadoras", label: "Lavadoras" },
-      { slug: "microondas", label: "Microondas" },
-      { slug: "neveras", label: "Neveras" },
-      { slug: "pequenos", label: "Electrodomésticos pequeños" },
-      { slug: "secadoras", label: "Secadoras" },
-    ],
-  },
-  {
     key: "hogar",
     label: "Hogar",
     subs: [
-      { slug: "colchones", label: "Colchones" },
+      { slug: "muebles-de-hogar", label: "Muebles de hogar" },
       { slug: "decoracion", label: "Decoración" },
+      { slug: "colchones", label: "Colchones" },
       { slug: "iluminacion", label: "Iluminación" },
-      { slug: "jardin", label: "Jardín" },
       { slug: "menaje", label: "Menaje" },
-      { slug: "muebles", label: "Muebles" },
       { slug: "organizacion", label: "Organización" },
+      { slug: "jardin-y-terraza", label: "Jardín y terraza" },
+      { slug: "otros", label: "Otros" },
     ],
   },
   {
@@ -457,7 +444,7 @@ export default function DonarPage() {
 
             <div className="rounded-xl border border-slate-200 bg-white p-4 mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                 <span className="text-sm font-semibold text-slate-900">
                   Beneficios de verificar tu cuenta
                 </span>
@@ -528,7 +515,7 @@ export default function DonarPage() {
 
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-semibold text-slate-900">
                 DONACIÓN GRATUITA
               </span>

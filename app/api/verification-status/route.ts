@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       isVerified: !!verification,
       whatsappNumber: verification?.whatsappNumber || null,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { ok: false, error: "Error verificando estado" },
       { status: 500 }

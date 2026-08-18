@@ -212,8 +212,14 @@ export async function POST(req: Request) {
     const details =
       body?.details && typeof body.details === "object" ? body.details : null;
 
-        // Security: Force price = 0 for donations
+    const ownerEmail = sessionEmail;
+
+    // Seguridad Kubo Ayuda: las donaciones exigen cuenta PARTICULAR verificada,
+    // usan el WhatsApp verificado (nunca body.phone) y fuerzan price = 0.
     const isDonation = details?.kuboAyuda?.type === "DONATION";
+
+    let finalPhone = phone;
+    let finalPrice = parsedPrice;
 
     if (isDonation) {
       if (sellerType !== "PARTICULAR") {
@@ -246,15 +252,22 @@ export async function POST(req: Request) {
         );
       }
 
-      // Force WhatsApp number from verification record and price to 0
-      body.phone = verification.whatsappNumber;
+      let verifiedPhone = String(verification.whatsappNumber).replace(/\D/g, "");
+      if (verifiedPhone.length > 10 && verifiedPhone.startsWith("57")) {
+        verifiedPhone = verifiedPhone.slice(2);
+      }
+      verifiedPhone = verifiedPhone.slice(0, 10);
+
+      if (!verifiedPhone || verifiedPhone.length < 7) {
+        return NextResponse.json(
+          { ok: false, error: "Tu número de WhatsApp verificado no es válido." },
+          { status: 403 }
+        );
+      }
+
+      finalPhone = verifiedPhone;
+      finalPrice = 0;
     }
-
-    const finalPrice = isDonation ? 0 : parsedPrice;
-    const finalPhone = isDonation ? body.phone : phone;
-
-
-    const ownerEmail = sessionEmail;
 
     const businessName = String(body?.businessName ?? "").trim();
     const businessDescription = String(body?.businessDescription ?? "").trim();
@@ -291,7 +304,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!phone || phone.length < 7) {
+    if (!finalPhone || finalPhone.length < 7) {
       return NextResponse.json(
         { ok: false, error: "El teléfono no es válido." },
         { status: 400 }
@@ -319,7 +332,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (parsedPrice !== null && Number.isNaN(parsedPrice)) {
+    if (!isDonation && parsedPrice !== null && Number.isNaN(parsedPrice)) {
       return NextResponse.json(
         { ok: false, error: "El precio no es válido." },
         { status: 400 }
@@ -368,7 +381,7 @@ export async function POST(req: Request) {
 
     const requiresPrice = !["empleo", "servicios"].includes(categorySlug);
 
-    if (requiresPrice && parsedPrice === null) {
+    if (!isDonation && requiresPrice && parsedPrice === null) {
       return NextResponse.json(
         { ok: false, error: "El precio es obligatorio." },
         { status: 400 }
@@ -482,13 +495,12 @@ export async function POST(req: Request) {
         })
       : null;
 
-        const listing = await prisma.listing.create({
+    const listing = await prisma.listing.create({
       data: {
         title,
         description,
         phone: finalPhone,
         price: finalPrice,
-
         currency,
         city,
         location,
