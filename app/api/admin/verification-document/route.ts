@@ -47,22 +47,27 @@ export async function GET(req: Request) {
   const type = String(url.searchParams.get("type") ?? "").trim();
   const requestId = String(url.searchParams.get("requestId") ?? "").trim();
 
-  if (!requestId || !["business", "identity"].includes(type)) {
+  if (!requestId || !["business", "identity", "account-business"].includes(type)) {
     return NextResponse.json({ ok: false, error: "Parámetros inválidos." }, { status: 400 });
   }
 
   const record =
     type === "business"
       ? await prisma.businessVerificationRequest.findUnique({ where: { id: requestId } })
-      : await prisma.identityVerificationRequest.findUnique({ where: { id: requestId } });
+      : type === "identity"
+        ? await prisma.identityVerificationRequest.findUnique({ where: { id: requestId } })
+        : await prisma.accountVerification.findFirst({
+            where: { id: requestId, type: "EMPRESA" },
+          });
 
   if (!record) {
     return NextResponse.json({ ok: false, error: "Solicitud no encontrada." }, { status: 404 });
   }
 
-  const identifier = type === "business"
-    ? (record as { rutUrl: string }).rutUrl
-    : (record as { documentUrl: string }).documentUrl;
+  const identifier =
+    type === "identity"
+      ? (record as { documentUrl: string }).documentUrl
+      : (record as { rutUrl: string }).rutUrl;
 
   const filePath = resolvePrivateDocumentPath(identifier ?? "");
 

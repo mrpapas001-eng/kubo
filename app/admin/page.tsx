@@ -106,6 +106,7 @@ export default async function AdminDashboardPage() {
     pendingReports,
     pendingIdentity,
     pendingBusiness,
+    pendingAccountVerifications,
     totalConversations,
     totalViews,
   ] = await Promise.all([
@@ -118,11 +119,13 @@ export default async function AdminDashboardPage() {
     prisma.listingReport.count({ where: { status: "pending" } }),
     prisma.identityVerificationRequest.count({ where: { status: "pending" } }),
     prisma.businessVerificationRequest.count({ where: { status: "pending" } }),
+    prisma.accountVerification.count({ where: { status: "PENDING" } }),
     prisma.conversation.count(),
     prisma.listing.aggregate({ _sum: { views: true } }),
   ]);
 
-  const pendingTotal = pendingReports + pendingIdentity + pendingBusiness;
+  const pendingTotal =
+    pendingReports + pendingIdentity + pendingBusiness + pendingAccountVerifications;
   const views = totalViews._sum.views ?? 0;
 
   return (
@@ -188,7 +191,7 @@ export default async function AdminDashboardPage() {
             </h2>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-4">
           <AdminLink
             href="/admin/reports"
             title="Reportes"
@@ -211,6 +214,14 @@ export default async function AdminDashboardPage() {
             icon={Building2}
             badge={pendingBusiness}
             actionLabel="Gestionar empresas"
+          />
+          <AdminLink
+            href="/admin/account-verifications"
+            title="Verificaciones pendientes"
+            description="Revisa solicitudes de cuenta por WhatsApp y RUT."
+            icon={ShieldCheck}
+            badge={pendingAccountVerifications}
+            actionLabel="Gestionar solicitudes"
           />
           </div>
         </div>
