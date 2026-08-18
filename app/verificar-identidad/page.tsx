@@ -2,12 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { FileCheck2, IdCard, UploadCloud } from "lucide-react";
+import { FileCheck2, IdCard } from "lucide-react";
 
 export default function VerificarIdentidadPage() {
-  const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -16,46 +14,21 @@ export default function VerificarIdentidadPage() {
     event.preventDefault();
     setMessage("");
 
-    if (!documentFile) {
-      setMessage("Sube una foto o PDF de tu documento.");
-      return;
-    }
-
     if (!whatsappNumber.trim()) {
       setMessage("Ingresa tu numero de WhatsApp.");
-      return;
-    }
-
-    if (!consent) {
-      setMessage("Acepta el tratamiento de datos para continuar.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const form = new FormData();
-      form.append("documents", documentFile);
-
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: form,
-      });
-      const uploadData = await uploadRes.json();
-
-      if (!uploadRes.ok || !uploadData.documentUrl) {
-        throw new Error(uploadData.error || "No se pudo subir el documento.");
-      }
-
       const res = await fetch("/api/identity-verification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          documentUrl: uploadData.documentUrl,
           whatsappNumber: whatsappNumber.trim(),
-          consent,
         }),
       });
       const data = await res.json();
@@ -106,7 +79,7 @@ export default function VerificarIdentidadPage() {
                 <div className="text-lg font-black">Solicitud recibida</div>
               </div>
               <p className="mt-2 text-sm font-medium text-slate-600">
-                Revisaremos el documento desde el panel de administracion.
+                Revisaremos tu solicitud por WhatsApp.
               </p>
             </div>
           ) : (
@@ -123,44 +96,6 @@ export default function VerificarIdentidadPage() {
                   required
                 />
               </div>
-
-              <label className="block rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
-                <UploadCloud className="mx-auto h-8 w-8 text-[#0f3c8c]" />
-                <div className="mt-3 text-sm font-black text-slate-900">
-                  Subir documento de identidad
-                </div>
-                <p className="mt-1 text-xs font-medium text-slate-500">
-                  PDF, JPG, PNG o WEBP. Maximo 10MB.
-                </p>
-                <input
-                  type="file"
-                  accept=".pdf,image/jpeg,image/png,image/webp"
-                  className="sr-only"
-                  onChange={(event) => {
-                    setDocumentFile(event.target.files?.[0] || null);
-                  }}
-                  required
-                />
-                {documentFile ? (
-                  <div className="mt-3 rounded-2xl bg-white px-4 py-2 text-xs font-bold text-slate-700">
-                    {documentFile.name}
-                  </div>
-                ) : null}
-              </label>
-
-              <label className="flex gap-3 rounded-3xl border border-blue-100 bg-blue-50 p-4">
-                <input
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(event) => setConsent(event.target.checked)}
-                  className="mt-1 h-4 w-4 shrink-0"
-                />
-                <span className="text-sm font-medium leading-relaxed text-slate-600">
-                  Autorizo a Kubo a revisar este documento solo para verificar
-                  mi identidad. Entiendo que puedo pedir la eliminacion de mis
-                  datos.
-                </span>
-              </label>
 
               {message ? (
                 <div className="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700">

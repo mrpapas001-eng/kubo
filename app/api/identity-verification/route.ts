@@ -14,27 +14,11 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const documentUrl = String(body.documentUrl || "").trim();
     const whatsappNumber = String(body.whatsappNumber || "").replace(/\D/g, "").trim();
-    const consent = Boolean(body.consent);
-
-    if (!documentUrl) {
-      return NextResponse.json(
-        { error: "Sube una foto o PDF de tu documento." },
-        { status: 400 }
-      );
-    }
 
     if (!whatsappNumber) {
       return NextResponse.json(
         { error: "Escribe tu numero de WhatsApp para verificar tu cuenta." },
-        { status: 400 }
-      );
-    }
-
-    if (!consent) {
-      return NextResponse.json(
-        { error: "Debes aceptar el tratamiento de datos para verificarte." },
         { status: 400 }
       );
     }
@@ -70,7 +54,7 @@ export async function POST(req: Request) {
         data: {
           status: "PENDING",
           whatsappNumber,
-          documentUrl,
+          documentUrl: null,
           reviewedAt: null,
           adminNote: null,
           updatedAt: new Date(),
@@ -86,7 +70,7 @@ export async function POST(req: Request) {
         type: "PARTICULAR",
         status: "PENDING",
         whatsappNumber,
-        documentUrl,
+        documentUrl: null,
       },
     });
 
