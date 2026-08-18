@@ -82,8 +82,9 @@ export default function ListingCard({
     new Date(item.featuredUntil).getTime() > now.getTime();
 
   const isBusiness = Boolean(item?.isBusiness);
-  const businessVerified = Boolean(item?.businessVerified);
-  const identityVerified = Boolean(item?.isVerified);
+  const accountVerificationType = item?.accountVerificationType;
+  const businessVerified = accountVerificationType === "EMPRESA";
+  const identityVerified = accountVerificationType === "PARTICULAR";
 
   const image = item?.imageUrl || "/placeholders/listing.jpg";
   const href = item?.id ? `/listing/${item.id}` : "#";
@@ -169,19 +170,7 @@ export default function ListingCard({
 
   const sellerLabel = businessVerified
     ? "Empresa verificada"
-    : isBusiness
-      ? "Empresa"
-      : identityVerified
-        ? "Identidad verificada"
-        : "Particular";
-
-  const trustText = businessVerified
-    ? "RUT revisado por Kubo"
-    : identityVerified
-      ? "Identidad revisada por Kubo"
-      : isBusiness
-        ? "Empresa sin verificar"
-        : "Vendedor particular";
+    : "Usuario verificado";
 
   return (
     <Link
@@ -270,28 +259,18 @@ export default function ListingCard({
             {extraLine || city}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black shadow-sm ${
-                businessVerified
-                  ? "bg-[#0f3c8c] text-white"
-                  : identityVerified
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-600"
-              }`}
-            >
-              {businessVerified || identityVerified ? (
+          {accountVerificationType ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black shadow-sm ${
+                  businessVerified ? "bg-[#0f3c8c] text-white" : "bg-emerald-600 text-white"
+                }`}
+              >
                 <BadgeCheck className="h-3.5 w-3.5" />
-              ) : (
-                <ShieldCheck className="h-3.5 w-3.5 text-[#0f3c8c]" />
-              )}
-              {sellerLabel}
-            </span>
-
-            <span className="text-[11px] font-semibold text-slate-400">
-              {trustText}
-            </span>
-          </div>
+                {sellerLabel}
+              </span>
+            </div>
+          ) : null}
 
 
 

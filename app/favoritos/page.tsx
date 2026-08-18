@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
+import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingCard from "@/components/ListingCard";
 import BackButton from "@/components/BackButton";
 
@@ -49,9 +50,10 @@ export default async function FavoritosPage() {
         },
       })
     : [];
+  const listingsWithVerification = await attachAccountVerification(listings);
 
   const orderedListings = listingIds
-    .map((id) => listings.find((item) => item.id === id))
+    .map((id) => listingsWithVerification.find((item) => item.id === id))
     .filter(Boolean);
 
   return (

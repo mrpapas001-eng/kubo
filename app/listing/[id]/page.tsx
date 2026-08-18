@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
+import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingGallery from "@/components/ListingGallery";
 import ListingCard from "@/components/ListingCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -179,7 +180,7 @@ export default async function ListingDetail({ params }: PageProps) {
 
   if (!id) return notFound();
 
-  const listing = await prisma.listing.findUnique({
+  let listing = await prisma.listing.findUnique({
     where: { id },
   });
 
@@ -194,6 +195,9 @@ export default async function ListingDetail({ params }: PageProps) {
   if (listingStatus !== "active" && !isOwner && !isAdmin) {
     return notFound();
   }
+
+  const [listingWithVerification] = await attachAccountVerification([listing]);
+  listing = listingWithVerification;
 
   await prisma.listing.update({
     where: { id },
@@ -216,6 +220,7 @@ export default async function ListingDetail({ params }: PageProps) {
     },
     take: 6,
   });
+  const similarListingsWithVerification = await attachAccountVerification(similarListings);
 
   const fallback = "/placeholders/listing.jpg";
   const baseUrl = getBaseUrl();
@@ -266,25 +271,23 @@ export default async function ListingDetail({ params }: PageProps) {
     : "#";
 
   const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
+  const accountVerificationType = listingWithVerification.accountVerificationType;
   const sellerLabel =
-    listing.sellerType === "PARTICULAR"
-      ? listing.isVerified
-        ? "Identidad verificada"
-        : "Particular"
-      : listing.businessVerified
-        ? "Empresa verificada"
-        : "Empresa";
+    accountVerificationType === "EMPRESA"
+      ? "Empresa verificada"
+      : accountVerificationType === "PARTICULAR"
+        ? "Usuario verificado"
+        : "Vendedor en Kubo";
 
-  const trustDescription = listing.businessVerified
-    ? "Kubo reviso el RUT de esta empresa."
-    : listing.isVerified
-      ? "Kubo reviso la identidad de este vendedor."
-      : listing.sellerType === "PARTICULAR"
-        ? "Este vendedor aun no ha verificado su identidad."
-        : "Esta empresa aun no ha verificado su RUT.";
+  const trustDescription =
+    accountVerificationType === "EMPRESA"
+      ? "Kubo verificó esta empresa."
+      : accountVerificationType === "PARTICULAR"
+        ? "Kubo verificó esta cuenta."
+        : "Esta cuenta aún no tiene una verificación aprobada.";
 
   const showBusinessVerificationCta =
-    Boolean(isOwner && listing.isBusiness && !listing.businessVerified);
+    Boolean(isOwner && listing.isBusiness && accountVerificationType !== "EMPRESA");
 
   const cityCoords: Record<string, [number, number]> = {
     pereira: [4.8143, -75.6946],
@@ -620,7 +623,7 @@ const visibilityDescription = isPremiumListing
               </h2>
 
               <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {similarListings.map((item) => (
+                {similarListingsWithVerification.map((item) => (
                   <ListingCard key={item.id} item={item} />
                 ))}
               </div>

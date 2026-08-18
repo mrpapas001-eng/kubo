@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { attachAccountVerification } from "@/lib/accountVerification";
 
 type RouteContext = {
   params: Promise<{
@@ -48,9 +49,11 @@ export async function GET(_req: Request, context: RouteContext) {
       );
     }
 
+    const [listingWithVerification] = await attachAccountVerification([listing]);
+
     return NextResponse.json({
       ok: true,
-      listing,
+      listing: listingWithVerification,
     });
   } catch (error: any) {
     console.error("GET /api/listings/[id] error:", error);

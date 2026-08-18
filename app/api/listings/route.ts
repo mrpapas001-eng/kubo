@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { attachAccountVerification } from "@/lib/accountVerification";
 
 const SMART_ORDER = [
   { isPremium: "desc" as const },
@@ -146,10 +147,11 @@ export async function GET(req: Request) {
     });
 
     const total = await prisma.listing.count({ where });
+    const itemsWithVerification = await attachAccountVerification(items);
 
     return NextResponse.json({
       ok: true,
-      items,
+      items: itemsWithVerification,
       nextSkip: skip + items.length,
       hasMore: skip + items.length < total,
       fallbackUsed: false,

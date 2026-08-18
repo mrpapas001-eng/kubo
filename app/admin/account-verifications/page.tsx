@@ -7,6 +7,23 @@ import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
 import AdminAccountVerificationActions from "@/components/AdminAccountVerificationActions";
 
+const WHATSAPP_VERIFICATION_MESSAGE =
+  "Hola, somos Kubo Anuncios. Recibimos una solicitud para verificar tu cuenta. Por favor responde a este mensaje para confirmar que este número te pertenece.";
+
+function getWhatsAppHref(value: string | null) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  const normalized = digits.startsWith("0") ? digits.slice(1) : digits;
+  const number = /^3\d{9}$/.test(normalized)
+    ? `57${normalized}`
+    : /^57\d{10}$/.test(normalized)
+      ? normalized
+      : normalized;
+
+  return number
+    ? `https://wa.me/${number}?text=${encodeURIComponent(WHATSAPP_VERIFICATION_MESSAGE)}`
+    : null;
+}
+
 export default async function AdminAccountVerificationsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
@@ -54,6 +71,7 @@ export default async function AdminAccountVerificationsPage() {
           {requests.length ? (
             requests.map((item) => {
               const isBusiness = item.type === "EMPRESA";
+              const whatsappHref = getWhatsAppHref(item.whatsappNumber);
 
               return (
                 <div
@@ -88,6 +106,16 @@ export default async function AdminAccountVerificationsPage() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row lg:items-center">
+                      {whatsappHref ? (
+                        <a
+                          href={whatsappHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex h-11 items-center justify-center rounded-2xl bg-[#25D366] px-5 text-sm font-black text-white hover:bg-[#1fb85a]"
+                        >
+                          Verificar por WhatsApp
+                        </a>
+                      ) : null}
                       {isBusiness && item.rutUrl ? (
                         <a
                           href={`/api/admin/verification-document?type=account-business&requestId=${item.id}`}

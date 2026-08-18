@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
+import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingCard from "@/components/ListingCard";
 
 type PageProps = {
@@ -49,12 +50,13 @@ export default async function CompanyPage({ params }: PageProps) {
 
   if (listings.length === 0) return notFound();
 
-  const first = listings[0];
+  const listingsWithVerification = await attachAccountVerification(listings);
+  const first = listingsWithVerification[0];
 
   const businessName = first.businessName || "Empresa verificada";
   const businessType = first.businessType || "Empresa";
   const businessLogo = first.businessLogo || "";
-  const isVerified = Boolean(first.businessVerified);
+  const isVerified = first.accountVerificationType === "EMPRESA";
   const city = first.city || "Colombia";
   const phone = first.phone || "";
   const ownerEmail = first.ownerEmail || "";
@@ -118,7 +120,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
                 <div className="min-w-0">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase text-[#0f3c8c] shadow-sm">
-                    <BadgeCheck className="h-3.5 w-3.5" />
+                    {isVerified ? <BadgeCheck className="h-3.5 w-3.5" /> : null}
                     {isVerified ? "Empresa verificada" : "Empresa en Kubo"}
                   </div>
 
@@ -226,7 +228,7 @@ export default async function CompanyPage({ params }: PageProps) {
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {listings.map((item) => (
+                  {listingsWithVerification.map((item) => (
                   <ListingCard key={item.id} item={item} />
                 ))}
               </div>

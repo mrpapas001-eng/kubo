@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { attachAccountVerification } from "@/lib/accountVerification";
 import Link from "next/link";
 import BackButton from "@/components/BackButton";
 import ListingCard from "@/components/ListingCard";
@@ -24,7 +25,7 @@ export default async function MisAnunciosPage() {
     );
   }
 
-  const listings = await prisma.listing.findMany({
+  const rawListings = await prisma.listing.findMany({
     where: {
       ownerEmail: myEmail,
     },
@@ -32,11 +33,12 @@ export default async function MisAnunciosPage() {
       createdAt: "desc",
     },
   });
+  const listings = await attachAccountVerification(rawListings);
 
   const now = new Date();
 
   const hasUnverifiedBusiness = listings.some(
-    (item: any) => item.isBusiness && !item.businessVerified
+    (item: any) => item.isBusiness && item.accountVerificationType !== "EMPRESA"
   );
 
   return (

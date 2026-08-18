@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingCard from "@/components/ListingCard";
 import Link from "next/link";
 import {
@@ -121,10 +122,11 @@ export default async function BuscarPage({ searchParams }: Props) {
     },
     take: 300,
   });
+  const listingsWithVerification = await attachAccountVerification(rawListings);
 
   const now = new Date();
 
-  const allListings = rawListings.map((item: any) => {
+  const allListings = listingsWithVerification.map((item: any) => {
     const isPremiumActive =
       item.isPremium &&
       item.premiumUntil &&

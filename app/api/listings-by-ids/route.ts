@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { attachAccountVerification } from "@/lib/accountVerification";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -20,5 +21,5 @@ export async function GET(req: Request) {
     },
   });
 
-  return NextResponse.json(listings);
+  return NextResponse.json(await attachAccountVerification(listings));
 }

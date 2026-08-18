@@ -1,4 +1,5 @@
 import { prisma } from "../db";
+import { attachAccountVerification } from "../accountVerification";
 
 type GetHomeListingsArgs = {
   take?: number;
@@ -62,7 +63,9 @@ const listings = await prisma.listing.findMany({
   take: take + skip + 100,
 });
 
-  return listings
+  const listingsWithVerification = await attachAccountVerification(listings);
+
+  return listingsWithVerification
     .map(normalizePromotionStatus)
     .sort(sortListings)
     .slice(skip, skip + take);
@@ -85,7 +88,9 @@ where: {
     take: take + skip + 100,
   });
 
-  return listings
+  const listingsWithVerification = await attachAccountVerification(listings);
+
+  return listingsWithVerification
     .map(normalizePromotionStatus)
     .sort(sortListings)
     .slice(skip, skip + take);
@@ -102,7 +107,9 @@ const listings = await prisma.listing.findMany({
   take: 100,
 });
 
-  return listings
+  const listingsWithVerification = await attachAccountVerification(listings);
+
+  return listingsWithVerification
     .map(normalizePromotionStatus)
     .sort(sortListings)
     .filter((listing: any) => {
@@ -128,7 +135,7 @@ const listings = await prisma.listing.findMany({
         id: listing.id,
         title: listing.title,
         image: listing.imageUrl || "/placeholders/listing.jpg",
-        badge: listing.businessVerified
+        badge: listing.accountVerificationType === "EMPRESA"
           ? "Empresa verificada"
           : listing.isPremium
             ? "Premium reel"
