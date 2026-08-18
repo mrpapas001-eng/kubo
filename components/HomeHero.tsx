@@ -66,9 +66,9 @@ export default function HomeHero() {
               </div>
 
               <h1 className="mt-4 max-w-3xl text-4xl font-black leading-[1.02] tracking-[-0.04em] md:text-5xl lg:text-[58px]">
-                Encuentra lo que
-                <br className="hidden md:block" />
-                buscas, cerca de ti
+                <span className="block">Encuentra</span>
+                <span className="block">lo que buscas,</span>
+                <span className="block">cerca de ti</span>
               </h1>
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/85 md:text-base">
