@@ -77,9 +77,12 @@ export default function AyudaPage() {
                   </div>
                 </div>
 
-                <button className="mt-6 w-full rounded-2xl bg-[#0f3c8c] px-6 py-4 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:text-base">
+                <Link
+                  href="/ayuda/donar"
+                  className="mt-6 block w-full rounded-2xl bg-[#0f3c8c] px-6 py-4 text-center text-sm font-black text-white transition hover:bg-[#0c2f6d] md:text-base"
+                >
                   Quiero donar
-                </button>
+                </Link>
               </div>
 
               {/* Necesito ayuda card */}

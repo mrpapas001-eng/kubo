@@ -32,8 +32,14 @@ function parseDetails(details: unknown) {
   }
 }
 
-function formatPrice(price: unknown, currency?: string) {
+function formatPrice(price: unknown, currency?: string, details?: unknown) {
   const numeric = Number(price);
+  const parsedDetails = parseDetails(details);
+  const isDonation = parsedDetails?.kuboAyuda?.type === "DONATION";
+
+  if (isDonation) {
+    return "GRATIS";
+  }
 
   if (!Number.isNaN(numeric) && numeric > 0) {
     return new Intl.NumberFormat("es-CO", {
@@ -88,9 +94,9 @@ export default function ListingCard({
 
   const image = item?.imageUrl || "/placeholders/listing.jpg";
   const href = item?.id ? `/listing/${item.id}` : "#";
-  const formattedPrice = formatPrice(item?.price, item?.currency);
-
   const details: any = parseDetails(item?.details);
+  const formattedPrice = formatPrice(item?.price, item?.currency, details);
+  const isDonation = details?.kuboAyuda?.type === "DONATION";
   const reelUrl = typeof details?.reelUrl === "string" ? details.reelUrl : "";
 
   const motor = details?.motor || {};
@@ -195,11 +201,16 @@ export default function ListingCard({
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
         {item?.id ? <FavoriteButton listingId={item.id} /> : null}
 
-        {isFeatured && !isPremium ? (
+                {isDonation ? (
+          <div className="absolute left-3 top-3 z-30 rounded-full bg-amber-400 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
+            💛 DONACIÓN
+          </div>
+        ) : isFeatured && !isPremium ? (
           <div className="absolute left-3 top-3 z-20 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
             DESTACADO
           </div>
         ) : null}
+
 
         <Image
           src={image}

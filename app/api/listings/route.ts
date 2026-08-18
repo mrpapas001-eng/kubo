@@ -212,6 +212,48 @@ export async function POST(req: Request) {
     const details =
       body?.details && typeof body.details === "object" ? body.details : null;
 
+        // Security: Force price = 0 for donations
+    const isDonation = details?.kuboAyuda?.type === "DONATION";
+
+    if (isDonation) {
+      if (sellerType !== "PARTICULAR") {
+        return NextResponse.json(
+          { ok: false, error: "Las donaciones solo pueden ser publicadas por particulares." },
+          { status: 403 }
+        );
+      }
+
+      const verification = await prisma.accountVerification.findUnique({
+        where: {
+          email_type: {
+            email: ownerEmail,
+            type: "PARTICULAR",
+          },
+        },
+      });
+
+      if (!verification || verification.status !== "VERIFIED") {
+        return NextResponse.json(
+          { ok: false, error: "Tu cuenta debe estar verificada para publicar donaciones." },
+          { status: 403 }
+        );
+      }
+
+      if (!verification.whatsappNumber) {
+        return NextResponse.json(
+          { ok: false, error: "Debes tener un número de WhatsApp vinculado para donar." },
+          { status: 403 }
+        );
+      }
+
+      // Force WhatsApp number from verification record and price to 0
+      body.phone = verification.whatsappNumber;
+    }
+
+    const finalPrice = isDonation ? 0 : parsedPrice;
+    const finalPhone = isDonation ? body.phone : phone;
+
+
     const ownerEmail = sessionEmail;
 
     const businessName = String(body?.businessName ?? "").trim();
@@ -440,12 +482,13 @@ export async function POST(req: Request) {
         })
       : null;
 
-    const listing = await prisma.listing.create({
+        const listing = await prisma.listing.create({
       data: {
         title,
         description,
-        phone,
-        price: parsedPrice,
+        phone: finalPhone,
+        price: finalPrice,
+
         currency,
         city,
         location,

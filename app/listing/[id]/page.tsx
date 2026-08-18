@@ -41,6 +41,13 @@ function getBaseUrl() {
 }
 
 function buildPrice(listing: any) {
+  const details = parseDetails(listing.details);
+  const isDonation = details?.kuboAyuda?.type === "DONATION";
+
+  if (isDonation) {
+    return "GRATIS";
+  }
+
   if (typeof listing.price === "number") {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -227,8 +234,10 @@ export default async function ListingDetail({ params }: PageProps) {
   const pageUrl = `${baseUrl}/listing/${listing.id}`;
   const seoImage = listing.imageUrl || `${baseUrl}${fallback}`;
 
-  const details: any = parseDetails(listing.details);
+    const details: any = parseDetails(listing.details);
+  const isDonation = details?.kuboAyuda?.type === "DONATION";
   const reelUrl = typeof details?.reelUrl === "string" ? details.reelUrl : "";
+
 
   const gallery: string[] = Array.isArray(details?.images) ? details.images : [];
   const images = [listing.imageUrl, ...gallery].filter(Boolean) as string[];
@@ -741,8 +750,15 @@ const visibilityDescription = isPremiumListing
           </div>
 
           <div className="order-2 h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:sticky lg:top-24">
-            <div className="mb-4 flex flex-wrap gap-2">
+                        <div className="mb-4 flex flex-wrap gap-2">
+              {isDonation ? (
+                <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-900 shadow-sm">
+                  💛 Kubo Ayuda - Donación
+                </span>
+              ) : null}
+
               {listing.categorySlug ? (
+
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700">
                   {listing.categorySlug}
                 </span>
@@ -824,14 +840,49 @@ const visibilityDescription = isPremiumListing
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl bg-[#0b1736] px-5 py-5 text-white">
+                        <div className="mt-6 rounded-2xl bg-[#0b1736] px-5 py-5 text-white">
               <div className="text-xs font-black uppercase tracking-wide text-slate-300">
-                Precio
+                {isDonation ? "Valor" : "Precio"}
               </div>
               <div className="mt-1 text-3xl font-black">{formattedPrice}</div>
             </div>
 
+            {isDonation ? (
+              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Heart className="h-5 w-5 text-amber-600" />
+                  <span className="text-sm font-black text-slate-900">INFORMACIÓN DE LA DONACIÓN</span>
+                </div>
+                
+                <div className="space-y-3">
+                  {details.kuboAyuda?.condition && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600 font-medium">Estado:</span>
+                      <span className="text-slate-900 font-bold">
+                        {details.kuboAyuda.condition === "NEW" ? "NUEVO" : 
+                         details.kuboAyuda.condition === "GOOD" ? "BUEN ESTADO" : "USADO FUNCIONAL"}
+                      </span>
+                    </div>
+                  )}
+                  {details.kuboAyuda?.deliveryMethod && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600 font-medium">Entrega:</span>
+                      <span className="text-slate-900 font-bold">
+                        {details.kuboAyuda.deliveryMethod === "PICKUP" ? "Lo recoge la persona" : 
+                         details.kuboAyuda.deliveryMethod === "DELIVERY" ? "Puedo entregarlo" : "Acordar entrega"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-amber-200 text-xs font-bold text-amber-800 leading-relaxed italic">
+                  "Este artículo se entrega gratuitamente a través de Kubo Ayuda."
+                </div>
+              </div>
+            ) : null}
+
             {isCar || isRealEstate ? (
+
               <div className="mt-6">
                 <div className="mb-3 text-sm font-black text-slate-900">
                   Características

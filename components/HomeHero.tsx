@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Search, ChevronDown } from "lucide-react";
+import { MapPin, Search, ChevronDown, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const CATEGORY_OPTIONS = [
   { value: "", label: "Todas las categorías" },
@@ -76,7 +77,20 @@ export default function HomeHero() {
               </p>
             </div>
 
-            <div className="lg:pt-0">
+            <div className="flex flex-col gap-3 lg:pt-0">
+              <Link
+                href="/ayuda"
+                className="group flex items-center gap-2 rounded-xl bg-amber-400 px-3 py-2 shadow-lg transition hover:bg-amber-300 md:px-4 md:py-2.5"
+              >
+                <span className="text-[10px] font-black text-[#0f3c8c] md:text-xs">
+                  🇨🇴 CON KUBO AYUDA ❤️
+                </span>
+                <span className="hidden text-xs font-semibold text-[#0f3c8c] md:inline">
+                  Personas ayudando a personas
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 text-[#0f3c8c] transition group-hover:translate-x-0.5 md:h-4 md:w-4" />
+              </Link>
+
               <div className="rounded-[20px] border border-white/10 bg-slate-900/35 px-5 py-4 backdrop-blur-md">
                 <div className="flex items-center gap-2 text-sm font-black text-white">
                   <MapPin className="h-4 w-4 text-rose-300" />
