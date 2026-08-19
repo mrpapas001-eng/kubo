@@ -2,13 +2,34 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { HandHeart, Heart, ShieldCheck, CheckCircle, AlertCircle } from "lucide-react";
+import { prisma } from "@/lib/db";
+import AidRequestCard from "@/components/AidRequestCard";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Kubo Ayuda - Donaciones y solicitudes de ayuda",
   description: "Conectamos personas que quieren donar con personas que realmente lo necesitan.",
 };
 
-export default function AyudaPage() {
+export default async function AyudaPage() {
+  const approvedNeeds = await prisma.aidRequest.findMany({
+    where: { status: { in: ["APPROVED", "MATCHED"] } },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      city: true,
+      description: true,
+      contextImageUrl: true,
+      status: true,
+      ownerName: true,
+      createdAt: true,
+    },
+  });
+
   return (
     <div className="min-h-screen bg-[#F5F7FB] text-slate-900">
       <div className="relative overflow-hidden">
@@ -135,11 +156,41 @@ export default function AyudaPage() {
                   </div>
                 </div>
 
-                <button className="mt-6 w-full rounded-2xl bg-[#0f3c8c] px-6 py-4 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:text-base">
+                <Link
+                  href="/ayuda/necesito"
+                  className="mt-6 block w-full rounded-2xl bg-[#0f3c8c] px-6 py-4 text-center text-sm font-black text-white transition hover:bg-[#0c2f6d] md:text-base"
+                >
                   Necesito ayuda
-                </button>
+                </Link>
               </div>
             </section>
+
+            {/* Approved needs */}
+            {approvedNeeds.length > 0 && (
+              <section className="mt-6">
+                <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-xl font-black text-slate-900 md:text-2xl">
+                      Necesidades verificadas
+                    </h2>
+                    <Link
+                      href="/ayuda/necesidades"
+                      className="text-sm font-black text-[#0f3c8c] hover:underline"
+                    >
+                      Ver todas →
+                    </Link>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Solicitudes revisadas y aprobadas por Kubo. Nunca se pide dinero.
+                  </p>
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {approvedNeeds.map((request) => (
+                      <AidRequestCard key={request.id} request={request} />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* How it works */}
             <section className="mt-6">
