@@ -1,8 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Heart, MapPin, Clock } from "lucide-react";
 import { AID_CATEGORIES } from "@/lib/aidRequestPolicy";
 
@@ -23,39 +19,7 @@ function categoryLabel(slug: string): string {
 }
 
 export default function AidRequestCard({ request }: { request: PublicAidRequest }) {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
   const isMatched = request.status === "MATCHED";
-
-  async function handleContact() {
-    setError("");
-
-    if (!session?.user?.email) {
-      router.push("/api/auth/signin");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/aid-requests/${request.id}/contact`, {
-        method: "POST",
-      });
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || "No se pudo obtener el contacto.");
-      }
-
-      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo obtener el contacto.");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -99,29 +63,14 @@ export default function AidRequestCard({ request }: { request: PublicAidRequest 
           {request.ownerName ? <span>· {request.ownerName}</span> : null}
         </div>
 
-        {isMatched && (
-          <p className="mt-2 text-xs leading-4 text-amber-700">
-            Ya hay una ayuda en curso para esta solicitud, pero puedes contactar por si se necesita algo más.
-          </p>
-        )}
-
-        {error && (
-          <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>
-        )}
-
-        <button
-          onClick={handleContact}
-          disabled={loading}
-          className="mt-4 w-full rounded-2xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0c2f6d] disabled:opacity-60"
-        >
-          {loading ? "Cargando..." : "Quiero ayudar"}
-        </button>
-
-        {!session?.user?.email && (
-          <p className="mt-2 text-center text-[11px] text-slate-400">
-            Debes iniciar sesión para ver el contacto.
-          </p>
-        )}
+        <div className="mt-auto pt-4">
+          <Link
+            href={`/ayuda/necesidades/${request.id}`}
+            className="block w-full rounded-2xl bg-[#0f3c8c] px-5 py-3 text-center text-sm font-black text-white transition hover:bg-[#0c2f6d]"
+          >
+            Quiero ayudar
+          </Link>
+        </div>
       </div>
     </div>
   );

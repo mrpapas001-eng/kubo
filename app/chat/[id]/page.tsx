@@ -74,6 +74,15 @@ export default async function ChatPage({ params }: PageProps) {
     where: { id: conversation.listingId },
   });
 
+  const aidRequest = listing
+    ? null
+    : await prisma.aidRequest.findUnique({
+        where: { id: conversation.listingId },
+        select: { id: true, contextImageUrl: true },
+      });
+
+  const headerImageUrl = listing?.imageUrl ?? aidRequest?.contextImageUrl ?? null;
+
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
       <div className="flex items-center gap-3 border-b border-slate-100 bg-white px-5 py-4">
@@ -85,9 +94,9 @@ export default async function ChatPage({ params }: PageProps) {
         </Link>
 
         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0f3c8c] text-lg font-black text-white">
-          {listing?.imageUrl ? (
+          {headerImageUrl ? (
             <Image
-              src={listing.imageUrl}
+              src={headerImageUrl}
               alt={conversation.listingTitle}
               width={48}
               height={48}
@@ -116,9 +125,9 @@ export default async function ChatPage({ params }: PageProps) {
       <div className="border-b border-slate-100 bg-white/80 p-4">
         <div className="flex items-center gap-4 rounded-[28px] bg-gradient-to-r from-slate-50 to-blue-50 p-4 shadow-sm">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-200">
-            {listing?.imageUrl ? (
+            {headerImageUrl ? (
               <Image
-                src={listing.imageUrl}
+                src={headerImageUrl}
                 alt={conversation.listingTitle}
                 width={80}
                 height={80}
@@ -133,14 +142,22 @@ export default async function ChatPage({ params }: PageProps) {
             </div>
 
             <div className="mt-1 text-sm font-bold text-slate-500">
-              {listing ? formatPrice(listing.price, listing.currency) : "Anuncio"}
+              {listing
+                ? formatPrice(listing.price, listing.currency)
+                : aidRequest
+                  ? "Kubo Ayuda"
+                  : "Anuncio"}
             </div>
 
             <Link
-              href={`/listing/${conversation.listingId}`}
+              href={
+                aidRequest
+                  ? `/ayuda/necesidades/${conversation.listingId}`
+                  : `/listing/${conversation.listingId}`
+              }
               className="mt-3 inline-flex rounded-full bg-[#0f3c8c] px-4 py-2 text-xs font-black text-white hover:bg-[#0c2f6d]"
             >
-              Ver anuncio
+              {aidRequest ? "Ver solicitud" : "Ver anuncio"}
             </Link>
           </div>
         </div>
