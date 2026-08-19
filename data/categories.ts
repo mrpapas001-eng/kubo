@@ -189,4 +189,52 @@ export const CATEGORIES: Category[] = [
       { slug: "otros", label: "Otros", template: "PRODUCT" },
     ],
   },
+  {
+    slug: "juguetes",
+    label: "Juguetes",
+    subcategories: [
+      { slug: "peluches", label: "Peluches", template: "PRODUCT" },
+      { slug: "munecas-y-figuras", label: "Muñecas y figuras", template: "PRODUCT" },
+      { slug: "juegos-de-mesa", label: "Juegos de mesa", template: "PRODUCT" },
+      { slug: "didacticos", label: "Didácticos", template: "PRODUCT" },
+      { slug: "aire-libre", label: "Aire libre", template: "PRODUCT" },
+      { slug: "otros", label: "Otros", template: "PRODUCT" },
+    ],
+  },
+  {
+    slug: "papeleria-oficina",
+    label: "Papelería y Oficina",
+    subcategories: [
+      { slug: "utiles-escolares", label: "Útiles escolares", template: "PRODUCT" },
+      { slug: "cuadernos-y-papel", label: "Cuadernos y papel", template: "PRODUCT" },
+      { slug: "escritura-y-dibujo", label: "Escritura y dibujo", template: "PRODUCT" },
+      { slug: "oficina-y-archivo", label: "Oficina y archivo", template: "PRODUCT" },
+      { slug: "arte-y-manualidades", label: "Arte y manualidades", template: "PRODUCT" },
+      { slug: "otros", label: "Otros", template: "PRODUCT" },
+    ],
+  },
+  {
+    slug: "herramientas-ferreteria",
+    label: "Herramientas y Ferretería",
+    subcategories: [
+      { slug: "herramientas-electricas", label: "Herramientas eléctricas", template: "PRODUCT" },
+      { slug: "herramientas-manuales", label: "Herramientas manuales", template: "PRODUCT" },
+      { slug: "construccion", label: "Construcción", template: "PRODUCT" },
+      { slug: "jardineria", label: "Jardinería", template: "PRODUCT" },
+      { slug: "seguridad-industrial", label: "Seguridad industrial", template: "PRODUCT" },
+      { slug: "otros", label: "Otros", template: "PRODUCT" },
+    ],
+  },
+  {
+    slug: "salud-belleza",
+    label: "Salud y Belleza",
+    subcategories: [
+      { slug: "maquillaje", label: "Maquillaje", template: "PRODUCT" },
+      { slug: "cuidado-de-la-piel", label: "Cuidado de la piel", template: "PRODUCT" },
+      { slug: "cabello", label: "Cabello", template: "PRODUCT" },
+      { slug: "aparatos-de-belleza", label: "Aparatos de belleza", template: "PRODUCT" },
+      { slug: "salud-y-bienestar", label: "Salud y bienestar", template: "PRODUCT" },
+      { slug: "otros", label: "Otros", template: "PRODUCT" },
+    ],
+  },
 ];

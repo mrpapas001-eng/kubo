@@ -15,6 +15,10 @@ import {
   Shirt,
   Camera,
   Gift,
+  ToyBrick,
+  Paperclip,
+  Hammer,
+  Sparkles,
 } from "lucide-react";
 
 const categories = [
@@ -37,6 +41,11 @@ const categories = [
   { label: "Bebés", href: "/categoria/bebes", icon: Baby },
   { label: "Moda", href: "/categoria/moda", icon: Shirt },
   { label: "Regalos y celebraciones", href: "/categoria/regalos-celebraciones", icon: Gift },
+
+  { label: "Juguetes", href: "/categoria/juguetes", icon: ToyBrick },
+  { label: "Papelería y Oficina", href: "/categoria/papeleria-oficina", icon: Paperclip },
+  { label: "Herramientas y Ferretería", href: "/categoria/herramientas-ferreteria", icon: Hammer },
+  { label: "Salud y Belleza", href: "/categoria/salud-belleza", icon: Sparkles },
 ];
 
 export default function CategoryChips() {

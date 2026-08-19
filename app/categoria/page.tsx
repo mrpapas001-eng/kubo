@@ -16,6 +16,10 @@ import {
   Gamepad2,
   ChevronRight,
   Gift,
+  ToyBrick,
+  Paperclip,
+  Hammer,
+  Sparkles,
 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 
@@ -37,6 +41,10 @@ function getCategoryIcon(slug: string): IconType {
   if (slug === "imagen-sonido") return Tv;
   if (slug === "juegos") return Gamepad2;
   if (slug === "regalos-celebraciones") return Gift;
+  if (slug === "juguetes") return ToyBrick;
+  if (slug === "papeleria-oficina") return Paperclip;
+  if (slug === "herramientas-ferreteria") return Hammer;
+  if (slug === "salud-belleza") return Sparkles;
   return ChevronRight;
 }
 
@@ -99,6 +107,22 @@ function getCategoryDescription(slug: string, label: string) {
 
   if (slug === "regalos-celebraciones") {
     return "Velas, regalos, flores, globos y detalles para momentos especiales.";
+  }
+
+  if (slug === "juguetes") {
+    return "Peluches, muñecas, juegos de mesa y juguetes para todas las edades.";
+  }
+
+  if (slug === "papeleria-oficina") {
+    return "Útiles escolares, cuadernos, escritura y artículos de oficina.";
+  }
+
+  if (slug === "herramientas-ferreteria") {
+    return "Herramientas eléctricas y manuales, construcción y jardinería.";
+  }
+
+  if (slug === "salud-belleza") {
+    return "Maquillaje, cuidado personal, cabello, salud y bienestar.";
   }
 
   return `Explora anuncios en ${label.toLowerCase()} con una experiencia clara y visual.`;

@@ -17,6 +17,10 @@ const CATEGORY_OPTIONS = [
   { value: "moda", label: "Moda" },
   { value: "bebes", label: "Bebés" },
   { value: "mascotas", label: "Mascotas" },
+  { value: "juguetes", label: "Juguetes" },
+  { value: "papeleria-oficina", label: "Papelería y Oficina" },
+  { value: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
+  { value: "salud-belleza", label: "Salud y Belleza" },
 ];
 
 export default function HomeHero() {

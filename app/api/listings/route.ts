@@ -114,6 +114,38 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "jardin-y-terraza",
     "otros",
   ],
+  juguetes: [
+    "peluches",
+    "munecas-y-figuras",
+    "juegos-de-mesa",
+    "didacticos",
+    "aire-libre",
+    "otros",
+  ],
+  "papeleria-oficina": [
+    "utiles-escolares",
+    "cuadernos-y-papel",
+    "escritura-y-dibujo",
+    "oficina-y-archivo",
+    "arte-y-manualidades",
+    "otros",
+  ],
+  "herramientas-ferreteria": [
+    "herramientas-electricas",
+    "herramientas-manuales",
+    "construccion",
+    "jardineria",
+    "seguridad-industrial",
+    "otros",
+  ],
+  "salud-belleza": [
+    "maquillaje",
+    "cuidado-de-la-piel",
+    "cabello",
+    "aparatos-de-belleza",
+    "salud-y-bienestar",
+    "otros",
+  ],
 };
 
 const REAL_ESTATE_SUBS_REQUIRING_ROOMS = [

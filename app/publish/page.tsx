@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Sparkles } from "lucide-react";
+import { recommendCategory } from "@/lib/catalog/recommendCategory";
 
 type CategoryKey =
   | "motor"
@@ -22,7 +23,11 @@ type CategoryKey =
   | "bebes"
   | "moda"
   | "hogar"
-  | "regalos-celebraciones";
+  | "regalos-celebraciones"
+  | "juguetes"
+  | "papeleria-oficina"
+  | "herramientas-ferreteria"
+  | "salud-belleza";
 
 type DealType = "venta" | "arriendo";
 
@@ -306,6 +311,54 @@ const CATEGORY_OPTIONS: Array<{
       { slug: "otros", label: "Otros" },
     ],
   },
+  {
+    key: "juguetes",
+    label: "Juguetes",
+    subs: [
+      { slug: "peluches", label: "Peluches" },
+      { slug: "munecas-y-figuras", label: "Muñecas y figuras" },
+      { slug: "juegos-de-mesa", label: "Juegos de mesa" },
+      { slug: "didacticos", label: "Didácticos" },
+      { slug: "aire-libre", label: "Aire libre" },
+      { slug: "otros", label: "Otros" },
+    ],
+  },
+  {
+    key: "papeleria-oficina",
+    label: "Papelería y Oficina",
+    subs: [
+      { slug: "utiles-escolares", label: "Útiles escolares" },
+      { slug: "cuadernos-y-papel", label: "Cuadernos y papel" },
+      { slug: "escritura-y-dibujo", label: "Escritura y dibujo" },
+      { slug: "oficina-y-archivo", label: "Oficina y archivo" },
+      { slug: "arte-y-manualidades", label: "Arte y manualidades" },
+      { slug: "otros", label: "Otros" },
+    ],
+  },
+  {
+    key: "herramientas-ferreteria",
+    label: "Herramientas y Ferretería",
+    subs: [
+      { slug: "herramientas-electricas", label: "Herramientas eléctricas" },
+      { slug: "herramientas-manuales", label: "Herramientas manuales" },
+      { slug: "construccion", label: "Construcción" },
+      { slug: "jardineria", label: "Jardinería" },
+      { slug: "seguridad-industrial", label: "Seguridad industrial" },
+      { slug: "otros", label: "Otros" },
+    ],
+  },
+  {
+    key: "salud-belleza",
+    label: "Salud y Belleza",
+    subs: [
+      { slug: "maquillaje", label: "Maquillaje" },
+      { slug: "cuidado-de-la-piel", label: "Cuidado de la piel" },
+      { slug: "cabello", label: "Cabello" },
+      { slug: "aparatos-de-belleza", label: "Aparatos de belleza" },
+      { slug: "salud-y-bienestar", label: "Salud y bienestar" },
+      { slug: "otros", label: "Otros" },
+    ],
+  },
 ];
 
 function toTitleCase(s: string) {
@@ -383,6 +436,9 @@ export default function PublishPage() {
 
   const [category, setCategory] = useState<CategoryKey>("motor");
   const [subcategory, setSubcategory] = useState<string>("carros");
+  const [sellQuery, setSellQuery] = useState("");
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false);
+  const [suggestionApplied, setSuggestionApplied] = useState(false);
   const [price, setPrice] = useState<string>("");
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -444,6 +500,7 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
       if (draft.manualCity !== undefined) setManualCity(draft.manualCity);
       if (draft.category !== undefined) setCategory(draft.category);
       if (draft.subcategory !== undefined) setSubcategory(draft.subcategory);
+      if (draft.sellQuery !== undefined) setSellQuery(draft.sellQuery);
       if (draft.price !== undefined) setPrice(draft.price);
 
       if (draft.carBrand !== undefined) setCarBrand(draft.carBrand);
@@ -485,6 +542,7 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
       manualCity,
       category,
       subcategory,
+      sellQuery,
       price,
       carBrand,
       carModel,
@@ -520,6 +578,7 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
     manualCity,
     category,
     subcategory,
+    sellQuery,
     price,
     carBrand,
     carModel,
@@ -553,6 +612,33 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
   const subsForCategory = useMemo(() => {
     return CATEGORY_OPTIONS.find((c) => c.key === category)?.subs ?? [];
   }, [category]);
+
+  const suggestion = useMemo(() => {
+    const rec = recommendCategory(sellQuery);
+    if (!rec) return null;
+    const cat = CATEGORY_OPTIONS.find((c) => c.key === rec.categoryKey);
+    if (!cat) return null;
+    const sub = rec.subcategorySlug
+      ? cat.subs.find((s) => s.slug === rec.subcategorySlug) ?? null
+      : null;
+    return { ...rec, categoryLabel: cat.label, subLabel: sub?.label ?? null, subSlug: sub?.slug ?? null };
+  }, [sellQuery]);
+
+  function onSellQueryChange(next: string) {
+    setSellQuery(next);
+    setSuggestionDismissed(false);
+    setSuggestionApplied(false);
+  }
+
+  function applySuggestion() {
+    if (!suggestion) return;
+    setCategory(suggestion.categoryKey as CategoryKey);
+    const firstSub =
+      CATEGORY_OPTIONS.find((c) => c.key === suggestion.categoryKey)?.subs?.[0]?.slug ??
+      "general";
+    setSubcategory(suggestion.subSlug ?? firstSub);
+    setSuggestionApplied(true);
+  }
 
   function onPickCategory(next: CategoryKey) {
     setCategory(next);
@@ -1022,6 +1108,69 @@ if (!session) {
           <form onSubmit={onSubmit} className="mt-8">
             {step === 1 ? (
               <div className="space-y-5">
+                <div className="rounded-2xl border border-blue-100 bg-[#f4f8ff] p-4 md:p-5">
+                  <label className="flex items-center gap-2 text-sm font-black text-slate-900">
+                    <Sparkles className="h-4 w-4 text-[#0f3c8c]" />
+                    ¿Qué quieres vender?
+                  </label>
+                  <p className="mt-1 text-xs font-medium text-slate-500">
+                    Escribe qué quieres publicar y te ayudamos a encontrar la categoría.
+                  </p>
+                  <input
+                    value={sellQuery}
+                    onChange={(e) => onSellQueryChange(e.target.value)}
+                    className="mt-3 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-[15px]"
+                    placeholder="Ej: Peluche grande de Stitch"
+                  />
+
+                  {suggestion && !suggestionDismissed ? (
+                    suggestionApplied && category === suggestion.categoryKey ? (
+                      <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Categoría aplicada: {suggestion.categoryLabel}
+                        {suggestion.subLabel ? ` · ${suggestion.subLabel}` : ""}. Puedes
+                        cambiarla abajo si lo prefieres.
+                      </div>
+                    ) : (
+                      <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+                        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+                          Categoría recomendada
+                        </div>
+                        <div className="mt-1 text-lg font-black text-slate-900">
+                          {suggestion.emoji} {suggestion.categoryLabel}
+                          {suggestion.subLabel ? (
+                            <span className="ml-2 text-sm font-bold text-slate-500">
+                              {suggestion.subLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                          <button
+                            type="button"
+                            onClick={applySuggestion}
+                            className="h-11 rounded-xl bg-[#0f3c8c] px-5 text-sm font-black text-white hover:bg-[#0c2f6d]"
+                          >
+                            Usar esta categoría
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSuggestionDismissed(true)}
+                            className="h-11 rounded-xl border border-slate-200 px-5 text-sm font-black text-slate-700 hover:bg-slate-50"
+                          >
+                            Elegir otra categoría
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  ) : null}
+
+                  {sellQuery.trim().length >= 3 && !suggestion ? (
+                    <p className="mt-3 text-xs font-bold text-slate-500">
+                      No estamos seguros de la categoría ideal. Elige una manualmente abajo.
+                    </p>
+                  ) : null}
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <label className="text-sm font-bold text-slate-700">

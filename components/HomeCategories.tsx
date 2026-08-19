@@ -15,6 +15,10 @@ import {
   Monitor,
   Sofa,
   Gift,
+  ToyBrick,
+  Paperclip,
+  Hammer,
+  Sparkles,
 } from "lucide-react";
 
 const categories = [
@@ -31,6 +35,10 @@ const categories = [
   { slug: "bebes", name: "Bebés", icon: Baby },
   { slug: "mascotas", name: "Mascotas", icon: PawPrint },
   { slug: "regalos-celebraciones", name: "Regalos y celebraciones", icon: Gift },
+  { slug: "juguetes", name: "Juguetes", icon: ToyBrick },
+  { slug: "papeleria-oficina", name: "Papelería y Oficina", icon: Paperclip },
+  { slug: "herramientas-ferreteria", name: "Herramientas y Ferretería", icon: Hammer },
+  { slug: "salud-belleza", name: "Salud y Belleza", icon: Sparkles },
 ];
 
 export default function HomeCategories() {

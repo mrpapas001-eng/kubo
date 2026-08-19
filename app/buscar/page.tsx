@@ -67,6 +67,10 @@ const CATEGORY_OPTIONS = [
   { slug: "mascotas", label: "Mascotas" },
   { slug: "bebes", label: "Bebés" },
   { slug: "moda", label: "Moda y complementos" },
+  { slug: "juguetes", label: "Juguetes" },
+  { slug: "papeleria-oficina", label: "Papelería y Oficina" },
+  { slug: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
+  { slug: "salud-belleza", label: "Salud y Belleza" },
 ];
 
 const QUICK_CATEGORIES = [
