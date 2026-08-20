@@ -191,6 +191,8 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
     });
   }, [activeIndex, muted, viewerOpen]);
 
+  if (reels.length === 0) return null;
+
   return (
     <>
       <section

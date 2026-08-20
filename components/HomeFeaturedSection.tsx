@@ -1,16 +1,22 @@
 "use client";
 
+import type { SponsorAd } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListingCard from "@/components/ListingCard";
-import SponsoredBanner from "@/components/SponsoredBanner";
+import SponsoredCard from "@/components/SponsoredCard";
+import SponsorFeedCard from "@/components/SponsorFeedCard";
+import HomePremiumShowcase from "@/components/HomePremiumShowcase";
+import ReelsSection, { type ReelItem } from "@/components/ReelsSection";
 
 const RealMap = dynamic(() => import("@/components/RealMap"), { ssr: false });
 
 type Props = {
   listings: any[];
-  sponsors: any[];
+  sideSponsors: SponsorAd[];
+  feedSponsors: SponsorAd[];
+  reels: ReelItem[];
   cities: string[];
 };
 
@@ -49,7 +55,9 @@ function getListingPriority(item: any) {
 
 export default function HomeFeaturedSection({
   listings,
-  sponsors,
+  sideSponsors,
+  feedSponsors,
+  reels,
   cities,
 }: Props) {
   const [selectedCity, setSelectedCity] = useState("");
@@ -129,9 +137,9 @@ export default function HomeFeaturedSection({
   }, [sortedListings, center]);
 
   const topListings = sortedListings.slice(0, 6);
-  const sideListings = sortedListings.slice(6, 8);
-  const extraPool = sortedListings.slice(8);
+  const extraPool = sortedListings.slice(6);
   const extraListings = extraPool.slice(0, extraVisibleCount);
+  const sideSponsor = sideSponsors?.[0] ?? null;
 
   const hasMoreExtra = extraVisibleCount < extraPool.length;
 
@@ -183,7 +191,6 @@ export default function HomeFeaturedSection({
             </button>
           </div>
         </div>
-<div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-3 mt-5"></div>
 
         <div className="hidden mt-5 md:grid md:grid-cols-2 lg:grid-cols-5 gap-3">
           <select
@@ -261,7 +268,7 @@ export default function HomeFeaturedSection({
             </p>
 
             {topListings.length > 0 ? (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {topListings.map((item, idx) => (
                   <ListingCard key={`top-${item?.id ?? idx}`} item={item} />
                 ))}
@@ -312,6 +319,8 @@ export default function HomeFeaturedSection({
               </div>
             </div>
 
+            {sideSponsor ? <SponsoredCard sponsor={sideSponsor} /> : null}
+
             <div className="rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-sm">
               <div className="flex flex-col items-center justify-center text-center">
                 <img
@@ -329,34 +338,37 @@ export default function HomeFeaturedSection({
         </div>
       </div>
 
-      <div
-        className={`mt-6 grid grid-cols-1 gap-6 ${
-          sponsors?.length > 0
-            ? "lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)]"
-            : "lg:grid-cols-1"
-        }`}
-      >
-        {sponsors?.length > 0 ? (
-          <div className="min-w-0 h-full">
-            <SponsoredBanner sponsors={sponsors} />
-          </div>
-        ) : (
-          <div />
-        )}
+      <HomePremiumShowcase listings={listings} />
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {sideListings.map((item, idx) => (
-            <ListingCard key={`side-${item?.id ?? idx}`} item={item} />
-          ))}
-        </div>
+      <div className="mt-6">
+        <ReelsSection items={reels} />
       </div>
 
       {extraListings.length > 0 ? (
         <div className="mt-6">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {extraListings.map((item, idx) => (
-              <ListingCard key={`extra-${item?.id ?? idx}`} item={item} />
-            ))}
+          <div className="flex items-end justify-between">
+            <h2 className="text-2xl font-black text-slate-900 md:text-3xl">
+              Más anuncios
+            </h2>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {extraListings.map((item, idx) => {
+              const sponsor =
+                feedSponsors?.length > 0 && (idx + 1) % 8 === 0
+                  ? feedSponsors[(Math.floor(idx / 8)) % feedSponsors.length]
+                  : null;
+
+              return [
+                <ListingCard key={`extra-${item?.id ?? idx}`} item={item} />,
+                sponsor ? (
+                  <SponsorFeedCard
+                    key={`feed-sponsor-${sponsor.id}-${idx}`}
+                    sponsor={sponsor}
+                  />
+                ) : null,
+              ];
+            })}
           </div>
         </div>
       ) : null}
