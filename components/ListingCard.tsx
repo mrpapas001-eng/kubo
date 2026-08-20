@@ -210,7 +210,7 @@ export default function ListingCard({
             💛 DONACIÓN
           </div>
         ) : isFeatured && !isPremium ? (
-          <div className="absolute left-3 top-3 z-20 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
+          <div className="absolute left-3 top-3 z-20 rounded-full bg-[#0f3c8c] px-3 py-1.5 text-[11px] font-black tracking-wide text-white shadow-sm ring-1 ring-black/10 backdrop-blur">
             DESTACADO
           </div>
         ) : null}
@@ -296,18 +296,17 @@ export default function ListingCard({
           }`}
         >
           <div
-            className={`text-[23px] font-black tracking-tight ${
-              isPremium
-                ? "bg-gradient-to-r from-violet-700 to-blue-600 bg-clip-text text-transparent"
-                : "text-slate-900"
+            className={`min-w-0 truncate text-[23px] font-black tracking-tight ${
+              isPremium ? "text-amber-600" : "text-slate-900"
             }`}
+            title={formattedPrice}
           >
             {formattedPrice}
           </div>
 
-          <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500">
-            <MapPin className="h-4 w-4 text-slate-400" />
-            {city}
+          <div className="inline-flex min-w-0 shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-500">
+            <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+            <span className="max-w-[120px] truncate">{city}</span>
           </div>
         </div>
       </div>

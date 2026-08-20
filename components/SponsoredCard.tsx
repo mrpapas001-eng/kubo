@@ -23,7 +23,7 @@ export default function SponsoredCard({ sponsors, sponsor }: Props) {
       rel="noreferrer"
       className="group block h-full overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
-      <div className="relative flex h-full min-h-[420px] flex-col">
+      <div className="relative flex h-full flex-col">
         <div className="relative h-[220px] overflow-hidden bg-slate-100">
           <img
             src={imageUrl}
@@ -40,7 +40,7 @@ export default function SponsoredCard({ sponsors, sponsor }: Props) {
 
         <div className="flex flex-1 flex-col p-5">
           <div className="flex-1">
-            <h3 className="text-[22px] font-black leading-tight tracking-tight text-slate-900">
+            <h3 className="line-clamp-2 text-[22px] font-black leading-tight tracking-tight text-slate-900">
               {title}
             </h3>
 

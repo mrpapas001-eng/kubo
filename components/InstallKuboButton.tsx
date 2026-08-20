@@ -86,15 +86,15 @@ export default function InstallKuboButton() {
   }
 
   return (
-    <section className="mt-6 rounded-[28px] border border-blue-100 bg-white p-5 shadow-sm md:flex md:items-center md:justify-between md:p-6">
-      <div>
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0f3c8c]">
+    <section className="mt-6 rounded-[28px] border border-blue-100 bg-white p-5 shadow-sm md:flex md:items-center md:justify-between md:px-6 md:py-4">
+      <div className="md:flex md:min-w-0 md:items-center md:gap-4">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0f3c8c] md:hidden">
           Kubo en tu celular
         </p>
-        <h2 className="mt-2 text-2xl font-black text-slate-900">
+        <h2 className="mt-2 text-2xl font-black text-slate-900 md:mt-0 md:text-lg">
           Instala Kubo en tu celular
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 md:mt-0 md:truncate">
           Próximamente disponible en Google Play.
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function InstallKuboButton() {
         <button
           type="button"
           onClick={handleInstall}
-          className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:mt-0"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f3c8c] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:mt-0"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
           {installPrompt ? "Instalar Kubo" : "Agregar a pantalla de inicio"}
