@@ -203,6 +203,7 @@ model SponsorAd {
   ctaUrl    String?
   type      String
   placement String
+  categorySlug String?
   priority  Int      @default(0)
   startAt   DateTime
   endAt     DateTime
@@ -258,3 +259,4 @@ model Message {
   @@index([senderEmail])
   @@index([createdAt])
 }
+

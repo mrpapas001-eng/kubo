@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { getListings } from "@/lib/queries/home";
+import { getCategorySponsors, getCategoryFeedSponsors } from "@/lib/queries/sponsors";
 import HomeListingsClient from "@/components/HomeListingsClient";
 import BackButton from "@/components/BackButton";
 
@@ -370,15 +371,11 @@ export default async function CategoryPage({ params }: PageProps) {
 
   const heroImage = getCategoryHeroImage(category.slug);
   const listings = await getListings({ categorySlug: category.slug, take: 12 });
+  const categorySponsors = await getCategorySponsors(category.slug);
+  const categorySponsor = categorySponsors[0] ?? null;
+  const categoryFeedSponsors = await getCategoryFeedSponsors(category.slug);
 
-  const sponsorListing =
-    listings.find((item: any) => item?.isPremium) ||
-    listings.find((item: any) => item?.isFeatured) ||
-    null;
-
-  const visibleListings = sponsorListing
-    ? listings.filter((item: any) => item.id !== sponsorListing.id)
-    : listings;
+  const visibleListings = listings;
 
   const isRealEstate = category.slug === "inmobiliaria";
   const isCellphones = category.slug === "celulares";
@@ -654,55 +651,49 @@ export default async function CategoryPage({ params }: PageProps) {
           </div>
 
           <div className="mt-6">
-            {sponsorListing ? (
-              <Link
-                href={`/listing/${sponsorListing.id}`}
-                className="mb-6 grid overflow-hidden rounded-[28px] border border-yellow-200 bg-gradient-to-br from-yellow-50 to-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md lg:grid-cols-[1.05fr_0.95fr]"
+            {categorySponsor ? (
+              <a
+                href={categorySponsor.ctaUrl ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="mb-6 block overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="relative min-h-[260px] overflow-hidden bg-slate-100">
-                  <img
-                    src={sponsorListing.imageUrl || "/placeholders/listing.jpg"}
-                    alt={sponsorListing.title || "Anuncio patrocinado"}
-                    className="h-full w-full object-cover transition duration-500 hover:scale-105"
-                  />
+                {categorySponsor.imageUrl ? (
+                  <div className="relative w-full overflow-hidden bg-slate-100">
+                    <div className="relative aspect-[16/8] w-full sm:aspect-[16/7] md:aspect-[16/4]">
+                      <img
+                        src={categorySponsor.imageUrl}
+                        alt={categorySponsor.title || "Anuncio patrocinado"}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
 
-                  <div className="absolute left-4 top-4 rounded-full bg-yellow-400 px-4 py-2 text-xs font-black uppercase text-white shadow">
-                    ⭐ Premium
+                      <div className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white backdrop-blur-sm md:left-4 md:top-4 md:text-[11px]">
+                        Patrocinado
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  <div className="bg-[#0f3c8c] px-6 py-8 text-white md:px-8">
+                    <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/70">
+                      Patrocinado
+                    </div>
 
-                  <div className="absolute bottom-4 left-4 rounded-full bg-black/65 px-4 py-2 text-xs font-black text-white backdrop-blur">
-                    Patrocinado
+                    <h3 className="mt-2 text-2xl font-black">
+                      {categorySponsor.title}
+                    </h3>
+
+                    {categorySponsor.subtitle ? (
+                      <p className="mt-2 max-w-2xl text-sm text-white/80">
+                        {categorySponsor.subtitle}
+                      </p>
+                    ) : null}
+
+                    <div className="mt-5 inline-flex rounded-xl bg-white px-4 py-2 text-sm font-black text-[#0f3c8c]">
+                      {categorySponsor.ctaText || "Ver oferta"}
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex flex-col justify-center p-6">
-                  <div className="text-xs font-black uppercase tracking-[0.18em] text-yellow-600">
-                    Anuncio destacado
-                  </div>
-
-                  <h3 className="mt-2 text-3xl font-black text-slate-900">
-                    {sponsorListing.title}
-                  </h3>
-
-                  <p className="mt-2 text-sm font-bold text-slate-500">
-                    {sponsorListing.city}
-                  </p>
-
-                  <div className="mt-5 text-3xl font-black text-[#0f3c8c]">
-                    {sponsorListing.price
-                      ? new Intl.NumberFormat("es-CO", {
-                          style: "currency",
-                          currency: sponsorListing.currency ?? "COP",
-                          maximumFractionDigits: 0,
-                        }).format(Number(sponsorListing.price))
-                      : "Consultar precio"}
-                  </div>
-
-                  <div className="mt-6 inline-flex w-fit rounded-2xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white">
-                    Ver anuncio
-                  </div>
-                </div>
-              </Link>
+                )}
+              </a>
             ) : null}
 
             {listings.length === 0 ? (
@@ -737,6 +728,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 initialListings={visibleListings}
                 variant="category"
                 categorySlug={slug}
+                sponsors={categoryFeedSponsors}
                 title={
                   isRealEstate
                     ? "Propiedades destacadas"

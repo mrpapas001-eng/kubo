@@ -222,38 +222,37 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
             Ver todos los reels
           </a>
         </div>
-
-  <div className="mt-6 overflow-hidden">
-  <div className="flex w-max animate-[reels-marquee_28s_linear_infinite] gap-4 pb-2 hover:[animation-play-state:paused]">
-    {[...reels, ...reels].map((reel, index) => (
+        <div className="mt-5 overflow-x-auto pb-2">
+          <div className="flex w-max snap-x snap-mandatory gap-4">
+            {reels.map((reel, index) => (
               <button
-                key={`${reel.id}-${index}`}
+                key={reel.id}
                 type="button"
                 onClick={() => openReel(index)}
-                className="group w-[220px] shrink-0 overflow-hidden rounded-[26px] border border-slate-200 bg-slate-950 text-left shadow-sm transition hover:-translate-y-1"
+                className="group w-[150px] shrink-0 snap-start overflow-hidden rounded-[22px] border border-slate-200 bg-slate-950 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:w-[160px] md:w-[170px] lg:w-[180px]"
               >
                 <div className="relative aspect-[9/16] overflow-hidden">
                   <img
                     src={reel.image}
                     alt={reel.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
                   <div className="absolute left-3 top-3">
-                    <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
+                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur">
                       {reel.badge ?? "Reel"}
                     </span>
                   </div>
 
-                  <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-3">
-                    <div className="line-clamp-3 text-sm font-bold leading-snug text-white md:text-base">
+                  <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
+                    <div className="line-clamp-2 text-xs font-bold leading-snug text-white md:text-sm">
                       {reel.title}
                     </div>
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg">
-                      <Play className="ml-0.5 h-4 w-4 fill-current" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg">
+                      <Play className="ml-0.5 h-3.5 w-3.5 fill-current" />
                     </div>
                   </div>
                 </div>
@@ -262,16 +261,6 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
           </div>
         </div>
       </section>
-      <style jsx>{`
-  @keyframes reels-marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
-`}</style>
 
       {viewerOpen ? (
         <div className="fixed inset-0 z-[120] bg-black">
@@ -386,3 +375,5 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
     </>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+﻿import { ArrowRight } from "lucide-react";
 
 type SponsorItem = {
   id: string;
@@ -16,7 +16,7 @@ export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
       href={sponsor.ctaUrl ?? "#"}
       target="_blank"
       rel="noreferrer"
-      className="group relative block overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
         {sponsor.imageUrl ? (
@@ -37,20 +37,20 @@ export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
         </div>
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="flex flex-1 flex-col space-y-2.5 p-3 md:space-y-3 md:p-4">
         <div className="space-y-1.5">
-          <h3 className="line-clamp-2 min-h-[48px] text-[18px] font-extrabold leading-snug text-slate-900">
+          <h3 className="line-clamp-2 min-h-[40px] text-[15px] font-extrabold leading-snug text-slate-900 md:min-h-[48px] md:text-[18px]">
             {sponsor.title}
           </h3>
 
           {sponsor.subtitle ? (
-            <p className="line-clamp-2 text-sm font-medium text-slate-500">
+            <p className="line-clamp-2 text-[11px] font-medium text-slate-500 md:text-sm">
               {sponsor.subtitle}
             </p>
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
           <span className="min-w-0 truncate text-sm font-black text-[#0f3c8c]">
             {sponsor.ctaText || "Conocer más"}
           </span>
@@ -63,3 +63,4 @@ export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
     </a>
   );
 }
+

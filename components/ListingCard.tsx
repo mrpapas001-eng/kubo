@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -35,23 +35,35 @@ function parseDetails(details: unknown) {
 function formatPrice(price: unknown, currency?: string, details?: unknown) {
   const numeric = Number(price);
   const parsedDetails = parseDetails(details);
-  const isDonation = parsedDetails?.kuboAyuda?.type === "DONATION";
 
-  if (isDonation) {
+  if (parsedDetails?.kuboAyuda?.type === "DONATION") {
     return "GRATIS";
   }
 
-  if (!Number.isNaN(numeric) && numeric > 0) {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: currency ?? "COP",
-      maximumFractionDigits: 0,
-    }).format(numeric);
+  if (Number.isNaN(numeric) || numeric <= 0) {
+    return "Consultar";
   }
 
-  return "Consultar precio";
-}
+  if ((currency ?? "COP") === "COP" && numeric > 999_999_999_999) {
+    return "Consultar";
+  }
 
+  if ((currency ?? "COP") === "COP" && numeric >= 10_000_000) {
+    const millones = numeric / 1_000_000;
+    const valor =
+      millones >= 100
+        ? Math.round(millones)
+        : Number(millones.toFixed(1));
+
+    return `$${valor} M`;
+  }
+
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: currency ?? "COP",
+    maximumFractionDigits: 0,
+  }).format(numeric);
+}
 function formatPublishedDate(value: unknown) {
   if (!value) return null;
 
@@ -181,7 +193,7 @@ export default function ListingCard({
   return (
     <Link
       href={href}
-      className={`group relative block overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 ${
         isPremium
           ? "border-2 border-yellow-400 bg-gradient-to-b from-yellow-50 via-white to-white shadow-[0_18px_60px_rgba(245,158,11,0.28)] hover:shadow-[0_26px_90px_rgba(245,158,11,0.38)]"
           : isFeatured
@@ -219,7 +231,7 @@ export default function ListingCard({
           src={image}
           alt={item?.title || "Anuncio"}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          sizes="(max-width: 768px) 50vw, (max-width: 1280px) 50vw, 33vw"
           className={`object-cover transition-transform duration-500 ${
             isPremium ? "group-hover:scale-[1.06]" : "group-hover:scale-[1.03]"
           }`}
@@ -255,7 +267,7 @@ export default function ListingCard({
         ) : null}
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="flex flex-1 flex-col space-y-2.5 p-3 md:space-y-3 md:p-4">
         <div className="space-y-1.5">
           <h3
             className={`line-clamp-2 min-h-[48px] text-[18px] font-extrabold leading-snug ${
@@ -266,7 +278,7 @@ export default function ListingCard({
           </h3>
 
           <div
-            className={`text-sm font-medium text-slate-500 ${
+            className={`line-clamp-1 text-[11px] font-medium text-slate-500 md:text-sm ${
               hideLocationBelowTitleOnMobile ? "hidden md:block" : ""
             }`}
           >
@@ -276,11 +288,11 @@ export default function ListingCard({
           {accountVerificationType ? (
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black shadow-sm ${
-                  businessVerified ? "bg-[#0f3c8c] text-white" : "bg-emerald-600 text-white"
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-black shadow-sm md:gap-1.5 md:px-3 md:py-1.5 md:text-[11px] ${
+                  businessVerified ? "bg-[#082f6f] text-white" : "bg-[#0f3c8c] text-white"
                 }`}
               >
-                <BadgeCheck className="h-3.5 w-3.5" />
+                <BadgeCheck className="h-3 w-3 md:h-3.5 md:w-3.5" />
                 {sellerLabel}
               </span>
             </div>
@@ -291,12 +303,12 @@ export default function ListingCard({
         </div>
 
         <div
-          className={`flex items-end justify-between gap-3 border-t pt-3 ${
+          className={`mt-auto flex flex-col items-start gap-1.5 border-t pt-3 md:flex-row md:items-end md:justify-between md:gap-3 ${
             isPremium ? "border-yellow-200" : "border-slate-100"
           }`}
         >
           <div
-            className={`min-w-0 truncate text-[23px] font-black tracking-tight ${
+            className={`min-w-0 max-w-full truncate text-[18px] font-black tracking-tight md:max-w-[65%] md:text-[23px] ${
               isPremium ? "text-amber-600" : "text-slate-900"
             }`}
             title={formattedPrice}
@@ -304,12 +316,21 @@ export default function ListingCard({
             {formattedPrice}
           </div>
 
-          <div className="inline-flex min-w-0 shrink-0 items-center gap-1.5 text-sm font-semibold text-slate-500">
-            <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-            <span className="max-w-[120px] truncate">{city}</span>
+          <div className="inline-flex min-w-0 items-center gap-1 text-[10px] font-semibold text-slate-500 md:shrink-0 md:gap-1.5 md:text-sm">
+            <MapPin className="h-3 w-3 shrink-0 text-slate-400 md:h-4 md:w-4" />
+            <span className="max-w-[130px] truncate md:max-w-[120px]">{city}</span>
           </div>
         </div>
       </div>
     </Link>
   );
 }
+
+
+
+
+
+
+
+
+
