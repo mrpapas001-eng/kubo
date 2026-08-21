@@ -6,6 +6,7 @@ import ListingCard from "@/components/ListingCard";
 import ListingCardSkeleton from "@/components/ListingCardSkeleton";
 import StateEmpty from "@/components/StateEmpty";
 import StateError from "@/components/StateError";
+import SponsorFeedCard from "@/components/SponsorFeedCard";
 
 type Props = {
   initialListings: any[];

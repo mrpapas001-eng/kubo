@@ -1,21 +1,5 @@
+import type { SponsorAd } from "@prisma/client";
 import { prisma } from "../db";
-
-export type SponsorAd = {
-  id: string;
-  title: string;
-  subtitle?: string | null;
-  imageUrl?: string | null;
-  ctaText?: string | null;
-  ctaUrl?: string | null;
-  type: string;
-  placement: string;
-  categorySlug?: string | null;
-  priority: number;
-  startAt: Date;
-  endAt: Date;
-  isActive: boolean;
-  createdAt: Date;
-};
 
 export type HomeSponsors = {
   main: SponsorAd[];
