@@ -14,23 +14,46 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
+
     const requestId = String(body?.requestId ?? "");
     const action = String(body?.action ?? "");
+
     const rejectionReason = String(body?.rejectionReason ?? "").trim();
+
     const adminNotes =
       typeof body?.adminNotes === "string" ? body.adminNotes.trim() : null;
+
     const matchedListingId =
       typeof body?.matchedListingId === "string" && body.matchedListingId.trim()
         ? body.matchedListingId.trim()
         : null;
 
-    if (!requestId || !["approve", "reject", "match", "complete"].includes(action)) {
-      return NextResponse.json({ error: "Solicitud inválida" }, { status: 400 });
+    const contextImageUrl =
+      typeof body?.contextImageUrl === "string" && body.contextImageUrl.trim()
+        ? body.contextImageUrl.trim()
+        : null;
+
+    const allowedActions = [
+      "approve",
+      "reject",
+      "match",
+      "complete",
+      "image",
+    ];
+
+    if (!requestId || !allowedActions.includes(action)) {
+      return NextResponse.json(
+        { error: "Solicitud inválida" },
+        { status: 400 }
+      );
     }
 
     const aidRequest = await prisma.aidRequest.findUnique({
       where: { id: requestId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+      },
     });
 
     if (!aidRequest) {
@@ -40,6 +63,30 @@ export async function POST(req: Request) {
       );
     }
 
+    /*
+     * AGREGAR / CAMBIAR IMAGEN
+     */
+    if (action === "image") {
+      if (!contextImageUrl) {
+        return NextResponse.json(
+          { error: "Debes indicar una imagen válida." },
+          { status: 400 }
+        );
+      }
+
+      await prisma.aidRequest.update({
+        where: { id: requestId },
+        data: {
+          contextImageUrl,
+        },
+      });
+
+      return NextResponse.json({ ok: true });
+    }
+
+    /*
+     * APROBAR
+     */
     if (action === "approve") {
       if (aidRequest.status !== "PENDING") {
         return NextResponse.json(
@@ -57,7 +104,12 @@ export async function POST(req: Request) {
           ...(adminNotes !== null ? { adminNotes } : {}),
         },
       });
-    } else if (action === "reject") {
+    }
+
+    /*
+     * RECHAZAR
+     */
+    else if (action === "reject") {
       if (!["PENDING", "APPROVED", "MATCHED"].includes(aidRequest.status)) {
         return NextResponse.json(
           { error: "Esta solicitud ya no está activa." },
@@ -67,7 +119,10 @@ export async function POST(req: Request) {
 
       if (!rejectionReason) {
         return NextResponse.json(
-          { error: "Debes indicar el motivo del rechazo (visible para el solicitante)." },
+          {
+            error:
+              "Debes indicar el motivo del rechazo (visible para el solicitante).",
+          },
           { status: 400 }
         );
       }
@@ -82,10 +137,18 @@ export async function POST(req: Request) {
           ...(adminNotes !== null ? { adminNotes } : {}),
         },
       });
-    } else if (action === "match") {
+    }
+
+    /*
+     * MARCAR EN PROCESO
+     */
+    else if (action === "match") {
       if (aidRequest.status !== "APPROVED") {
         return NextResponse.json(
-          { error: "Solo se pueden marcar en proceso solicitudes aprobadas." },
+          {
+            error:
+              "Solo se pueden marcar en proceso solicitudes aprobadas.",
+          },
           { status: 400 }
         );
       }
@@ -99,11 +162,18 @@ export async function POST(req: Request) {
           ...(adminNotes !== null ? { adminNotes } : {}),
         },
       });
-    } else {
-      // action === "complete"
+    }
+
+    /*
+     * COMPLETAR
+     */
+    else if (action === "complete") {
       if (!["APPROVED", "MATCHED"].includes(aidRequest.status)) {
         return NextResponse.json(
-          { error: "Solo se pueden completar solicitudes aprobadas o en proceso." },
+          {
+            error:
+              "Solo se pueden completar solicitudes aprobadas o en proceso.",
+          },
           { status: 400 }
         );
       }
@@ -122,6 +192,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("POST /api/admin/aid-request error:", error);
+
     return NextResponse.json(
       { error: "No se pudo procesar la solicitud" },
       { status: 500 }
