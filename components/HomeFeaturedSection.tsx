@@ -1,16 +1,22 @@
-"use client";
+﻿"use client";
 
+import type { SponsorAd } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListingCard from "@/components/ListingCard";
-import SponsoredBanner from "@/components/SponsoredBanner";
+import SponsoredCard from "@/components/SponsoredCard";
+import SponsorFeedCard from "@/components/SponsorFeedCard";
+import HomePremiumShowcase from "@/components/HomePremiumShowcase";
+import ReelsSection, { type ReelItem } from "@/components/ReelsSection";
 
 const RealMap = dynamic(() => import("@/components/RealMap"), { ssr: false });
 
 type Props = {
   listings: any[];
-  sponsors: any[];
+  sideSponsors: SponsorAd[];
+  feedSponsors: SponsorAd[];
+  reels: ReelItem[];
   cities: string[];
 };
 
@@ -23,8 +29,8 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "La Virginia": [4.8997, -75.8828],
   Cartago: [4.7464, -75.9117],
   Armenia: [4.5339, -75.6811],
-  Bogotá: [4.711, -74.0721],
-  Medellín: [6.2442, -75.5812],
+  "Bogotá": [4.711, -74.0721],
+  "Medellín": [6.2442, -75.5812],
   Cali: [3.4516, -76.532],
   Barranquilla: [10.9685, -74.7813],
   Cartagena: [10.391, -75.4794],
@@ -49,7 +55,9 @@ function getListingPriority(item: any) {
 
 export default function HomeFeaturedSection({
   listings,
-  sponsors,
+  sideSponsors,
+  feedSponsors,
+  reels,
   cities,
 }: Props) {
   const [selectedCity, setSelectedCity] = useState("");
@@ -129,9 +137,32 @@ export default function HomeFeaturedSection({
   }, [sortedListings, center]);
 
   const topListings = sortedListings.slice(0, 6);
-  const sideListings = sortedListings.slice(6, 8);
-  const extraPool = sortedListings.slice(8);
+  const extraPool = sortedListings.slice(6);
   const extraListings = extraPool.slice(0, extraVisibleCount);
+  const sideSponsor =
+    sideSponsors?.[0] ??
+    {
+      id: "side-demo",
+      title: "Claro hogar",
+      subtitle: "Fibra óptica para tu hogar con mayor velocidad.",
+      imageUrl: "/placeholders/claro-demo.jpg",
+      ctaText: "Ver oferta",
+      ctaUrl: "#",
+    };
+
+  const demoFeedSponsors =
+    feedSponsors?.length > 0
+      ? feedSponsors
+      : [
+          {
+            id: "feed-demo",
+            title: "Claro hogar",
+            subtitle: "Fibra óptica para tu hogar con mayor velocidad.",
+            imageUrl: "/placeholders/claro-demo.jpg",
+            ctaText: "Ver oferta",
+            ctaUrl: "#",
+          },
+        ];
 
   const hasMoreExtra = extraVisibleCount < extraPool.length;
 
@@ -145,8 +176,8 @@ export default function HomeFeaturedSection({
 
   function getTabClass(tab: SortMode) {
     return sortMode === tab
-      ? "rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700"
-      : "rounded-xl px-4 py-2 text-sm font-black text-slate-500 transition hover:bg-slate-50 hover:text-slate-700";
+      ? "rounded-xl bg-[#0f3c8c] px-4 py-2 text-sm font-black text-white shadow-sm"
+      : "rounded-xl px-4 py-2 text-sm font-black text-slate-500 transition hover:bg-blue-50 hover:text-[#0f3c8c]";
   }
 
   function getTitle() {
@@ -157,10 +188,10 @@ export default function HomeFeaturedSection({
 
   return (
     <section className="mt-6">
-      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+      <div className="rounded-[28px] border border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_42%)] p-5 shadow-[0_14px_40px_rgba(15,60,140,0.06)] md:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#0f3c8c]">
               Anuncios destacados
             </div>
 
@@ -183,7 +214,6 @@ export default function HomeFeaturedSection({
             </button>
           </div>
         </div>
-<div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-3 mt-5"></div>
 
         <div className="hidden mt-5 md:grid md:grid-cols-2 lg:grid-cols-5 gap-3">
           <select
@@ -261,7 +291,7 @@ export default function HomeFeaturedSection({
             </p>
 
             {topListings.length > 0 ? (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {topListings.map((item, idx) => (
                   <ListingCard key={`top-${item?.id ?? idx}`} item={item} />
                 ))}
@@ -298,7 +328,7 @@ export default function HomeFeaturedSection({
                 </div>
               </div>
 
-              <div className="h-[430px] w-full bg-slate-100">
+              <div className="h-[300px] w-full bg-slate-100">
                 {mapListings.length > 0 ? (
                   <RealMap listings={mapListings} center={center} zoom={12} />
                 ) : null}
@@ -312,51 +342,48 @@ export default function HomeFeaturedSection({
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-slate-200 bg-white px-6 py-5 shadow-sm">
-              <div className="flex flex-col items-center justify-center text-center">
-                <img
-                  src="/brand/kubo-logo.png"
-                  alt="Kubo anuncios"
-                  className="h-auto w-[190px]"
-                />
-
-                <p className="mt-3 max-w-[240px] text-sm leading-5 text-slate-500">
-                  Publicaciones reales, personas reales. Encuentra oportunidades cerca de ti en Kubo Anuncios.
-                </p>
-              </div>
-            </div>
+            {sideSponsor ? <SponsoredCard sponsor={sideSponsor} /> : null}
           </aside>
         </div>
       </div>
 
-      <div
-        className={`mt-6 grid grid-cols-1 gap-6 ${
-          sponsors?.length > 0
-            ? "lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)]"
-            : "lg:grid-cols-1"
-        }`}
-      >
-        {sponsors?.length > 0 ? (
-          <div className="min-w-0 h-full">
-            <SponsoredBanner sponsors={sponsors} />
-          </div>
-        ) : (
-          <div />
-        )}
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {sideListings.map((item, idx) => (
-            <ListingCard key={`side-${item?.id ?? idx}`} item={item} />
-          ))}
+      {sideSponsor ? (
+        <div className="mt-5 lg:hidden">
+          <SponsoredCard sponsor={sideSponsor} />
         </div>
+      ) : null}
+
+      <HomePremiumShowcase listings={listings} />
+
+      <div className="mt-6">
+        <ReelsSection items={reels} />
       </div>
 
       {extraListings.length > 0 ? (
         <div className="mt-6">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {extraListings.map((item, idx) => (
-              <ListingCard key={`extra-${item?.id ?? idx}`} item={item} />
-            ))}
+          <div className="flex items-end justify-between">
+            <h2 className="text-2xl font-black text-slate-900 md:text-3xl">
+              Más anuncios
+            </h2>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {extraListings.map((item, idx) => {
+              const sponsor =
+                demoFeedSponsors.length > 0 && (idx + 1) % 8 === 0
+                  ? demoFeedSponsors[(Math.floor(idx / 8)) % demoFeedSponsors.length]
+                  : null;
+
+              return [
+                <ListingCard key={`extra-${item?.id ?? idx}`} item={item} />,
+                sponsor ? (
+                  <SponsorFeedCard
+                    key={`feed-sponsor-${sponsor.id}-${idx}`}
+                    sponsor={sponsor}
+                  />
+                ) : null,
+              ];
+            })}
           </div>
         </div>
       ) : null}
@@ -375,3 +402,14 @@ export default function HomeFeaturedSection({
     </section>
   );
 }
+
+
+
+
+
+
+
+
+
+
+

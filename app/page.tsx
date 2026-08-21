@@ -1,9 +1,8 @@
 import Header from "@/components/Header";
 import HomeHero from "@/components/HomeHero";
 import HomeCategories from "@/components/HomeCategories";
-import HomeAyudaSection from "@/components/HomeAyudaSection";
 import HomeFeaturedSection from "@/components/HomeFeaturedSection";
-import ReelsSection from "@/components/ReelsSection";
+import HomeSponsorMain from "@/components/HomeSponsorMain";
 import Footer from "@/components/Footer";
 import InstallKuboButton from "@/components/InstallKuboButton";
 import { getHomeListings, getHomeReels } from "@/lib/queries/home";
@@ -46,6 +45,10 @@ const CATEGORY_OPTIONS = [
   { slug: "mascotas", label: "Mascotas" },
   { slug: "bebes", label: "Bebés" },
   { slug: "moda", label: "Moda y complementos" },
+  { slug: "juguetes", label: "Juguetes" },
+  { slug: "papeleria-oficina", label: "Papelería y Oficina" },
+  { slug: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
+  { slug: "salud-belleza", label: "Salud y Belleza" },
 ];
 
 export default async function Home() {
@@ -67,18 +70,17 @@ export default async function Home() {
           <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-8">
             <HomeHero />
             <InstallKuboButton />
-<HomeCategories />
-<HomeAyudaSection />
+            <HomeCategories />
 
-<HomeFeaturedSection
-  listings={initialListings}
-  sponsors={sponsors}
-  cities={CITIES}
-/>
+            <HomeSponsorMain sponsors={sponsors.main} />
 
-<section className="mt-6">
-  <ReelsSection items={reels} />
-</section>
+            <HomeFeaturedSection
+              listings={initialListings}
+              sideSponsors={sponsors.side}
+              feedSponsors={sponsors.feed}
+              reels={reels}
+              cities={CITIES}
+            />
 
           </div>
         </main>

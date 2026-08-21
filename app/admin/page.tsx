@@ -7,6 +7,7 @@ import {
   Eye,
   FileWarning,
   Flag,
+  Heart,
   IdCard,
   Megaphone,
   ShieldCheck,
@@ -107,6 +108,7 @@ export default async function AdminDashboardPage() {
     pendingIdentity,
     pendingBusiness,
     pendingAccountVerifications,
+    pendingAidRequests,
     totalConversations,
     totalViews,
   ] = await Promise.all([
@@ -120,12 +122,17 @@ export default async function AdminDashboardPage() {
     prisma.identityVerificationRequest.count({ where: { status: "pending" } }),
     prisma.businessVerificationRequest.count({ where: { status: "pending" } }),
     prisma.accountVerification.count({ where: { status: "PENDING" } }),
+    prisma.aidRequest.count({ where: { status: "PENDING" } }),
     prisma.conversation.count(),
     prisma.listing.aggregate({ _sum: { views: true } }),
   ]);
 
   const pendingTotal =
-    pendingReports + pendingIdentity + pendingBusiness + pendingAccountVerifications;
+    pendingReports +
+    pendingIdentity +
+    pendingBusiness +
+    pendingAccountVerifications +
+    pendingAidRequests;
   const views = totalViews._sum.views ?? 0;
 
   return (
@@ -221,6 +228,14 @@ export default async function AdminDashboardPage() {
             description="Revisa solicitudes de cuenta por WhatsApp y RUT."
             icon={ShieldCheck}
             badge={pendingAccountVerifications}
+            actionLabel="Gestionar solicitudes"
+          />
+          <AdminLink
+            href="/admin/aid-requests"
+            title="Solicitudes de ayuda"
+            description="Revisa y aprueba solicitudes de Kubo Ayuda antes de publicarlas."
+            icon={Heart}
+            badge={pendingAidRequests}
             actionLabel="Gestionar solicitudes"
           />
           </div>

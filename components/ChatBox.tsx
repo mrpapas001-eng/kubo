@@ -7,6 +7,7 @@ type Message = {
   body: string;
   senderEmail: string;
   createdAt: string | Date;
+  readAt?: string | Date | null;
 };
 
 type Props = {
@@ -114,6 +115,7 @@ export default function ChatBox({
           const isMe =
             currentUserEmail &&
             msg.senderEmail?.toLowerCase().trim() === currentUserEmail;
+          const isRead = isMe && Boolean(msg.readAt);
 
           return (
             <div
@@ -130,12 +132,20 @@ export default function ChatBox({
                 <div>{msg.body}</div>
 
                 <div
-                  className={`mt-1 text-right text-[10px] font-medium opacity-70 ${
+                  className={`mt-1 flex items-center justify-end gap-1 text-[10px] font-medium ${
                     isMe ? "text-green-700" : "text-slate-400"
                   }`}
                 >
-                  {formatTime(msg.createdAt)}
-                  {isMe ? " ✓✓" : ""}
+                  <span className="opacity-70">{formatTime(msg.createdAt)}</span>
+                  {isMe ? (
+                    <span
+                      className={isRead ? "font-black text-blue-500" : "font-black text-slate-500"}
+                      title={isRead ? "Leído" : "Enviado"}
+                      aria-label={isRead ? "Mensaje leído" : "Mensaje enviado"}
+                    >
+                      ✓✓
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </div>

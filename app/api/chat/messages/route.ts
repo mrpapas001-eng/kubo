@@ -36,9 +36,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const isParticipant =
-      conversation.buyerEmail === userEmail ||
-      conversation.sellerEmail === userEmail;
+    const buyerEmail = conversation.buyerEmail?.toLowerCase().trim();
+    const sellerEmail = conversation.sellerEmail?.toLowerCase().trim();
+    const isParticipant = buyerEmail === userEmail || sellerEmail === userEmail;
 
     if (!isParticipant) {
       return NextResponse.json(
@@ -46,6 +46,18 @@ export async function GET(req: Request) {
         { status: 403 }
       );
     }
+
+    // Mientras el usuario tiene esta conversación abierta, los mensajes que
+    // recibe se consideran leídos. Esto permite que el remitente vea el cambio
+    // de ✓✓ gris a ✓✓ azul en su siguiente actualización del chat.
+    await prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderEmail: { not: userEmail },
+        readAt: null,
+      },
+      data: { readAt: new Date() },
+    });
 
     const messages = await prisma.message.findMany({
       where: { conversationId },

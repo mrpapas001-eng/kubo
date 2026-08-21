@@ -1,86 +1,43 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { claimLaunchPromotion } from "@/lib/launchPromotion";
 
-function getValidDays(value: string | null) {
-  const days = Number(value);
-
-  if ([7, 15, 30].includes(days)) {
-    return days;
-  }
-
-  return 7;
-}
+const messages: Record<string, string> = {
+  CAMPAIGN_INACTIVE: "La promoción gratuita de lanzamiento no está activa.",
+  NOT_FOUND: "Anuncio no encontrado.",
+  FORBIDDEN: "No puedes destacar este anuncio.",
+  BUSINESS_ONLY: "La promoción de lanzamiento está disponible para anuncios de empresa.",
+  NOT_ACTIVE: "Solo puedes promocionar anuncios activos.",
+  NOT_TODAY: "Los cupos gratuitos son solo para anuncios publicados hoy.",
+  ALREADY_PROMOTED: "Este anuncio ya tiene una promoción activa.",
+  USER_DAILY_LIMIT: "Ya utilizaste tu promoción gratuita de hoy.",
+  SOLD_OUT: "Los 20 cupos Destacado de hoy ya se agotaron. Mañana habrá nuevos cupos para anuncios nuevos.",
+};
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.email) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const userEmail = session.user.email.toLowerCase().trim();
-
   const { searchParams } = new URL(request.url);
-
   const listingId = searchParams.get("listingId");
-  const days = getValidDays(searchParams.get("days"));
-
   if (!listingId) {
     return NextResponse.json({ error: "Falta listingId" }, { status: 400 });
   }
 
-  const listing = await prisma.listing.findUnique({
-    where: {
-      id: listingId,
-    },
-  });
-
-  if (!listing) {
-    return NextResponse.json(
-      { error: "Anuncio no encontrado" },
-      { status: 404 }
+  try {
+    await claimLaunchPromotion(
+      listingId,
+      session.user.email.toLowerCase().trim(),
+      "featured"
     );
+    return NextResponse.redirect(new URL(`/listing/${listingId}`, request.url));
+  } catch (error) {
+    const code = error instanceof Error ? error.message : "UNKNOWN";
+    const message = messages[code] ?? "No se pudo activar Destacado.";
+    const status = code === "NOT_FOUND" ? 404 : code === "FORBIDDEN" ? 403 : code === "SOLD_OUT" ? 409 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
-
-  const ownerEmail = listing.ownerEmail?.toLowerCase().trim();
-
-  if (ownerEmail !== userEmail) {
-    return NextResponse.json(
-      { error: "No puedes destacar este anuncio" },
-      { status: 403 }
-    );
-  }
-
-  // Only businesses can activate promotions
-  if (!listing.isBusiness) {
-    return NextResponse.json(
-      { error: "Solo las empresas pueden activar Destacado/Premium" },
-      { status: 403 }
-    );
-  }
-
-  if (listing.status !== "active") {
-    return NextResponse.json(
-      { error: "Solo puedes destacar anuncios activos" },
-      { status: 400 }
-    );
-  }
-
-  const featuredUntil = new Date();
-  featuredUntil.setDate(featuredUntil.getDate() + days);
-
-  await prisma.listing.update({
-    where: { id: listingId },
-    data: {
-      isFeatured: true,
-      isPremium: false,
-      featuredUntil,
-      premiumPlan: null,
-      premiumUntil: null,
-    },
-  });
-
-  return NextResponse.redirect(new URL(`/listing/${listingId}`, request.url));
 }

@@ -40,6 +40,43 @@ model AccountVerification {
   @@index([submittedAt])
 }
 
+enum AidRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MATCHED
+  COMPLETED
+  CANCELLED
+}
+
+model AidRequest {
+  id               String           @id @default(cuid())
+  ownerEmail       String
+  ownerName        String?
+  whatsappNumber   String
+  title            String
+  category         String
+  city             String
+  description      String
+  contextImageUrl  String?
+  status           AidRequestStatus @default(PENDING)
+  isActive         Boolean?
+  rejectionReason  String?
+  adminNotes       String?
+  matchedListingId String?
+  createdAt        DateTime         @default(now())
+  reviewedAt       DateTime?
+  completedAt      DateTime?
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([ownerEmail, isActive])
+  @@index([status])
+  @@index([city])
+  @@index([category])
+  @@index([createdAt])
+  @@index([ownerEmail])
+}
+
 model Listing {
   id              String   @id @default(cuid())
   title           String
@@ -166,6 +203,7 @@ model SponsorAd {
   ctaUrl    String?
   type      String
   placement String
+  categorySlug String?
   priority  Int      @default(0)
   startAt   DateTime
   endAt     DateTime
@@ -221,3 +259,4 @@ model Message {
   @@index([senderEmail])
   @@index([createdAt])
 }
+

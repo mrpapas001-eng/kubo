@@ -38,6 +38,15 @@ export default async function ChatListPage() {
     },
   });
 
+  const aidRequestIds = new Set(
+    (
+      await prisma.aidRequest.findMany({
+        where: { id: { in: conversations.map((c) => c.listingId) } },
+        select: { id: true },
+      })
+    ).map((r) => r.id)
+  );
+
   return (
     <div className="h-screen w-full border-r border-slate-200 bg-white p-6">
       <div className="flex items-center justify-between">
@@ -149,10 +158,14 @@ return (
     {/* 🔥 BOTÓN VER ANUNCIO */}
     <div className="mt-3">
       <Link
-        href={`/listing/${conversation.listingId}`}
+        href={
+          aidRequestIds.has(conversation.listingId)
+            ? `/ayuda/necesidades/${conversation.listingId}`
+            : `/listing/${conversation.listingId}`
+        }
         className="text-xs font-black text-[#0f3c8c] hover:underline"
       >
-        Ver anuncio
+        {aidRequestIds.has(conversation.listingId) ? "Ver solicitud" : "Ver anuncio"}
       </Link>
     </div>
   </div>

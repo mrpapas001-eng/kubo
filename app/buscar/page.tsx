@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+﻿import { prisma } from "@/lib/db";
 import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingCard from "@/components/ListingCard";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import {
   Gamepad2,
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
+import { recommendCategory } from "@/lib/catalog/recommendCategory";
 
 type Props = {
   searchParams?: Promise<{
@@ -67,6 +68,10 @@ const CATEGORY_OPTIONS = [
   { slug: "mascotas", label: "Mascotas" },
   { slug: "bebes", label: "Bebés" },
   { slug: "moda", label: "Moda y complementos" },
+  { slug: "juguetes", label: "Juguetes" },
+  { slug: "papeleria-oficina", label: "Papelería y Oficina" },
+  { slug: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
+  { slug: "salud-belleza", label: "Salud y Belleza" },
 ];
 
 const QUICK_CATEGORIES = [
@@ -97,6 +102,8 @@ export default async function BuscarPage({ searchParams }: Props) {
 
   const normalizedCity = city.toLowerCase();
   const normalizedCategory = category.toLowerCase();
+
+  const categoryRecommendation = q ? recommendCategory(q) : null;
 
   function buildPageHref(page: number) {
     const search = new URLSearchParams();
@@ -172,7 +179,21 @@ export default async function BuscarPage({ searchParams }: Props) {
       .join(" ")
       .toLowerCase();
 
-    if (q && !haystack.includes(q)) return false;
+    if (q) {
+      const directMatch = haystack.includes(q);
+
+      const categoryMatch =
+        categoryRecommendation &&
+        String(item.categorySlug ?? "").trim().toLowerCase() ===
+          categoryRecommendation.categoryKey.toLowerCase();
+
+      const subcategoryMatch =
+        categoryRecommendation?.subcategorySlug &&
+        String(item.subcategorySlug ?? "").trim().toLowerCase() ===
+          categoryRecommendation.subcategorySlug.toLowerCase();
+
+      if (!directMatch && !subcategoryMatch && !categoryMatch) return false;
+    }
 
     const price = Number(item.price || 0);
 
@@ -595,3 +616,7 @@ export default async function BuscarPage({ searchParams }: Props) {
     </div>
   );
 }
+
+
+
+

@@ -6,6 +6,7 @@ import ListingCard from "@/components/ListingCard";
 import ListingCardSkeleton from "@/components/ListingCardSkeleton";
 import StateEmpty from "@/components/StateEmpty";
 import StateError from "@/components/StateError";
+import SponsorFeedCard from "@/components/SponsorFeedCard";
 
 type Props = {
   initialListings: any[];
@@ -85,7 +86,7 @@ function SponsorBlock({
   const imageUrl = sponsor?.imageUrl || "/electrodomesticos-hero.jpg";
   const title = sponsor?.title || "Patrocinado";
   const subtitle = sponsor?.subtitle || "";
-  const ctaText = sponsor?.ctaText || "Ver más";
+  const ctaText = sponsor?.ctaText || "Ver mÃ¡s";
   const ctaUrl = sponsor?.ctaUrl || "/";
 
   if (compact) {
@@ -223,7 +224,7 @@ export default function HomeListingsClient({
         try {
           data = JSON.parse(raw);
         } catch {
-          throw new Error("La API de listings no devolvió JSON válido.");
+          throw new Error("La API de listings no devolviÃ³ JSON vÃ¡lido.");
         }
 
         if (!res.ok) {
@@ -280,7 +281,7 @@ export default function HomeListingsClient({
       try {
         data = JSON.parse(raw);
       } catch {
-        throw new Error("La API de listings no devolvió JSON válido.");
+        throw new Error("La API de listings no devolviÃ³ JSON vÃ¡lido.");
       }
 
       if (!res.ok) {
@@ -296,7 +297,7 @@ export default function HomeListingsClient({
       setHasMore(Boolean(data?.hasMore));
     } catch (error: any) {
       console.error("Load more failed", error);
-      setError("Error cargando más anuncios");
+      setError("Error cargando mÃ¡s anuncios");
     } finally {
       setIsLoadingMore(false);
     }
@@ -459,9 +460,9 @@ export default function HomeListingsClient({
   const headerSubtitle = subtitle
     ? subtitle
     : isCategoryView
-    ? "Explora publicaciones reales dentro de esta sección."
+    ? "Explora publicaciones reales dentro de esta secciÃ³n."
     : searchQuery
-    ? `Mostrando resultados para “${searchQuery}” en ${selectedCity}`
+    ? `Mostrando resultados para â€œ${searchQuery}â€ en ${selectedCity}`
     : "Explora anuncios recientes y opciones destacadas cerca de ti.";
 
   return (
@@ -511,11 +512,11 @@ export default function HomeListingsClient({
               >
                 <option value="">Combustible</option>
                 <option value="Gasolina">Gasolina</option>
-                <option value="Diésel">Diésel</option>
+                <option value="DiÃ©sel">DiÃ©sel</option>
                 <option value="Gas">Gas</option>
-                <option value="Híbrido">Híbrido</option>
-                <option value="Eléctrico">Eléctrico</option>
-                <option value="Eléctrica">Eléctrica</option>
+                <option value="HÃ­brido">HÃ­brido</option>
+                <option value="ElÃ©ctrico">ElÃ©ctrico</option>
+                <option value="ElÃ©ctrica">ElÃ©ctrica</option>
               </select>
 
               <select
@@ -523,16 +524,16 @@ export default function HomeListingsClient({
                 onChange={(e) => setMotorTransmission(e.target.value)}
                 className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700"
               >
-                <option value="">Transmisión</option>
-                <option value="Mecánica">Mecánica</option>
-                <option value="Automática">Automática</option>
-                <option value="Semiautomática">Semiautomática</option>
+                <option value="">TransmisiÃ³n</option>
+                <option value="MecÃ¡nica">MecÃ¡nica</option>
+                <option value="AutomÃ¡tica">AutomÃ¡tica</option>
+                <option value="SemiautomÃ¡tica">SemiautomÃ¡tica</option>
               </select>
 
               <input
                 value={motorYearMin}
                 onChange={(e) => setMotorYearMin(e.target.value.replace(/\D/g, ""))}
-                placeholder="Año mínimo"
+                placeholder="AÃ±o mÃ­nimo"
                 inputMode="numeric"
                 className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700"
               />
@@ -540,7 +541,7 @@ export default function HomeListingsClient({
               <input
                 value={motorKmMax}
                 onChange={(e) => setMotorKmMax(e.target.value.replace(/\D/g, ""))}
-                placeholder="Km máximo"
+                placeholder="Km mÃ¡ximo"
                 inputMode="numeric"
                 className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700"
               />
@@ -578,15 +579,15 @@ export default function HomeListingsClient({
             <StateEmpty
               title={
                 searchQuery
-                  ? "No encontramos resultados para tu búsqueda"
+                  ? "No encontramos resultados para tu bÃºsqueda"
                   : "No hay anuncios disponibles"
               }
               subtitle={
                 searchQuery
                   ? "Prueba con menos palabras o cambia los filtros."
                   : isCategoryView
-                  ? "Todavía no hay anuncios en esta sección."
-                  : `Todavía no hay anuncios en ${selectedCity}.`
+                  ? "TodavÃ­a no hay anuncios en esta secciÃ³n."
+                  : `TodavÃ­a no hay anuncios en ${selectedCity}.`
               }
             />
           </div>
@@ -619,7 +620,7 @@ export default function HomeListingsClient({
       <input
         value={realEstateRoomsMin}
         onChange={(e) => setRealEstateRoomsMin(e.target.value.replace(/\D/g, ""))}
-        placeholder="Alcobas mín."
+        placeholder="Alcobas mÃ­n."
         inputMode="numeric"
         className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700"
       />
@@ -627,7 +628,7 @@ export default function HomeListingsClient({
       <input
         value={realEstateBathsMin}
         onChange={(e) => setRealEstateBathsMin(e.target.value.replace(/\D/g, ""))}
-        placeholder="Baños mín."
+        placeholder="BaÃ±os mÃ­n."
         inputMode="numeric"
         className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700"
       />
@@ -635,7 +636,7 @@ export default function HomeListingsClient({
       <input
         value={realEstateSqmMin}
         onChange={(e) => setRealEstateSqmMin(e.target.value.replace(/\D/g, ""))}
-        placeholder="Metros² mín."
+        placeholder="MetrosÂ² mÃ­n."
         inputMode="numeric"
         className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700"
       />
@@ -744,12 +745,29 @@ export default function HomeListingsClient({
             ) : null}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {filteredListings.map((item, idx) => (
-              <ListingCard key={`${item?.id ?? idx}`} item={item} />
-            ))}
-          </div>
-        )}
+  <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
+    {filteredListings.flatMap((item, idx) => {
+      const shouldInsertSponsor =
+        isCategoryView &&
+        sponsors.length > 0 &&
+        (idx + 1) % 12 === 0;
+
+      const sponsor = shouldInsertSponsor
+        ? sponsors[Math.floor(idx / 12) % sponsors.length]
+        : null;
+
+      return [
+        <ListingCard key={`${item?.id ?? idx}`} item={item} />,
+        sponsor ? (
+          <SponsorFeedCard
+            key={`category-feed-${sponsor.id}-${idx}`}
+            sponsor={sponsor}
+          />
+        ) : null,
+      ];
+    })}
+  </div>
+)}
 
         <div className="flex justify-center pt-2">
           {hasMore ? (
@@ -758,11 +776,11 @@ export default function HomeListingsClient({
               disabled={isLoadingMore || isRefreshing}
               className="h-11 rounded-xl bg-[#0f3c8c] px-6 text-sm font-bold text-white shadow-sm transition hover:bg-[#0c2f6d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoadingMore ? "Cargando..." : "Cargar más"}
+              {isLoadingMore ? "Cargando..." : "Cargar mÃ¡s"}
             </button>
           ) : filteredListings.length > 0 ? (
             <div className="text-sm font-medium text-slate-500">
-              No hay más anuncios por ahora.
+              No hay mÃ¡s anuncios por ahora.
             </div>
           ) : null}
         </div>

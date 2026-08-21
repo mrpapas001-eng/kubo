@@ -114,6 +114,38 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "jardin-y-terraza",
     "otros",
   ],
+  juguetes: [
+    "peluches",
+    "munecas-y-figuras",
+    "juegos-de-mesa",
+    "didacticos",
+    "aire-libre",
+    "otros",
+  ],
+  "papeleria-oficina": [
+    "utiles-escolares",
+    "cuadernos-y-papel",
+    "escritura-y-dibujo",
+    "oficina-y-archivo",
+    "arte-y-manualidades",
+    "otros",
+  ],
+  "herramientas-ferreteria": [
+    "herramientas-electricas",
+    "herramientas-manuales",
+    "construccion",
+    "jardineria",
+    "seguridad-industrial",
+    "otros",
+  ],
+  "salud-belleza": [
+    "maquillaje",
+    "cuidado-de-la-piel",
+    "cabello",
+    "aparatos-de-belleza",
+    "salud-y-bienestar",
+    "otros",
+  ],
 };
 
 const REAL_ESTATE_SUBS_REQUIRING_ROOMS = [
@@ -214,6 +246,61 @@ export async function POST(req: Request) {
 
     const ownerEmail = sessionEmail;
 
+    // Seguridad Kubo Ayuda: las donaciones exigen cuenta PARTICULAR verificada,
+    // usan el WhatsApp verificado (nunca body.phone) y fuerzan price = 0.
+    const isDonation = details?.kuboAyuda?.type === "DONATION";
+
+    let finalPhone = phone;
+    let finalPrice = parsedPrice;
+
+    if (isDonation) {
+      if (sellerType !== "PARTICULAR") {
+        return NextResponse.json(
+          { ok: false, error: "Las donaciones solo pueden ser publicadas por particulares." },
+          { status: 403 }
+        );
+      }
+
+      const verification = await prisma.accountVerification.findUnique({
+        where: {
+          email_type: {
+            email: ownerEmail,
+            type: "PARTICULAR",
+          },
+        },
+      });
+
+      if (!verification || verification.status !== "VERIFIED") {
+        return NextResponse.json(
+          { ok: false, error: "Tu cuenta debe estar verificada para publicar donaciones." },
+          { status: 403 }
+        );
+      }
+
+      if (!verification.whatsappNumber) {
+        return NextResponse.json(
+          { ok: false, error: "Debes tener un número de WhatsApp vinculado para donar." },
+          { status: 403 }
+        );
+      }
+
+      let verifiedPhone = String(verification.whatsappNumber).replace(/\D/g, "");
+      if (verifiedPhone.length > 10 && verifiedPhone.startsWith("57")) {
+        verifiedPhone = verifiedPhone.slice(2);
+      }
+      verifiedPhone = verifiedPhone.slice(0, 10);
+
+      if (!verifiedPhone || verifiedPhone.length < 7) {
+        return NextResponse.json(
+          { ok: false, error: "Tu número de WhatsApp verificado no es válido." },
+          { status: 403 }
+        );
+      }
+
+      finalPhone = verifiedPhone;
+      finalPrice = 0;
+    }
+
     const businessName = String(body?.businessName ?? "").trim();
     const businessDescription = String(body?.businessDescription ?? "").trim();
     const businessWebsite = String(body?.businessWebsite ?? "").trim();
@@ -249,7 +336,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!phone || phone.length < 7) {
+    if (!finalPhone || finalPhone.length < 7) {
       return NextResponse.json(
         { ok: false, error: "El teléfono no es válido." },
         { status: 400 }
@@ -277,7 +364,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (parsedPrice !== null && Number.isNaN(parsedPrice)) {
+    if (!isDonation && parsedPrice !== null && Number.isNaN(parsedPrice)) {
       return NextResponse.json(
         { ok: false, error: "El precio no es válido." },
         { status: 400 }
@@ -326,7 +413,7 @@ export async function POST(req: Request) {
 
     const requiresPrice = !["empleo", "servicios"].includes(categorySlug);
 
-    if (requiresPrice && parsedPrice === null) {
+    if (!isDonation && requiresPrice && parsedPrice === null) {
       return NextResponse.json(
         { ok: false, error: "El precio es obligatorio." },
         { status: 400 }
@@ -444,8 +531,8 @@ export async function POST(req: Request) {
       data: {
         title,
         description,
-        phone,
-        price: parsedPrice,
+        phone: finalPhone,
+        price: finalPrice,
         currency,
         city,
         location,
