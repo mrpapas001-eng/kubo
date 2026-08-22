@@ -109,10 +109,10 @@ useEffect(() => {
         return;
       }
 
-      setShowPrompt(false);
-      setMessage("Notificaciones activadas correctamente.");
+ setShowPrompt(false);
+setMessage("");
 
-      console.log("Suscripción push guardada correctamente.");
+console.log("Suscripción push guardada correctamente.");
     } catch (error) {
       console.error("Error configurando notificaciones push:", error);
       setMessage("Ocurrió un error al activar las notificaciones.");
