@@ -6,7 +6,9 @@ self.addEventListener("push", (event) => {
   } catch {
     data = {
       title: "Kubo Anuncios",
-      body: event.data ? event.data.text() : "Tienes una nueva notificación.",
+      body: event.data
+        ? event.data.text()
+        : "Tienes una nueva notificación.",
     };
   }
 
@@ -21,7 +23,9 @@ self.addEventListener("push", (event) => {
     },
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
@@ -30,15 +34,20 @@ self.addEventListener("notificationclick", (event) => {
   const url = event.notification.data?.url || "/chat";
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
-      for (const client of windows) {
-        if ("focus" in client) {
-          client.navigate(url);
-          return client.focus();
+    clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then((windows) => {
+        for (const client of windows) {
+          if ("focus" in client) {
+            client.navigate(url);
+            return client.focus();
+          }
         }
-      }
 
-      return clients.openWindow(url);
-    })
+        return clients.openWindow(url);
+      })
   );
 });
