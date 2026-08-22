@@ -1,87 +1,50 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-export async function POST(req: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    const userEmail = session?.user?.email?.toLowerCase().trim() ?? null;
+const MONETIZATION_START = "2026-10-01";
 
-    if (!userEmail) {
-      return NextResponse.json(
-        { ok: false, error: "Debes iniciar sesión." },
-        { status: 401 }
-      );
-    }
+function colombiaDateKey(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
 
-    const formData = await req.formData();
-    const id = String(formData.get("id") ?? "");
+export async function POST() {
+  const session = await getServerSession(authOptions);
 
-    if (!id) {
-      return NextResponse.json(
-        { ok: false, error: "ID no recibido" },
-        { status: 400 }
-      );
-    }
-
-    const listing = await prisma.listing.findUnique({
-      where: { id },
-    });
-
-    if (!listing) {
-      return NextResponse.json(
-        { ok: false, error: "Anuncio no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    const ownerEmail = listing.ownerEmail?.toLowerCase().trim();
-
-    if (!ownerEmail || ownerEmail !== userEmail) {
-      return NextResponse.json(
-        { ok: false, error: "No puedes promocionar este anuncio." },
-        { status: 403 }
-      );
-    }
-
-    // Only businesses can activate promotions
-    if (!listing.isBusiness) {
-      return NextResponse.json(
-        { ok: false, error: "Solo las empresas pueden activar Destacado/Premium." },
-        { status: 403 }
-      );
-    }
-
-    if (listing.status !== "active") {
-      return NextResponse.json(
-        { ok: false, error: "Solo puedes promocionar anuncios activos." },
-        { status: 400 }
-      );
-    }
-
-    const now = new Date();
-
-    const premiumDays = 7;
-    const premiumUntil = new Date(
-      now.getTime() + premiumDays * 24 * 60 * 60 * 1000
-    );
-
-    await prisma.listing.update({
-      where: { id },
-      data: {
-        isPremium: true,
-        premiumUntil,
-      },
-    });
-
-    return NextResponse.redirect(new URL(`/listing/${id}`, req.url));
-  } catch (error: any) {
-    console.error("PROMOTE ERROR:", error);
-
+  if (!session?.user?.email) {
     return NextResponse.json(
-      { ok: false, error: error?.message ?? "Error promocionando anuncio" },
-      { status: 500 }
+      {
+        ok: false,
+        error: "Debes iniciar sesión.",
+      },
+      { status: 401 }
     );
   }
+
+  const today = colombiaDateKey();
+
+  if (today < MONETIZATION_START) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Las promociones de pago todavía no están activas. Durante esta etapa Kubo está en periodo de lanzamiento.",
+      },
+      { status: 403 }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      ok: false,
+      error:
+        "El sistema de promociones de pago todavía no ha sido habilitado.",
+    },
+    { status: 503 }
+  );
 }

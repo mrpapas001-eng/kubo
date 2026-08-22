@@ -15,18 +15,21 @@ export async function GET(req: Request) {
       );
     }
 
-    const { searchParams } = new URL(req.url);
-    const conversationId = String(searchParams.get("conversationId") ?? "").trim();
+    const url = new URL(req.url);
+    const conversationId =
+      url.searchParams.get("conversationId")?.trim() ?? "";
 
     if (!conversationId) {
       return NextResponse.json(
-        { ok: false, error: "Falta el chat." },
+        { ok: false, error: "Falta la conversación." },
         { status: 400 }
       );
     }
 
     const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
+      where: {
+        id: conversationId,
+      },
     });
 
     if (!conversation) {
@@ -36,9 +39,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const buyerEmail = conversation.buyerEmail?.toLowerCase().trim();
-    const sellerEmail = conversation.sellerEmail?.toLowerCase().trim();
-    const isParticipant = buyerEmail === userEmail || sellerEmail === userEmail;
+    const buyerEmail = conversation.buyerEmail.toLowerCase().trim();
+    const sellerEmail = conversation.sellerEmail.toLowerCase().trim();
+
+    const isParticipant =
+      buyerEmail === userEmail || sellerEmail === userEmail;
 
     if (!isParticipant) {
       return NextResponse.json(
@@ -47,21 +52,36 @@ export async function GET(req: Request) {
       );
     }
 
-    // Mientras el usuario tiene esta conversación abierta, los mensajes que
-    // recibe se consideran leídos. Esto permite que el remitente vea el cambio
-    // de ✓✓ gris a ✓✓ azul en su siguiente actualización del chat.
+    // Cuando el usuario tiene abierta la conversación,
+    // marcamos como leídos los mensajes que recibió.
     await prisma.message.updateMany({
       where: {
         conversationId,
-        senderEmail: { not: userEmail },
+        senderEmail: {
+          not: userEmail,
+        },
         readAt: null,
       },
-      data: { readAt: new Date() },
+      data: {
+        readAt: new Date(),
+      },
     });
 
     const messages = await prisma.message.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: "asc" },
+      where: {
+        conversationId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        id: true,
+        body: true,
+        senderEmail: true,
+        senderName: true,
+        createdAt: true,
+        readAt: true,
+      },
     });
 
     return NextResponse.json({
@@ -69,8 +89,13 @@ export async function GET(req: Request) {
       messages,
     });
   } catch (error: any) {
+    console.error("CHAT MESSAGES GET ERROR:", error);
+
     return NextResponse.json(
-      { ok: false, error: error?.message ?? "Error cargando mensajes." },
+      {
+        ok: false,
+        error: error?.message ?? "Error cargando mensajes.",
+      },
       { status: 500 }
     );
   }

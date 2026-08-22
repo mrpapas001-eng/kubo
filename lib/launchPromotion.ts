@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 
-export const FEATURED_DAILY_LIMIT = 20;
-export const PREMIUM_DAILY_LIMIT = 5;
+export const FEATURED_DAILY_LIMIT = 5;
+export const PREMIUM_DAILY_LIMIT = 2;
 
 // Lanzamiento: 15 días calendario en Colombia. Se puede cambiar sin tocar código.
 const CAMPAIGN_START = process.env.KUBO_LAUNCH_PROMO_START ?? "2026-08-20";

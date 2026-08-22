@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { sendPushToUser } from "@/lib/push";
 
 export async function POST(req: Request) {
   try {
@@ -38,9 +39,11 @@ export async function POST(req: Request) {
       );
     }
 
+    const buyerEmail = conversation.buyerEmail.toLowerCase().trim();
+    const sellerEmail = conversation.sellerEmail.toLowerCase().trim();
+
     const isParticipant =
-      conversation.buyerEmail === senderEmail ||
-      conversation.sellerEmail === senderEmail;
+      buyerEmail === senderEmail || sellerEmail === senderEmail;
 
     if (!isParticipant) {
       return NextResponse.json(
@@ -58,6 +61,28 @@ export async function POST(req: Request) {
       },
     });
 
+    const recipientEmail =
+      senderEmail === buyerEmail ? sellerEmail : buyerEmail;
+
+    try {
+      console.log("CHAT PUSH DEBUG:", {
+        senderEmail,
+        recipientEmail,
+        conversationId,
+      });
+
+      await sendPushToUser(recipientEmail, {
+        title: "Nuevo mensaje en Kubo",
+        body: `${senderName?.trim() || "Alguien"}: ${message}`,
+        url: `/chat/${conversation.id}`,
+      });
+    } catch (pushError) {
+      console.error(
+        "No se pudo enviar la notificación push:",
+        pushError
+      );
+    }
+
     return NextResponse.json({
       ok: true,
       message: savedMessage,
@@ -66,7 +91,10 @@ export async function POST(req: Request) {
     console.error("CHAT MESSAGE ERROR:", error);
 
     return NextResponse.json(
-      { ok: false, error: error?.message ?? "Error enviando mensaje." },
+      {
+        ok: false,
+        error: error?.message ?? "Error enviando mensaje.",
+      },
       { status: 500 }
     );
   }

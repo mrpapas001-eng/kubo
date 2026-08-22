@@ -483,6 +483,11 @@ const [businessWhatsapp, setBusinessWhatsapp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [publishedListingId, setPublishedListingId] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
+const [promotionLoading, setPromotionLoading] = useState<
+  "featured" | "premium" | null
+>(null);
+
+const [promotionError, setPromotionError] = useState<string | null>(null);
 
   // cargar borrador una sola vez al montar
   useEffect(() => {
@@ -940,6 +945,48 @@ if (!res.ok || !data?.ok) {
       setLoading(false);
     }
   }
+async function activatePromotion(kind: "featured" | "premium") {
+  if (!publishedListingId) return;
+
+  try {
+    setPromotionLoading(kind);
+    setPromotionError(null);
+
+    const res = await fetch(
+      `/api/promote/${kind}?listingId=${publishedListingId}`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (res.redirected) {
+      router.push(`/listing/${publishedListingId}`);
+      return;
+    }
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(
+        data?.error ||
+          `No se pudo activar ${
+            kind === "featured" ? "Destacado" : "Premium"
+          }.`
+      );
+    }
+
+    router.push(`/listing/${publishedListingId}`);
+  } catch (err: any) {
+    setPromotionError(
+      err?.message ||
+        `No se pudo activar ${
+          kind === "featured" ? "Destacado" : "Premium"
+        }.`
+    );
+  } finally {
+    setPromotionLoading(null);
+  }
+}
 
   if (status === "loading") {
     return (
@@ -1025,6 +1072,81 @@ if (!session) {
               </Link>
             </div>
           )}
+
+          {sellerType === "EMPRESA" ? (
+            <div className="mt-6 space-y-4">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">
+                  Dale más visibilidad a tu anuncio
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Durante el lanzamiento de Kubo, las promociones para empresas
+                  son gratuitas y tienen cupos diarios limitados.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => activatePromotion("featured")}
+                  disabled={promotionLoading !== null}
+                  className="rounded-2xl border border-[#0f3c8c]/20 bg-blue-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#0f3c8c]/40 hover:shadow-md disabled:opacity-60"
+                >
+                  <div className="text-xs font-black uppercase tracking-wide text-[#0f3c8c]">
+                    Destacado
+                  </div>
+
+                  <div className="mt-2 text-xl font-black text-slate-900">
+                    Gratis por 24 horas
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Tu anuncio obtiene más visibilidad y se diferencia
+                    visualmente del resto.
+                  </p>
+
+                  <div className="mt-4 text-sm font-black text-[#0f3c8c]">
+                    {promotionLoading === "featured"
+                      ? "Activando..."
+                      : "Activar Destacado"}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => activatePromotion("premium")}
+                  disabled={promotionLoading !== null}
+                  className="rounded-2xl border border-amber-300 bg-gradient-to-b from-amber-50 to-white p-5 text-left transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
+                >
+                  <div className="text-xs font-black uppercase tracking-wide text-amber-700">
+                    Premium
+                  </div>
+
+                  <div className="mt-2 text-xl font-black text-slate-900">
+                    Gratis por 24 horas
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Máxima visibilidad durante el lanzamiento, con apariencia
+                    Premium y cupos diarios limitados.
+                  </p>
+
+                  <div className="mt-4 text-sm font-black text-amber-700">
+                    {promotionLoading === "premium"
+                      ? "Activando..."
+                      : "Activar Premium"}
+                  </div>
+                </button>
+              </div>
+
+              {promotionError ? (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">
+                  {promotionError}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <button
             type="button"

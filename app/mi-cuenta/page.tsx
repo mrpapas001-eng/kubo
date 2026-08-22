@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
+  HandHeart,
   Heart,
   Home,
   MessageCircle,
@@ -28,19 +29,26 @@ const accountLinks = [
   {
     href: "/chat",
     title: "Chats",
-    description: "Continua conversaciones con compradores y vendedores.",
+    description: "Continúa conversaciones con compradores y vendedores.",
     icon: MessageCircle,
+  },
+  {
+    href: "/ayuda/necesito",
+    title: "Mis solicitudes de ayuda",
+    description:
+      "Consulta tus solicitudes, su estado y el historial de Kubo Ayuda.",
+    icon: HandHeart,
   },
   {
     href: "/verificar-empresa",
     title: "Verificar empresa",
-    description: "Envia el RUT para pedir el sello de empresa verificada.",
+    description: "Envía el RUT para pedir el sello de empresa verificada.",
     icon: ShieldCheck,
   },
   {
     href: "/verificar-identidad",
     title: "Verificar identidad",
-    description: "Confirma tu identidad para generar mas confianza.",
+    description: "Confirma tu identidad para generar más confianza.",
     icon: UserRound,
   },
   {
@@ -85,6 +93,7 @@ export default async function MiCuentaPage() {
   const personalVerification = accountVerifications.find(
     (item) => item.type === "PARTICULAR"
   );
+
   const businessVerification = accountVerifications.find(
     (item) => item.type === "EMPRESA"
   );
@@ -114,9 +123,11 @@ export default async function MiCuentaPage() {
               <h1 className="text-3xl font-black text-slate-900">
                 Mi cuenta
               </h1>
+
               <p className="mt-2 text-lg font-bold text-slate-800">
                 {session.user.name ?? "Usuario"}
               </p>
+
               <p className="text-sm text-slate-500">
                 {session.user.email ?? ""}
               </p>
@@ -130,8 +141,10 @@ export default async function MiCuentaPage() {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
               <PlusCircle className="h-6 w-6" />
             </div>
+
             <div className="min-w-0">
               <div className="text-lg font-black">Publicar anuncio</div>
+
               <p className="mt-1 text-sm font-medium text-white/75">
                 Crea una nueva publicación en Kubo.
               </p>
@@ -142,6 +155,7 @@ export default async function MiCuentaPage() {
             <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="h-5 w-5 text-[#0f3c8c]" />
+
                 <div className="text-base font-black text-slate-900">
                   {verificationSummary.status === "VERIFIED"
                     ? "Tu cuenta ya está verificada."
@@ -150,10 +164,12 @@ export default async function MiCuentaPage() {
                       : "Tu última verificación fue rechazada. Puedes volver a enviarla."}
                 </div>
               </div>
+
               <p className="mt-2 text-sm text-slate-600">
                 {verificationSummary.type === "PARTICULAR"
                   ? "Verificación de usuario."
                   : "Verificación de empresa."}
+
                 {verificationSummary.status === "PENDING"
                   ? " Estamos revisando tu información."
                   : verificationSummary.status === "REJECTED"
@@ -171,10 +187,12 @@ export default async function MiCuentaPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white">
                 <ShieldCheck className="h-6 w-6" />
               </div>
+
               <div className="min-w-0">
                 <div className="text-lg font-black">
                   Verifica tu empresa y obtén el sello Empresa verificada.
                 </div>
+
                 <p className="mt-1 text-sm font-medium text-[#0f3c8c]/80">
                   Envía tu RUT para que Kubo lo revise.
                 </p>
@@ -185,8 +203,10 @@ export default async function MiCuentaPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white">
                 <ShieldCheck className="h-6 w-6" />
               </div>
+
               <div className="min-w-0">
                 <div className="text-lg font-black">Empresa verificada</div>
+
                 <p className="mt-1 text-sm font-medium text-emerald-700">
                   RUT revisado por Kubo.
                 </p>
@@ -196,7 +216,10 @@ export default async function MiCuentaPage() {
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             {accountLinks.map((item) => {
-              if (item.href === "/verificar-empresa" && hasVerifiedBusiness) {
+              if (
+                item.href === "/verificar-empresa" &&
+                hasVerifiedBusiness
+              ) {
                 return null;
               }
 
@@ -206,15 +229,17 @@ export default async function MiCuentaPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-5 hover:bg-slate-100"
+                  className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-5 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-sm"
                 >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0f3c8c] shadow-sm">
                     <Icon className="h-5 w-5" />
                   </div>
+
                   <div className="min-w-0">
                     <div className="text-lg font-black text-slate-900">
                       {item.title}
                     </div>
+
                     <p className="mt-1 text-sm text-slate-500">
                       {item.description}
                     </p>
@@ -227,10 +252,12 @@ export default async function MiCuentaPage() {
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
             <div className="flex items-center gap-3">
               <UserRound className="h-5 w-5 text-[#0f3c8c]" />
+
               <div>
                 <div className="text-sm font-black text-slate-900">
                   Datos de cuenta
                 </div>
+
                 <div className="mt-0.5 text-sm text-slate-500">
                   Tus datos vienen de tu inicio de sesión.
                 </div>

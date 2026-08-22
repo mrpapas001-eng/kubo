@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import PushNotificationsInit from "@/components/PushNotificationsInit";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={nunito.className}>
         <AuthProvider>
+          <PushNotificationsInit />
           {children}
           <MobileBottomNav />
         </AuthProvider>

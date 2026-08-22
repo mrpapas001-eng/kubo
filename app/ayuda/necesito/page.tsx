@@ -346,8 +346,7 @@ export default function NecesitoAyudaPage() {
                   <button
                     onClick={() => handleAction(activeRequest.id, "complete")}
                     disabled={loading}
-                    className="flex-1 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-black text-white hover:bg-emerald-700 disabled:opacity-60"
-                  >
+className="flex-1 rounded-xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white hover:bg-[#0c2f6d] disabled:opacity-60"                  >
                     Ya recibí la ayuda
                   </button>
                 )}

@@ -5,6 +5,7 @@ import ListingCard from "@/components/ListingCard";
 type HomeListing = {
   id?: string;
   isPremium?: boolean;
+  premiumUntil?: string | Date | null;
 };
 
 type Props = {
@@ -12,9 +13,16 @@ type Props = {
 };
 
 export default function HomePremiumShowcase({ listings }: Props) {
-  // TEMPORAL para probar el diseño.
-  // Al terminar cambiaremos esto para mostrar solo isPremium.
-  const premium = (listings ?? []).slice(0, 3);
+  const now = new Date();
+
+  const premium = (listings ?? [])
+    .filter((item) => {
+      if (item?.isPremium !== true) return false;
+      if (!item?.premiumUntil) return false;
+
+      return new Date(item.premiumUntil) > now;
+    })
+    .slice(0, 3);
 
   if (premium.length === 0) return null;
 
@@ -62,4 +70,3 @@ export default function HomePremiumShowcase({ listings }: Props) {
     </section>
   );
 }
-
