@@ -26,18 +26,19 @@ export default function PushNotificationsInit() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (!session?.user?.email) return;
-    if (typeof window === "undefined") return;
+useEffect(() => {
+  if (!session?.user?.email) return;
+  if (typeof window === "undefined") return;
 
-    if (!("serviceWorker" in navigator)) return;
-    if (!("PushManager" in window)) return;
-    if (!("Notification" in window)) return;
+  if (!("Notification" in window)) {
+    setShowPrompt(true);
+    return;
+  }
 
-    if (Notification.permission === "default") {
-      setShowPrompt(true);
-    }
-  }, [session?.user?.email]);
+  if (Notification.permission !== "granted") {
+    setShowPrompt(true);
+  }
+}, [session?.user?.email]);
 
   async function activateNotifications() {
     try {
