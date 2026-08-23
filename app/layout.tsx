@@ -13,10 +13,10 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/brand/kubo-symbol.png",
-  },
+  icon: "/icons/kubo-icon-192.png",
+  shortcut: "/icons/kubo-icon-192.png",
+  apple: "/icons/kubo-icon-512.png",
+},
 };
 
 export const viewport: Viewport = {
