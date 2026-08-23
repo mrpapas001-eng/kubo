@@ -129,6 +129,19 @@ export async function PUT(req: Request, context: RouteContext) {
 
     const rawPrice = String(body?.price ?? "").replace(/\D/g, "");
     const price = rawPrice ? Number(rawPrice) : null;
+    const imageUrls = Array.isArray(body?.imageUrls)
+  ? body.imageUrls
+      .map((url: unknown) => String(url ?? "").trim())
+      .filter(Boolean)
+      .slice(0, 10)
+  : null;
+
+if (imageUrls && imageUrls.length === 0) {
+  return NextResponse.json(
+    { ok: false, error: "El anuncio debe tener al menos una imagen." },
+    { status: 400 }
+  );
+}
 
     if (!title) {
       return NextResponse.json(
@@ -151,15 +164,32 @@ export async function PUT(req: Request, context: RouteContext) {
       );
     }
 
-    const updated = await prisma.listing.update({
-      where: { id: cleanId },
-      data: {
-        title,
-        description,
-        phone,
-        price,
-      },
-    });
+const existingDetails =
+  existing.details &&
+  typeof existing.details === "object" &&
+  !Array.isArray(existing.details)
+    ? (existing.details as Record<string, unknown>)
+    : {};
+
+const updated = await prisma.listing.update({
+  where: { id: cleanId },
+  data: {
+    title,
+    description,
+    phone,
+    price,
+
+    ...(imageUrls
+      ? {
+          imageUrl: imageUrls[0],
+          details: {
+            ...existingDetails,
+            images: imageUrls,
+          },
+        }
+      : {}),
+  },
+});
 
     return NextResponse.json({
       ok: true,

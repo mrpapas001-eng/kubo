@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+
+const MAX_IMAGES = 10;
+
+type NewImage = {
+  file: File;
+  preview: string;
+};
 
 export default function EditListingPage() {
   const router = useRouter();
@@ -11,13 +18,34 @@ export default function EditListingPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [phone, setPhone] = useState("");
-  const [isDeleted, setIsDeleted] = useState(false);
+
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<NewImage[]>([]);
+
+  const totalImages = existingImages.length + newImages.length;
+
+  const allImages = useMemo(
+    () => [
+      ...existingImages.map((url) => ({
+        type: "existing" as const,
+        url,
+      })),
+      ...newImages.map((item, index) => ({
+        type: "new" as const,
+        url: item.preview,
+        index,
+      })),
+    ],
+    [existingImages, newImages]
+  );
 
   useEffect(() => {
     if (!id) {
@@ -27,7 +55,7 @@ export default function EditListingPage() {
 
     async function load() {
       setLoading(true);
-      setError(null);
+      setLoadError(null);
 
       try {
         const res = await fetch(`/api/listings/${id}`, {
@@ -37,15 +65,14 @@ export default function EditListingPage() {
         const data = await res.json();
 
         if (!res.ok || !data?.ok || !data?.listing) {
-          setError(data?.error ?? "No pudimos cargar este anuncio.");
+          setLoadError(data?.error ?? "No pudimos cargar este anuncio.");
           return;
         }
 
         const l = data.listing;
 
         if (l.status === "deleted") {
-          setIsDeleted(true);
-          setError("Este anuncio fue eliminado y ya no se puede editar.");
+          setLoadError("Este anuncio fue eliminado y ya no se puede editar.");
           return;
         }
 
@@ -55,8 +82,30 @@ export default function EditListingPage() {
           l.price !== null && l.price !== undefined ? String(l.price) : ""
         );
         setPhone(String(l.phone ?? ""));
+
+        const detailImages =
+          Array.isArray(l?.details?.images)
+            ? l.details.images
+                .map((url: unknown) => String(url ?? "").trim())
+                .filter(Boolean)
+            : [];
+
+        const mainImage = String(l.imageUrl ?? "").trim();
+
+        const loadedImages =
+          detailImages.length > 0
+            ? detailImages
+            : mainImage
+              ? [mainImage]
+              : [];
+
+        const uniqueImages: string[] = Array.from(
+  new Set<string>(loadedImages)
+).slice(0, MAX_IMAGES);
+
+setExistingImages(uniqueImages);
       } catch {
-        setError("Error al cargar el anuncio. Intenta nuevamente.");
+        setLoadError("Error al cargar el anuncio. Intenta nuevamente.");
       } finally {
         setLoading(false);
       }
@@ -65,12 +114,162 @@ export default function EditListingPage() {
     load();
   }, [id, router]);
 
+  useEffect(() => {
+    return () => {
+      newImages.forEach((item) => URL.revokeObjectURL(item.preview));
+    };
+  }, [newImages]);
+
+  function handleAddImages(e: React.ChangeEvent<HTMLInputElement>) {
+    setFormError(null);
+
+    const files = Array.from(e.target.files ?? []);
+
+    if (files.length === 0) return;
+
+    const available = MAX_IMAGES - totalImages;
+
+    if (available <= 0) {
+      setFormError(`Solo puedes tener hasta ${MAX_IMAGES} imágenes.`);
+      e.target.value = "";
+      return;
+    }
+
+    const selected = files.slice(0, available);
+
+    const invalidFile = selected.find(
+      (file) =>
+        !["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+          file.type
+        )
+    );
+
+    if (invalidFile) {
+      setFormError("Las imágenes deben ser JPG, PNG o WEBP.");
+      e.target.value = "";
+      return;
+    }
+
+    const oversizedFile = selected.find(
+      (file) => file.size > 8 * 1024 * 1024
+    );
+
+    if (oversizedFile) {
+      setFormError("Cada imagen puede pesar como máximo 8 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    const prepared = selected.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setNewImages((current) => [...current, ...prepared]);
+
+    if (files.length > available) {
+      setFormError(
+        `Solo se añadieron ${available} imágenes porque el máximo es ${MAX_IMAGES}.`
+      );
+    }
+
+    e.target.value = "";
+  }
+
+  function removeExistingImage(url: string) {
+    setFormError(null);
+    setExistingImages((current) =>
+      current.filter((image) => image !== url)
+    );
+  }
+
+  function removeNewImage(index: number) {
+    setFormError(null);
+
+    setNewImages((current) => {
+      const target = current[index];
+
+      if (target?.preview) {
+        URL.revokeObjectURL(target.preview);
+      }
+
+      return current.filter((_, i) => i !== index);
+    });
+  }
+
+  function makeExistingImagePrimary(url: string) {
+    setFormError(null);
+
+    setExistingImages((current) => [
+      url,
+      ...current.filter((image) => image !== url),
+    ]);
+  }
+
+  function makeNewImagePrimary(index: number) {
+    setFormError(null);
+
+    const selected = newImages[index];
+    if (!selected) return;
+
+    setNewImages((current) =>
+      current.filter((_, i) => i !== index)
+    );
+
+    setExistingImages((current) => current);
+
+    setNewImages((current) => [selected, ...current]);
+  }
+
+  async function uploadNewImages() {
+    if (newImages.length === 0) return [];
+
+    const formData = new FormData();
+
+    newImages.forEach((item) => {
+      formData.append("files", item.file);
+    });
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok || !Array.isArray(data?.urls)) {
+      throw new Error(data?.error ?? "No se pudieron subir las imágenes.");
+    }
+
+    return data.urls
+      .map((url: unknown) => String(url ?? "").trim())
+      .filter(Boolean);
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+
     setSaving(true);
-    setError(null);
+    setFormError(null);
 
     try {
+      if (totalImages === 0) {
+        setFormError("El anuncio debe tener al menos una imagen.");
+        return;
+      }
+
+      const uploadedUrls = await uploadNewImages();
+
+      const finalImages = [
+        ...existingImages,
+        ...uploadedUrls,
+      ].slice(0, MAX_IMAGES);
+
+      if (finalImages.length === 0) {
+        setFormError("El anuncio debe tener al menos una imagen.");
+        return;
+      }
+
       const res = await fetch(`/api/listings/${id}`, {
         method: "PUT",
         headers: {
@@ -81,19 +280,23 @@ export default function EditListingPage() {
           description: description.trim(),
           price: price.trim(),
           phone: phone.replace(/\D/g, "").slice(0, 10),
+          imageUrls: finalImages,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data?.ok) {
-        setError(data?.error ?? "Error al guardar.");
+        setFormError(data?.error ?? "Error al guardar.");
         return;
       }
 
       router.push(`/listing/${id}`);
-    } catch {
-      setError("Error al guardar. Intenta de nuevo.");
+      router.refresh();
+    } catch (error: any) {
+      setFormError(
+        error?.message ?? "Error al guardar. Intenta de nuevo."
+      );
     } finally {
       setSaving(false);
     }
@@ -109,7 +312,7 @@ export default function EditListingPage() {
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] px-6 pb-28 pt-10 md:py-10">
         <div className="mx-auto max-w-[800px] rounded-3xl bg-white p-8 shadow">
@@ -118,7 +321,7 @@ export default function EditListingPage() {
           </h1>
 
           <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
-            {error}
+            {loadError}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -149,16 +352,22 @@ export default function EditListingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] px-6 pb-28 pt-10 md:py-10">
-      <div className="mx-auto max-w-[800px] rounded-3xl bg-white p-8 shadow">
-        <h1 className="text-2xl font-black text-slate-900">Editar anuncio</h1>
+    <div className="min-h-screen bg-[#F8F9FB] px-4 pb-28 pt-6 sm:px-6 md:py-10">
+      <div className="mx-auto max-w-[800px] rounded-3xl bg-white p-5 shadow sm:p-8">
+        <h1 className="text-2xl font-black text-slate-900">
+          Editar anuncio
+        </h1>
+
         <p className="mt-2 text-sm font-medium text-slate-500">
-          Actualiza los datos principales de tu publicacion.
+          Actualiza los datos y las fotografías de tu publicación.
         </p>
 
-        <form onSubmit={handleSave} className="mt-6 space-y-4">
+        <form onSubmit={handleSave} className="mt-6 space-y-5">
           <div>
-            <label className="text-sm font-bold text-slate-700">Título</label>
+            <label className="text-sm font-bold text-slate-700">
+              Título
+            </label>
+
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -171,6 +380,7 @@ export default function EditListingPage() {
             <label className="text-sm font-bold text-slate-700">
               Descripción
             </label>
+
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -180,10 +390,15 @@ export default function EditListingPage() {
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">Precio</label>
+            <label className="text-sm font-bold text-slate-700">
+              Precio
+            </label>
+
             <input
               value={price}
-              onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) =>
+                setPrice(e.target.value.replace(/\D/g, ""))
+              }
               className="mt-2 w-full rounded-xl border border-slate-200 p-3"
               placeholder="Precio"
               inputMode="numeric"
@@ -191,17 +406,154 @@ export default function EditListingPage() {
           </div>
 
           <div>
-            <label className="text-sm font-bold text-slate-700">Teléfono</label>
+            <label className="text-sm font-bold text-slate-700">
+              Teléfono
+            </label>
+
             <input
               value={phone}
               onChange={(e) =>
-                setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                setPhone(
+                  e.target.value.replace(/\D/g, "").slice(0, 10)
+                )
               }
               className="mt-2 w-full rounded-xl border border-slate-200 p-3"
               placeholder="Teléfono"
               inputMode="numeric"
             />
           </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-black text-slate-900">
+                  Imágenes
+                </h2>
+
+                <p className="mt-1 text-xs text-slate-500">
+                  Puedes añadir, eliminar o cambiar la foto principal.
+                </p>
+              </div>
+
+              <span className="text-xs font-bold text-slate-500">
+                {totalImages}/{MAX_IMAGES}
+              </span>
+            </div>
+
+            {allImages.length > 0 ? (
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {existingImages.map((url, index) => (
+                  <div
+                    key={`existing-${url}-${index}`}
+                    className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                  >
+                    <div className="aspect-square overflow-hidden bg-slate-100">
+                      <img
+                        src={url}
+                        alt={`Imagen ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+
+                    {index === 0 && (
+                      <div className="absolute left-2 top-2 rounded-full bg-[#0f3c8c] px-2 py-1 text-[10px] font-black text-white shadow">
+                        PRINCIPAL
+                      </div>
+                    )}
+
+                    <div className="space-y-1.5 p-2">
+                      {index !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            makeExistingImagePrimary(url)
+                          }
+                          className="w-full rounded-lg bg-slate-100 px-2 py-2 text-[11px] font-bold text-slate-700"
+                        >
+                          Hacer principal
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(url)}
+                        className="w-full rounded-lg bg-red-50 px-2 py-2 text-[11px] font-bold text-red-600"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {newImages.map((item, index) => (
+                  <div
+                    key={`new-${item.preview}`}
+                    className="relative overflow-hidden rounded-2xl border border-blue-200 bg-white"
+                  >
+                    <div className="aspect-square overflow-hidden bg-slate-100">
+                      <img
+                        src={item.preview}
+                        alt={`Nueva imagen ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <div className="absolute right-2 top-2 rounded-full bg-blue-600 px-2 py-1 text-[10px] font-black text-white shadow">
+                      NUEVA
+                    </div>
+
+                    <div className="space-y-1.5 p-2">
+                      <button
+                        type="button"
+                        onClick={() => makeNewImagePrimary(index)}
+                        className="w-full rounded-lg bg-slate-100 px-2 py-2 text-[11px] font-bold text-slate-700"
+                      >
+                        Hacer principal
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(index)}
+                        className="w-full rounded-lg bg-red-50 px-2 py-2 text-[11px] font-bold text-red-600"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm font-medium text-slate-500">
+                El anuncio no tiene imágenes seleccionadas.
+              </div>
+            )}
+
+            {totalImages < MAX_IMAGES && (
+              <div className="mt-4">
+                <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#0f3c8c] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0c2f6d]">
+                  Añadir fotos
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    multiple
+                    onChange={handleAddImages}
+                    className="hidden"
+                  />
+                </label>
+
+                <p className="mt-2 text-xs text-slate-500">
+                  JPG, PNG o WEBP. Máximo 8 MB por imagen y 10 fotos
+                  por anuncio.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {formError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+              {formError}
+            </div>
+          )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
@@ -214,8 +566,9 @@ export default function EditListingPage() {
 
             <button
               type="button"
+              disabled={saving}
               onClick={() => router.push("/mis-anuncios")}
-              className="h-12 rounded-xl border border-slate-200 bg-white px-6 font-bold text-slate-700"
+              className="h-12 rounded-xl border border-slate-200 bg-white px-6 font-bold text-slate-700 disabled:opacity-60"
             >
               Cancelar
             </button>

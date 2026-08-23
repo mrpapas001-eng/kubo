@@ -7,6 +7,7 @@ import BackButton from "@/components/BackButton";
 import ListingCard from "@/components/ListingCard";
 import DeleteListingButton from "@/components/DeleteListingButton";
 import ReactivateListingButton from "@/components/ReactivateListingButton";
+import HideListingButton from "@/components/HideListingButton";
 
 export default async function MisAnunciosPage() {
   const session = await getServerSession(authOptions);
@@ -219,16 +220,19 @@ export default async function MisAnunciosPage() {
                         </div>
                       </div>
 
-                      {/* Desktop large message preserved */}
-                      <div className="mt-3 hidden md:block rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-                        Este anuncio fue eliminado y ya no tiene acciones disponibles.
-                      </div>
+                     {/* Acciones para anuncio eliminado en escritorio */}
+<div className="mt-3 hidden md:block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <p className="mb-3 text-sm font-medium text-slate-600">
+    Este anuncio está eliminado y no aparece públicamente.
+  </p>
+
+  <ReactivateListingButton listingId={item.id} />
+</div> 
                     </>
                   ) : (
                     <div
                       className={`mt-2 md:mt-3 grid gap-2 ${
-                        isHidden ? "grid-cols-1" : "grid-cols-[1fr_auto_auto]"
-                      }`}
+isHidden ? "grid-cols-1" : "grid-cols-[1fr_auto_auto_auto]"                      }`}
                     >
                       {!isHidden ? (
                         <>
@@ -249,6 +253,7 @@ export default async function MisAnunciosPage() {
                           >
                             Editar
                           </Link>
+                          <HideListingButton listingId={item.id} />
                         </>
                       ) : null}
 

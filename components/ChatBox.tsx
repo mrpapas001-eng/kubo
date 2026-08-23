@@ -35,10 +35,18 @@ export default function ChatBox({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const messagesRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesRef.current;
+
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "auto",
+    });
   }, [messages.length]);
 
   useEffect(() => {
@@ -48,18 +56,26 @@ export default function ChatBox({
       try {
         const res = await fetch(
           `/api/chat/messages?conversationId=${conversationId}`,
-          { cache: "no-store" }
+          {
+            cache: "no-store",
+          }
         );
 
         const data = await res.json();
 
-        if (!alive || !res.ok || !data?.ok || !Array.isArray(data.messages)) {
+        if (
+          !alive ||
+          !res.ok ||
+          !data?.ok ||
+          !Array.isArray(data.messages)
+        ) {
           return;
         }
 
         setMessages(data.messages);
       } catch {
-        // Silencioso para no molestar al usuario si falla una petición puntual
+        // Silencioso para no molestar al usuario
+        // si falla una petición puntual.
       }
     }
 
@@ -77,6 +93,7 @@ export default function ChatBox({
     e.preventDefault();
 
     const clean = text.trim();
+
     if (!clean) return;
 
     setLoading(true);
@@ -84,8 +101,13 @@ export default function ChatBox({
     try {
       const res = await fetch("/api/chat/message", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, message: clean }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversationId,
+          message: clean,
+        }),
       });
 
       const data = await res.json();
@@ -106,7 +128,10 @@ export default function ChatBox({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden bg-[radial-gradient(circle_at_top_left,_rgba(79,70,229,0.10),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(15,60,140,0.08),_transparent_40%),linear-gradient(to_bottom,#f8fafc,#eef2ff)] p-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div
+        ref={messagesRef}
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden bg-[radial-gradient(circle_at_top_left,_rgba(79,70,229,0.10),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(15,60,140,0.08),_transparent_40%),linear-gradient(to_bottom,#f8fafc,#eef2ff)] p-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      >
         <div className="mx-auto w-fit rounded-full bg-white/90 px-4 py-2 text-xs font-black text-slate-500 shadow-sm">
           Hoy
         </div>
@@ -115,12 +140,15 @@ export default function ChatBox({
           const isMe =
             currentUserEmail &&
             msg.senderEmail?.toLowerCase().trim() === currentUserEmail;
+
           const isRead = isMe && Boolean(msg.readAt);
 
           return (
             <div
               key={msg.id}
-              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+              className={`flex ${
+                isMe ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-[72%] rounded-[24px] px-5 py-3.5 text-[15px] leading-relaxed shadow-[0_10px_26px_rgba(15,23,42,0.08)] backdrop-blur-sm ${
@@ -136,12 +164,21 @@ export default function ChatBox({
                     isMe ? "text-green-700" : "text-slate-400"
                   }`}
                 >
-                  <span className="opacity-70">{formatTime(msg.createdAt)}</span>
+                  <span className="opacity-70">
+                    {formatTime(msg.createdAt)}
+                  </span>
+
                   {isMe ? (
                     <span
-                      className={isRead ? "font-black text-blue-500" : "font-black text-slate-500"}
+                      className={
+                        isRead
+                          ? "font-black text-blue-500"
+                          : "font-black text-slate-500"
+                      }
                       title={isRead ? "Leído" : "Enviado"}
-                      aria-label={isRead ? "Mensaje leído" : "Mensaje enviado"}
+                      aria-label={
+                        isRead ? "Mensaje leído" : "Mensaje enviado"
+                      }
                     >
                       ✓✓
                     </span>
@@ -151,8 +188,6 @@ export default function ChatBox({
             </div>
           );
         })}
-
-        <div ref={bottomRef} />
       </div>
 
       <form
