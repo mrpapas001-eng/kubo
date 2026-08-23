@@ -1,26 +1,43 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { Building2, FileText, ShieldCheck, UserRound } from "lucide-react";
+import {
+  Building2,
+  FileText,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
 import AdminAccountVerificationActions from "@/components/AdminAccountVerificationActions";
 
-const WHATSAPP_VERIFICATION_MESSAGE =
-  "Hola, somos Kubo Anuncios. Recibimos una solicitud para verificar tu cuenta. Por favor responde a este mensaje para confirmar que este número te pertenece.";
+const WHATSAPP_PARTICULAR_MESSAGE =
+  "Hola, somos Kubo Anuncios. Recibimos tu solicitud de verificación. Para continuar, por favor responde a este mensaje confirmando que este número de WhatsApp te pertenece. Gracias.";
 
-function getWhatsAppHref(value: string | null) {
+const WHATSAPP_BUSINESS_MESSAGE =
+  "Hola, somos Kubo Anuncios. Recibimos tu solicitud para verificar tu empresa en Kubo. Para continuar con la verificación, por favor responde a este mensaje confirmando que este número de WhatsApp pertenece a la empresa. Gracias.";
+
+function getWhatsAppHref(
+  value: string | null,
+  type: "PARTICULAR" | "EMPRESA"
+) {
   const digits = String(value ?? "").replace(/\D/g, "");
   const normalized = digits.startsWith("0") ? digits.slice(1) : digits;
+
   const number = /^3\d{9}$/.test(normalized)
     ? `57${normalized}`
     : /^57\d{10}$/.test(normalized)
       ? normalized
       : normalized;
 
+  const message =
+    type === "EMPRESA"
+      ? WHATSAPP_BUSINESS_MESSAGE
+      : WHATSAPP_PARTICULAR_MESSAGE;
+
   return number
-    ? `https://wa.me/${number}?text=${encodeURIComponent(WHATSAPP_VERIFICATION_MESSAGE)}`
+    ? `https://wa.me/${number}?text=${encodeURIComponent(message)}`
     : null;
 }
 
@@ -45,6 +62,7 @@ export default async function AdminAccountVerificationsPage() {
             <h1 className="text-3xl font-black text-slate-900 md:text-4xl">
               Verificaciones pendientes
             </h1>
+
             <p className="mt-2 text-sm font-medium text-slate-500">
               Revisa las solicitudes de verificación de cuenta pendientes.
             </p>
@@ -62,6 +80,7 @@ export default async function AdminAccountVerificationsPage() {
           <div className="text-xs font-black uppercase text-yellow-700">
             Pendientes
           </div>
+
           <div className="mt-2 text-2xl font-black text-yellow-800">
             {requests.length}
           </div>
@@ -71,7 +90,11 @@ export default async function AdminAccountVerificationsPage() {
           {requests.length ? (
             requests.map((item) => {
               const isBusiness = item.type === "EMPRESA";
-              const whatsappHref = getWhatsAppHref(item.whatsappNumber);
+
+              const whatsappHref = getWhatsAppHref(
+                item.whatsappNumber,
+                item.type
+              );
 
               return (
                 <div
@@ -87,8 +110,10 @@ export default async function AdminAccountVerificationsPage() {
                           ) : (
                             <UserRound className="h-3.5 w-3.5" />
                           )}
+
                           {isBusiness ? "Empresa" : "Particular"}
                         </span>
+
                         <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-black uppercase text-yellow-700">
                           {item.status}
                         </span>
@@ -97,11 +122,14 @@ export default async function AdminAccountVerificationsPage() {
                       <p className="mt-3 text-lg font-black text-slate-900">
                         {item.email}
                       </p>
+
                       <p className="mt-1 text-sm font-medium text-slate-600">
                         WhatsApp: {item.whatsappNumber || "No informado"}
                       </p>
+
                       <p className="mt-1 text-sm font-medium text-slate-500">
-                        Solicitud: {item.submittedAt.toLocaleString("es-CO")}
+                        Solicitud:{" "}
+                        {item.submittedAt.toLocaleString("es-CO")}
                       </p>
                     </div>
 
@@ -116,6 +144,7 @@ export default async function AdminAccountVerificationsPage() {
                           Verificar por WhatsApp
                         </a>
                       ) : null}
+
                       {isBusiness && item.rutUrl ? (
                         <a
                           href={`/api/admin/verification-document?type=account-business&requestId=${item.id}`}
@@ -129,9 +158,11 @@ export default async function AdminAccountVerificationsPage() {
                       ) : null}
 
                       <AdminAccountVerificationActions
-                        requestId={item.id}
-                        status={item.status}
-                      />
+  requestId={item.id}
+  status={item.status}
+  whatsappNumber={item.whatsappNumber}
+  accountType={item.type}
+/>
                     </div>
                   </div>
                 </div>
@@ -140,6 +171,7 @@ export default async function AdminAccountVerificationsPage() {
           ) : (
             <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
               <ShieldCheck className="mx-auto h-8 w-8 text-emerald-600" />
+
               <div className="mt-3 text-xl font-black text-slate-900">
                 No hay verificaciones pendientes
               </div>
