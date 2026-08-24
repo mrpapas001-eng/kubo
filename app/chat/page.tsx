@@ -25,7 +25,7 @@ export default async function ChatListPage() {
     );
   }
 
-  const user = session.user;
+  const user = session?.user;
 
   const conversations = await prisma.conversation.findMany({
     where: {
