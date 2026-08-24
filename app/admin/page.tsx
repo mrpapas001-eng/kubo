@@ -16,6 +16,7 @@ import {
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { isAdminEmail } from "@/lib/admin";
 
 function StatCard({
   label,
@@ -67,18 +68,22 @@ function AdminLink({
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e8f0ff] text-[#0f3c8c]">
         <Icon className="h-6 w-6" />
       </div>
+
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-black text-slate-900">{title}</h2>
+
           {badge !== undefined ? (
             <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-black text-yellow-800">
               {badge}
             </span>
           ) : null}
         </div>
+
         <p className="mt-1 text-sm font-medium leading-relaxed text-slate-500">
           {description}
         </p>
+
         {actionLabel ? (
           <div className="mt-4 text-sm font-black text-[#0f3c8c]">
             {actionLabel} →
@@ -93,7 +98,7 @@ export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
 
-  if (email !== "mr.papas001@gmail.com") {
+  if (!isAdminEmail(email)) {
     redirect("/");
   }
 
@@ -116,15 +121,31 @@ export default async function AdminDashboardPage() {
     prisma.listing.count({ where: { status: "active" } }),
     prisma.listing.count({ where: { status: "hidden" } }),
     prisma.listing.count({ where: { status: "deleted" } }),
-    prisma.listing.count({ where: { isPremium: true, status: "active" } }),
-    prisma.listing.count({ where: { isFeatured: true, status: "active" } }),
-    prisma.listingReport.count({ where: { status: "pending" } }),
-    prisma.identityVerificationRequest.count({ where: { status: "pending" } }),
-    prisma.businessVerificationRequest.count({ where: { status: "pending" } }),
-    prisma.accountVerification.count({ where: { status: "PENDING" } }),
-    prisma.aidRequest.count({ where: { status: "PENDING" } }),
+    prisma.listing.count({
+      where: { isPremium: true, status: "active" },
+    }),
+    prisma.listing.count({
+      where: { isFeatured: true, status: "active" },
+    }),
+    prisma.listingReport.count({
+      where: { status: "pending" },
+    }),
+    prisma.identityVerificationRequest.count({
+      where: { status: "pending" },
+    }),
+    prisma.businessVerificationRequest.count({
+      where: { status: "pending" },
+    }),
+    prisma.accountVerification.count({
+      where: { status: "PENDING" },
+    }),
+    prisma.aidRequest.count({
+      where: { status: "PENDING" },
+    }),
     prisma.conversation.count(),
-    prisma.listing.aggregate({ _sum: { views: true } }),
+    prisma.listing.aggregate({
+      _sum: { views: true },
+    }),
   ]);
 
   const pendingTotal =
@@ -133,6 +154,7 @@ export default async function AdminDashboardPage() {
     pendingBusiness +
     pendingAccountVerifications +
     pendingAidRequests;
+
   const views = totalViews._sum.views ?? 0;
 
   return (
@@ -143,9 +165,11 @@ export default async function AdminDashboardPage() {
             <p className="text-xs font-black uppercase tracking-wide text-[#0f3c8c]">
               Kubo admin
             </p>
+
             <h1 className="mt-2 text-3xl font-black text-slate-900 md:text-4xl">
               Panel de control
             </h1>
+
             <p className="mt-2 text-sm font-medium text-slate-500">
               Gestiona reportes, verificaciones y estado general del marketplace.
             </p>
@@ -163,13 +187,16 @@ export default async function AdminDashboardPage() {
           <div className="mb-6 rounded-3xl border border-yellow-200 bg-yellow-50 p-5">
             <div className="flex items-start gap-3">
               <FileWarning className="mt-0.5 h-6 w-6 shrink-0 text-yellow-700" />
+
               <div>
                 <div className="text-lg font-black text-yellow-900">
-                  Hay {pendingTotal} tarea{pendingTotal === 1 ? "" : "s"} pendiente
+                  Hay {pendingTotal} tarea
+                  {pendingTotal === 1 ? "" : "s"} pendiente
                 </div>
+
                 <p className="mt-1 text-sm font-medium text-yellow-800">
-                  Revisa reportes y solicitudes de verificacion antes de publicar
-                  cambios importantes.
+                  Revisa reportes y solicitudes de verificación antes de
+                  publicar cambios importantes.
                 </p>
               </div>
             </div>
@@ -178,66 +205,97 @@ export default async function AdminDashboardPage() {
 
         <div className="grid gap-3 md:grid-cols-4">
           <StatCard label="Anuncios" value={totalListings} />
-          <StatCard label="Activos" value={activeListings} tone="emerald" />
-          <StatCard label="Ocultos" value={hiddenListings} tone="yellow" />
-          <StatCard label="Eliminados" value={deletedListings} tone="red" />
+          <StatCard
+            label="Activos"
+            value={activeListings}
+            tone="emerald"
+          />
+          <StatCard
+            label="Ocultos"
+            value={hiddenListings}
+            tone="yellow"
+          />
+          <StatCard
+            label="Eliminados"
+            value={deletedListings}
+            tone="red"
+          />
         </div>
 
         <div className="mt-3 grid gap-3 md:grid-cols-4">
-          <StatCard label="Premium" value={premiumListings} tone="yellow" />
-          <StatCard label="Destacados" value={featuredListings} tone="blue" />
-          <StatCard label="Chats" value={totalConversations} />
-          <StatCard label="Visitas" value={views.toLocaleString("es-CO")} />
+          <StatCard
+            label="Premium"
+            value={premiumListings}
+            tone="yellow"
+          />
+          <StatCard
+            label="Destacados"
+            value={featuredListings}
+            tone="blue"
+          />
+          <StatCard
+            label="Chats"
+            value={totalConversations}
+          />
+          <StatCard
+            label="Visitas"
+            value={views.toLocaleString("es-CO")}
+          />
         </div>
 
         <div className="mt-8">
           <div className="mb-3 flex items-center gap-3">
             <ShieldCheck className="h-5 w-5 text-[#0f3c8c]" />
+
             <h2 className="text-xl font-black text-slate-900">
               Verificaciones
             </h2>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-4">
-          <AdminLink
-            href="/admin/reports"
-            title="Reportes"
-            description="Revisa anuncios reportados, oculta, resuelve o elimina publicaciones."
-            icon={Flag}
-            badge={pendingReports}
-          />
-          <AdminLink
-            href="/admin/identity-verifications"
-            title="Identidades"
-            description="Revisa documentos y verifica usuarios."
-            icon={IdCard}
-            badge={pendingIdentity}
-            actionLabel="Gestionar identidades"
-          />
-          <AdminLink
-            href="/admin/business-verifications"
-            title="Empresas"
-            description="Revisa RUT y aprueba empresas."
-            icon={Building2}
-            badge={pendingBusiness}
-            actionLabel="Gestionar empresas"
-          />
-          <AdminLink
-            href="/admin/account-verifications"
-            title="Verificaciones pendientes"
-            description="Revisa solicitudes de cuenta por WhatsApp y RUT."
-            icon={ShieldCheck}
-            badge={pendingAccountVerifications}
-            actionLabel="Gestionar solicitudes"
-          />
-          <AdminLink
-            href="/admin/aid-requests"
-            title="Solicitudes de ayuda"
-            description="Revisa y aprueba solicitudes de Kubo Ayuda antes de publicarlas."
-            icon={Heart}
-            badge={pendingAidRequests}
-            actionLabel="Gestionar solicitudes"
-          />
+            <AdminLink
+              href="/admin/reports"
+              title="Reportes"
+              description="Revisa anuncios reportados, oculta, resuelve o elimina publicaciones."
+              icon={Flag}
+              badge={pendingReports}
+            />
+
+            <AdminLink
+              href="/admin/identity-verifications"
+              title="Identidades"
+              description="Revisa documentos y verifica usuarios."
+              icon={IdCard}
+              badge={pendingIdentity}
+              actionLabel="Gestionar identidades"
+            />
+
+            <AdminLink
+              href="/admin/business-verifications"
+              title="Empresas"
+              description="Revisa RUT y aprueba empresas."
+              icon={Building2}
+              badge={pendingBusiness}
+              actionLabel="Gestionar empresas"
+            />
+
+            <AdminLink
+              href="/admin/account-verifications"
+              title="Verificaciones pendientes"
+              description="Revisa solicitudes de cuenta por WhatsApp y RUT."
+              icon={ShieldCheck}
+              badge={pendingAccountVerifications}
+              actionLabel="Gestionar solicitudes"
+            />
+
+            <AdminLink
+              href="/admin/aid-requests"
+              title="Solicitudes de ayuda"
+              description="Revisa y aprueba solicitudes de Kubo Ayuda antes de publicarlas."
+              icon={Heart}
+              badge={pendingAidRequests}
+              actionLabel="Gestionar solicitudes"
+            />
           </div>
         </div>
 
@@ -245,16 +303,19 @@ export default async function AdminDashboardPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-6 w-6 text-[#0f3c8c]" />
+
               <h2 className="text-xl font-black text-slate-900">
                 Confianza
               </h2>
             </div>
+
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <StatCard
                 label="Identidades pendientes"
                 value={pendingIdentity}
                 tone={pendingIdentity ? "yellow" : "emerald"}
               />
+
               <StatCard
                 label="Empresas pendientes"
                 value={pendingBusiness}
@@ -266,13 +327,24 @@ export default async function AdminDashboardPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <Megaphone className="h-6 w-6 text-yellow-700" />
+
               <h2 className="text-xl font-black text-slate-900">
                 Visibilidad
               </h2>
             </div>
+
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <StatCard label="Premium activos" value={premiumListings} tone="yellow" />
-              <StatCard label="Destacados activos" value={featuredListings} tone="blue" />
+              <StatCard
+                label="Premium activos"
+                value={premiumListings}
+                tone="yellow"
+              />
+
+              <StatCard
+                label="Destacados activos"
+                value={featuredListings}
+                tone="blue"
+              />
             </div>
           </div>
         </div>
@@ -281,18 +353,20 @@ export default async function AdminDashboardPage() {
           <AdminLink
             href="/buscar"
             title="Buscar anuncios"
-            description="Vista publica para revisar como aparecen los anuncios activos."
+            description="Vista pública para revisar cómo aparecen los anuncios activos."
             icon={Eye}
           />
+
           <AdminLink
             href="/mis-anuncios"
             title="Mis anuncios"
-            description="Acceso rapido a tus propias publicaciones de prueba."
+            description="Acceso rápido a tus propias publicaciones de prueba."
             icon={Store}
           />
+
           <AdminLink
             href="/verificar-empresa"
-            title="Probar verificacion"
+            title="Probar verificación"
             description="Enviar una solicitud de empresa para comprobar el flujo."
             icon={BadgeCheck}
           />

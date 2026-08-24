@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Store,
   UserRound,
+  Settings,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 
@@ -68,6 +69,8 @@ export default async function MiCuentaPage() {
 
   const myEmail = session.user.email?.toLowerCase().trim() ?? null;
 
+  const isAdmin = myEmail === "contacto.kuboanuncios@gmail.com";
+
   const businessListings = myEmail
     ? await prisma.listing.findMany({
         where: {
@@ -79,6 +82,7 @@ export default async function MiCuentaPage() {
     : [];
 
   const hasBusiness = businessListings.length > 0;
+
   const hasVerifiedBusiness = businessListings.some(
     (item) => item.businessVerified
   );
@@ -98,7 +102,8 @@ export default async function MiCuentaPage() {
     (item) => item.type === "EMPRESA"
   );
 
-  const verificationSummary = personalVerification ?? businessVerification;
+  const verificationSummary =
+    personalVerification ?? businessVerification;
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-28 pt-6 md:px-6 md:py-10">
@@ -143,7 +148,9 @@ export default async function MiCuentaPage() {
             </div>
 
             <div className="min-w-0">
-              <div className="text-lg font-black">Publicar anuncio</div>
+              <div className="text-lg font-black">
+                Publicar anuncio
+              </div>
 
               <p className="mt-1 text-sm font-medium text-white/75">
                 Crea una nueva publicación en Kubo.
@@ -205,13 +212,36 @@ export default async function MiCuentaPage() {
               </div>
 
               <div className="min-w-0">
-                <div className="text-lg font-black">Empresa verificada</div>
+                <div className="text-lg font-black">
+                  Empresa verificada
+                </div>
 
                 <p className="mt-1 text-sm font-medium text-emerald-700">
                   RUT revisado por Kubo.
                 </p>
               </div>
             </div>
+          ) : null}
+
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="mt-5 flex items-center gap-4 rounded-3xl border border-blue-200 bg-blue-50 px-5 py-5 text-[#0f3c8c] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
+                <Settings className="h-6 w-6" />
+              </div>
+
+              <div className="min-w-0">
+                <div className="text-lg font-black">
+                  Panel admin
+                </div>
+
+                <p className="mt-1 text-sm font-medium text-[#0f3c8c]/80">
+                  Gestiona reportes, verificaciones y solicitudes de Kubo.
+                </p>
+              </div>
+            </Link>
           ) : null}
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
