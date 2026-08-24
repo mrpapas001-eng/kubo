@@ -24,13 +24,41 @@ function formatPrice(price: unknown, currency?: string) {
   return "Precio a convenir";
 }
 
+function formatLastSeen(lastSeen: Date | null) {
+  if (!lastSeen) {
+    return "Sin actividad reciente";
+  }
+
+  const diffMs = Date.now() - lastSeen.getTime();
+  const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
+
+  if (diffMinutes < 60) {
+    return `Activo hace ${diffMinutes} min`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+
+  if (diffHours < 24) {
+    return `Activo hace ${diffHours} h`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays === 1) {
+    return "Activo ayer";
+  }
+
+  return `Activo hace ${diffDays} días`;
+}
+
 export default async function ChatPage({ params }: PageProps) {
   const { id } = await params;
 
   if (!id) return notFound();
 
   const session = await getServerSession(authOptions);
-  const currentUserEmail = session?.user?.email?.toLowerCase().trim() ?? "";
+  const currentUserEmail =
+    session?.user?.email?.toLowerCase().trim() ?? "";
 
   if (!currentUserEmail) {
     redirect("/api/auth/signin");
@@ -47,15 +75,45 @@ export default async function ChatPage({ params }: PageProps) {
 
   if (!conversation) return notFound();
 
-  const buyerEmail = conversation.buyerEmail?.toLowerCase().trim();
-  const sellerEmail = conversation.sellerEmail?.toLowerCase().trim();
+  const buyerEmail =
+    conversation.buyerEmail?.toLowerCase().trim();
+
+  const sellerEmail =
+    conversation.sellerEmail?.toLowerCase().trim();
 
   const isParticipant =
-    currentUserEmail === buyerEmail || currentUserEmail === sellerEmail;
+    currentUserEmail === buyerEmail ||
+    currentUserEmail === sellerEmail;
 
   if (!isParticipant) {
     return notFound();
   }
+
+  const otherUserEmail =
+    currentUserEmail === buyerEmail
+      ? sellerEmail
+      : buyerEmail;
+
+  const otherUserPresence = otherUserEmail
+    ? await prisma.userPresence.findUnique({
+        where: {
+          email: otherUserEmail,
+        },
+      })
+    : null;
+
+  const lastSeenAt = otherUserPresence?.lastSeen
+    ? new Date(otherUserPresence.lastSeen)
+    : null;
+
+  const isOnline = Boolean(
+    lastSeenAt &&
+      Date.now() - lastSeenAt.getTime() <= 60_000
+  );
+
+  const presenceLabel = isOnline
+    ? "En línea"
+    : formatLastSeen(lastSeenAt);
 
   await prisma.message.updateMany({
     where: {
@@ -71,17 +129,27 @@ export default async function ChatPage({ params }: PageProps) {
   });
 
   const listing = await prisma.listing.findUnique({
-    where: { id: conversation.listingId },
+    where: {
+      id: conversation.listingId,
+    },
   });
 
   const aidRequest = listing
     ? null
     : await prisma.aidRequest.findUnique({
-        where: { id: conversation.listingId },
-        select: { id: true, contextImageUrl: true },
+        where: {
+          id: conversation.listingId,
+        },
+        select: {
+          id: true,
+          contextImageUrl: true,
+        },
       });
 
-  const headerImageUrl = listing?.imageUrl ?? aidRequest?.contextImageUrl ?? null;
+  const headerImageUrl =
+    listing?.imageUrl ??
+    aidRequest?.contextImageUrl ??
+    null;
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
@@ -111,7 +179,16 @@ export default async function ChatPage({ params }: PageProps) {
           <div className="truncate text-base font-black text-slate-900">
             {conversation.listingTitle}
           </div>
-          <div className="text-xs font-bold text-green-500">● En línea</div>
+
+          {isOnline ? (
+            <div className="text-xs font-bold text-green-500">
+              ● {presenceLabel}
+            </div>
+          ) : (
+            <div className="text-xs font-bold text-slate-400">
+              {presenceLabel}
+            </div>
+          )}
         </div>
 
         <Link
@@ -143,7 +220,10 @@ export default async function ChatPage({ params }: PageProps) {
 
             <div className="mt-1 text-sm font-bold text-slate-500">
               {listing
-                ? formatPrice(listing.price, listing.currency)
+                ? formatPrice(
+                    listing.price,
+                    listing.currency
+                  )
                 : aidRequest
                   ? "Kubo Ayuda"
                   : "Anuncio"}
@@ -157,7 +237,9 @@ export default async function ChatPage({ params }: PageProps) {
               }
               className="mt-3 inline-flex rounded-full bg-[#0f3c8c] px-4 py-2 text-xs font-black text-white hover:bg-[#0c2f6d]"
             >
-              {aidRequest ? "Ver solicitud" : "Ver anuncio"}
+              {aidRequest
+                ? "Ver solicitud"
+                : "Ver anuncio"}
             </Link>
           </div>
         </div>

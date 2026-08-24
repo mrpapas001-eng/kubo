@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import PushNotificationsInit from "@/components/PushNotificationsInit";
+import PresenceHeartbeat from "@/components/PresenceHeartbeat";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -13,10 +14,10 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
-  icon: "/icons/kubo-icon-192.png",
-  shortcut: "/icons/kubo-icon-192.png",
-  apple: "/icons/kubo-icon-512.png",
-},
+    icon: "/icons/kubo-icon-192.png",
+    shortcut: "/icons/kubo-icon-192.png",
+    apple: "/icons/kubo-icon-512.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -35,7 +36,10 @@ export default function RootLayout({
       <body className={nunito.className}>
         <AuthProvider>
           <PushNotificationsInit />
+          <PresenceHeartbeat />
+
           {children}
+
           <MobileBottomNav />
         </AuthProvider>
       </body>

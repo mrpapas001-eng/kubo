@@ -271,3 +271,10 @@ model PushSubscription {
 
   @@index([userEmail])
 }
+model UserPresence {
+  email     String   @id
+  lastSeen  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lastSeen])
+}

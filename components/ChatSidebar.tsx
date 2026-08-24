@@ -46,8 +46,6 @@ export default async function ChatSidebar() {
 
   return (
     <aside className="hidden h-full w-[360px] shrink-0 border-r border-slate-200 bg-white p-6 lg:block">
-
-
       <div className="flex items-center justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
           <Image
@@ -76,18 +74,18 @@ export default async function ChatSidebar() {
         </div>
       </div>
 
-<div className="mt-8 flex items-center justify-between gap-3">
-  <h1 className="text-3xl font-black text-slate-900">
-    Conversaciones
-  </h1>
+      <div className="mt-8 flex items-center justify-between gap-3">
+        <h1 className="text-3xl font-black text-slate-900">
+          Conversaciones
+        </h1>
 
-  <Link
-    href="/"
-    className="shrink-0 rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white hover:bg-slate-700"
-  >
-    Salir
-  </Link>
-</div>
+        <Link
+          href="/"
+          className="shrink-0 rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white hover:bg-slate-700"
+        >
+          Salir
+        </Link>
+      </div>
 
       <p className="mt-2 text-sm font-medium text-slate-500">
         Conecta directamente con personas reales.
@@ -100,53 +98,65 @@ export default async function ChatSidebar() {
       </div>
 
       <div className="mt-6 space-y-3 overflow-y-auto">
-        {conversationsWithUnread.map((conversation) => {
-          const lastMessage = conversation.messages[0];
-          const hasUnread = conversation.unreadCount > 0;
+        {conversationsWithUnread.length === 0 ? (
+          <div className="rounded-3xl bg-slate-50 p-5 text-center">
+            <div className="text-sm font-black text-slate-900">
+              Aún no tienes chats
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Cuando escribas a alguien aparecerá aquí.
+            </p>
+          </div>
+        ) : (
+          conversationsWithUnread.map((conversation) => {
+            const lastMessage = conversation.messages[0];
+            const hasUnread = conversation.unreadCount > 0;
 
-          return (
-            <Link
-              key={conversation.id}
-              href={`/chat/${conversation.id}`}
-              className={`flex items-center gap-4 rounded-[26px] p-4 shadow-sm ring-1 ring-slate-100 transition hover:bg-[#f5f1ff] ${
-                hasUnread ? "bg-[#f5f1ff]" : "bg-white"
-              }`}
-            >
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#0f3c8c] text-lg font-black text-white">
-                {conversation.listingTitle?.[0] ?? "K"}
-                <span className="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
-              </div>
+            return (
+              <Link
+                key={conversation.id}
+                href={`/chat/${conversation.id}`}
+                className={`flex items-center gap-4 rounded-[26px] p-4 shadow-sm ring-1 ring-slate-100 transition hover:bg-[#f5f1ff] ${
+                  hasUnread ? "bg-[#f5f1ff]" : "bg-white"
+                }`}
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#0f3c8c] text-lg font-black text-white">
+                  {conversation.listingTitle?.[0] ?? "K"}
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div
-                    className={`truncate text-sm ${
-                      hasUnread
-                        ? "font-black text-slate-950"
-                        : "font-black text-slate-900"
-                    }`}
-                  >
-                    {conversation.listingTitle}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div
+                      className={`truncate text-sm ${
+                        hasUnread
+                          ? "font-black text-slate-950"
+                          : "font-black text-slate-900"
+                      }`}
+                    >
+                      {conversation.listingTitle}
+                    </div>
+
+                    {hasUnread ? (
+                      <div className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#4f32c8] px-2 text-[11px] font-black text-white">
+                        {conversation.unreadCount}
+                      </div>
+                    ) : null}
                   </div>
 
-                  {hasUnread ? (
-                    <div className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#4f32c8] px-2 text-[11px] font-black text-white">
-                      {conversation.unreadCount}
-                    </div>
-                  ) : null}
+                  <div
+                    className={`mt-1 truncate text-sm ${
+                      hasUnread
+                        ? "font-black text-slate-800"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {lastMessage?.body ?? "Sin mensajes"}
+                  </div>
                 </div>
-
-                <div
-                  className={`mt-1 truncate text-sm ${
-                    hasUnread ? "font-black text-slate-800" : "text-slate-500"
-                  }`}
-                >
-                  {lastMessage?.body ?? "Sin mensajes"}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })
+        )}
       </div>
     </aside>
   );
