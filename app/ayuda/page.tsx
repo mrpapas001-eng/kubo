@@ -117,12 +117,11 @@ export default async function AyudaPage() {
                     </div>
                   </div>
 
-                  <div className="relative hidden min-h-[250px] items-center justify-center lg:flex">
-                    <div className="absolute h-56 w-56 rounded-full bg-blue-300/20 blur-3xl" />
+<div className="relative flex min-h-[190px] items-center justify-center md:min-h-[220px] lg:min-h-[250px]">                    <div className="absolute h-56 w-56 rounded-full bg-blue-300/20 blur-3xl" />
 
-                    <div className="relative z-10 flex h-48 w-48 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.22)] backdrop-blur-md">
-                      <HandHeart className="h-28 w-28 stroke-[1.6] text-white" />
-                    </div>
+                    <div className="relative z-10 flex h-36 w-36 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.22)] backdrop-blur-md md:h-44 md:w-44 lg:h-48 lg:w-48">
+  <HandHeart className="h-20 w-20 stroke-[1.6] text-white md:h-24 md:w-24 lg:h-28 lg:w-28" />
+</div>
 
                     <div className="absolute right-[12%] top-[8%] flex h-16 w-16 rotate-6 items-center justify-center rounded-[20px] border border-white/20 bg-gradient-to-br from-[#4a8cff] to-[#1765e8] shadow-xl">
                       <Heart className="h-8 w-8 fill-white text-white" />
@@ -196,10 +195,10 @@ export default async function AyudaPage() {
                     </Link>
                   </div>
 
-                  <div className="relative hidden items-center justify-center md:flex">
+                  <div className="relative flex min-h-[190px] items-center justify-center md:min-h-0">
                     <div className="absolute bottom-8 h-28 w-44 rounded-[50%] bg-blue-200/50 blur-2xl" />
 
-                    <div className="relative h-56 w-full">
+                    <div className="relative h-48 w-full max-w-[280px] md:h-56 md:max-w-none">
                       <div className="absolute bottom-4 left-1/2 h-[86px] w-[145px] -translate-x-1/2 rounded-b-[24px] rounded-t-[10px] bg-gradient-to-b from-[#DFA45F] to-[#BB7E3D]" />
                       <div className="absolute bottom-[76px] left-[18%] h-16 w-[88px] rotate-[-10deg] rounded-[12px] bg-[#E9B56F]" />
                       <div className="absolute bottom-[76px] right-[18%] h-16 w-[88px] rotate-[10deg] rounded-[12px] bg-[#D99C55]" />
@@ -292,10 +291,10 @@ export default async function AyudaPage() {
                     </Link>
                   </div>
 
-                  <div className="relative hidden items-center justify-center md:flex">
+                  <div className="relative flex min-h-[190px] items-center justify-center md:min-h-0">
                     <div className="absolute h-44 w-44 rounded-full bg-blue-200/50 blur-2xl" />
 
-                    <div className="relative flex h-56 w-full items-center justify-center">
+                    <div className="relative flex h-48 w-full max-w-[280px] items-center justify-center md:h-56 md:max-w-none">
                       <div className="absolute bottom-6 left-[22%] h-24 w-12 rotate-[14deg] rounded-[24px] bg-gradient-to-b from-[#78A7F7] to-[#437EDB]" />
                       <div className="absolute bottom-6 right-[22%] h-24 w-12 rotate-[-14deg] rounded-[24px] bg-gradient-to-b from-[#78A7F7] to-[#437EDB]" />
                       <div className="relative z-10 flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-[#4A8EFF] via-[#246FEF] to-[#0F4EB8] shadow-[0_22px_45px_rgba(21,87,214,0.30)]">
@@ -578,9 +577,9 @@ export default async function AyudaPage() {
                     </p>
                   </div>
 
-                  <div className="hidden h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-white/70 md:flex">
-                    <PackageOpen className="h-9 w-9 text-[#1557d6]" />
-                  </div>
+                  <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-white/70 md:h-20 md:w-20">
+  <PackageOpen className="h-8 w-8 text-[#1557d6] md:h-9 md:w-9" />
+</div>
                 </div>
               </div>
             </section>
