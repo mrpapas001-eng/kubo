@@ -176,20 +176,22 @@ export default function Header() {
                   className="flex items-center gap-2"
                 >
                   {session.user?.image ? (
-                    <img
-                      src={session.user.image}
-                      alt={session.user?.name || "Usuario"}
-                      className="h-10 w-10 rounded-full border border-white object-cover shadow-sm"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-600 text-sm font-bold text-white shadow-sm">
-                      {(session.user?.name ||
-                        session.user?.email ||
-                        "U")
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
-                  )}
+  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white bg-slate-100 shadow-sm">
+    <img
+      src={session.user.image}
+      alt={session.user?.name || "Usuario"}
+      className="h-full w-full object-cover"
+    />
+  </div>
+) : (
+  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-600 text-sm font-bold text-white shadow-sm">
+    {(session.user?.name ||
+      session.user?.email ||
+      "U")
+      .charAt(0)
+      .toUpperCase()}
+  </div>
+)}
                 </Link>
 
                 <button
