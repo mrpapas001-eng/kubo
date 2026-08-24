@@ -28,6 +28,8 @@ import StartChatButton from "@/components/StartChatButton";
 import ReportListingModal from "@/components/ReportListingModal";
 import MobileListingActions from "@/components/MobileListingActions";
 import FavoriteButton from "@/components/FavoriteButton";
+import BackToResultsButton from "@/components/BackToResultsButton";
+import { isAdminEmail } from "@/lib/admin";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -197,7 +199,7 @@ export default async function ListingDetail({ params }: PageProps) {
   const isOwner =
     currentUserEmail &&
     listing.ownerEmail?.toLowerCase().trim() === currentUserEmail;
-  const isAdmin = currentUserEmail === "mr.papas001@gmail.com";
+  const isAdmin = isAdminEmail(currentUserEmail);
   const listingStatus = (listing as any).status ?? "active";
 
   if (listingStatus !== "active" && !isOwner && !isAdmin) {
@@ -386,6 +388,9 @@ const visibilityDescription = isPremiumListing
             subcategory={listing.subcategorySlug}
             title={listing.title}
           />
+            <div className="mb-5">
+    <BackToResultsButton />
+  </div>
 
           <div className="premium-shell overflow-hidden rounded-[32px] shadow-[0_28px_90px_rgba(245,158,11,0.28)]">
             <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
@@ -663,6 +668,10 @@ const visibilityDescription = isPremiumListing
           subcategory={listing.subcategorySlug}
           title={listing.title}
         />
+
+  <div className="mb-5">
+    <BackToResultsButton />
+  </div>
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
           <div className="order-1 space-y-5 md:space-y-6">
@@ -1016,15 +1025,10 @@ const visibilityDescription = isPremiumListing
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/"
-                className="flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-sm font-black text-slate-700 hover:bg-slate-50"
-              >
-                Volver a la home
-              </Link>
+  <BackToResultsButton className="h-12 px-6" />
 
-<ReportListingModal listingId={listing.id} />
-            </div>
+  <ReportListingModal listingId={listing.id} />
+</div>
           </div>
         </div>
         {similarListings.length > 0 ? (
