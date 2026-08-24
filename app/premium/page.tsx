@@ -47,7 +47,7 @@ export default async function PremiumPage({ searchParams }: Props) {
           <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600"><Flame className="h-6 w-6" /></div>
-              <div className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">{quota.featuredRemaining} de 20 disponibles hoy</div>
+              <div className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">{quota.featuredRemaining} de 3 disponibles hoy</div>
             </div>
             <h2 className="mt-5 text-2xl font-black text-slate-900">Destacado</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">Más visibilidad durante 48 horas y posición por encima de los anuncios normales.</p>
@@ -64,7 +64,7 @@ export default async function PremiumPage({ searchParams }: Props) {
           <div className="relative overflow-hidden rounded-[28px] border-2 border-yellow-400 bg-gradient-to-b from-yellow-50 to-white p-6 shadow-[0_24px_70px_rgba(245,158,11,0.25)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-400 text-slate-900"><Crown className="h-6 w-6" /></div>
-              <div className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-slate-900">{quota.premiumRemaining} de 5 disponibles hoy</div>
+              <div className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-slate-900">{quota.premiumRemaining} de 2 disponibles hoy</div>
             </div>
             <h2 className="mt-5 text-2xl font-black text-slate-900">Premium</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">La opción más exclusiva: máxima prioridad y diseño Premium durante 48 horas.</p>
