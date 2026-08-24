@@ -10,20 +10,39 @@ import { signIn, signOut, useSession } from "next-auth/react";
 export default function Header() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
 
   function closeMenu() {
     setMobileMenuOpen(false);
   }
 
+  function closeLoginMenu() {
+    setLoginMenuOpen(false);
+  }
+
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     closeMenu();
+    closeLoginMenu();
 
     if (pathname === "/") {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  }
+
+  function loginWithGoogle() {
+    closeMenu();
+    closeLoginMenu();
+    signIn("google");
+  }
+
+  function loginWithFacebook() {
+    closeMenu();
+    closeLoginMenu();
+    signIn("facebook");
   }
 
   useEffect(() => {
@@ -36,17 +55,24 @@ export default function Header() {
 
     async function loadUnread() {
       try {
-        const res = await fetch("/api/chat/unread", { cache: "no-store" });
+        const res = await fetch("/api/chat/unread", {
+          cache: "no-store",
+        });
+
         const data = await res.json();
 
         if (!active || !res.ok || !data?.ok) return;
+
         setUnreadTotal(Number(data.unreadTotal ?? 0));
       } catch {
-        if (active) setUnreadTotal(0);
+        if (active) {
+          setUnreadTotal(0);
+        }
       }
     }
 
     loadUnread();
+
     const interval = window.setInterval(loadUnread, 5000);
 
     return () => {
@@ -59,7 +85,11 @@ export default function Header() {
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/92 backdrop-blur-xl">
       <div className="mx-auto max-w-[1400px] px-4 md:px-6">
         <div className="flex items-center justify-between gap-4 py-4 md:py-3">
-          <Link href="/" className="shrink-0" onClick={handleLogoClick}>
+          <Link
+            href="/"
+            className="shrink-0"
+            onClick={handleLogoClick}
+          >
             <Image
               src="/kubo-logo-nuevo.png"
               alt="Kubo anuncios"
@@ -127,6 +157,7 @@ export default function Header() {
               className="relative inline-flex items-center gap-2 text-[15px] font-semibold text-slate-600 transition hover:text-slate-900"
             >
               Chats
+
               {unreadTotal > 0 ? (
                 <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0f3c8c] px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
                   {unreadTotal > 99 ? "99+" : unreadTotal}
@@ -140,7 +171,10 @@ export default function Header() {
               </div>
             ) : session ? (
               <div className="flex items-center gap-3">
-                <Link href="/mi-cuenta" className="flex items-center gap-2">
+                <Link
+                  href="/mi-cuenta"
+                  className="flex items-center gap-2"
+                >
                   {session.user?.image ? (
                     <img
                       src={session.user.image}
@@ -149,7 +183,9 @@ export default function Header() {
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-600 text-sm font-bold text-white shadow-sm">
-                      {(session.user?.name || session.user?.email || "U")
+                      {(session.user?.name ||
+                        session.user?.email ||
+                        "U")
                         .charAt(0)
                         .toUpperCase()}
                     </div>
@@ -165,13 +201,49 @@ export default function Header() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => signIn("google")}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                type="button"
-              >
-                Entrar
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setLoginMenuOpen((prev) => !prev)
+                  }
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                  type="button"
+                >
+                  Entrar
+                </button>
+
+                {loginMenuOpen ? (
+                  <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-[250px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                    <div className="px-3 pb-2 pt-1 text-xs font-black uppercase tracking-wide text-slate-400">
+                      Iniciar sesión
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={loginWithGoogle}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-base font-black">
+                        G
+                      </span>
+
+                      Continuar con Google
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={loginWithFacebook}
+                      className="mt-1 flex w-full items-center gap-3 rounded-xl bg-[#1877F2] px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-[#166fe5]"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-black text-[#1877F2]">
+                        f
+                      </span>
+
+                      Continuar con Facebook
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             )}
 
             <Link
@@ -184,9 +256,13 @@ export default function Header() {
 
           <button
             type="button"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            onClick={() =>
+              setMobileMenuOpen((prev) => !prev)
+            }
             className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 lg:hidden"
-            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-label={
+              mobileMenuOpen ? "Cerrar menú" : "Abrir menú"
+            }
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" />
@@ -195,7 +271,7 @@ export default function Header() {
             )}
 
             {unreadTotal > 0 ? (
-              <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0f3c8c] px-[6px] text-[10px] font-bold text-white">
+              <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0f3c8c] px-[6px] text-[10px] font-bold text-white">
                 {unreadTotal > 99 ? "99+" : unreadTotal}
               </span>
             ) : null}
@@ -267,9 +343,12 @@ export default function Header() {
                 className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-[15px] font-semibold text-slate-700 hover:bg-slate-50"
               >
                 <span>Chats</span>
+
                 {unreadTotal > 0 ? (
                   <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0f3c8c] px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
-                    {unreadTotal > 99 ? "99+" : unreadTotal}
+                    {unreadTotal > 99
+                      ? "99+"
+                      : unreadTotal}
                   </span>
                 ) : null}
               </Link>
@@ -281,7 +360,8 @@ export default function Header() {
               ) : session ? (
                 <>
                   <div className="px-3 py-2 text-sm font-semibold text-slate-700">
-                    {session.user?.name || session.user?.email}
+                    {session.user?.name ||
+                      session.user?.email}
                   </div>
 
                   <Link
@@ -304,16 +384,27 @@ export default function Header() {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => {
-                    closeMenu();
-                    signIn("google");
-                  }}
-                  className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                  type="button"
-                >
-                  Entrar
-                </button>
+                <div className="grid gap-2">
+                  <button
+                    type="button"
+                    onClick={loginWithGoogle}
+                    className="flex h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                  >
+                    <span className="font-black">G</span>
+                    Continuar con Google
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={loginWithFacebook}
+                    className="flex h-12 items-center justify-center gap-3 rounded-xl bg-[#1877F2] px-4 text-sm font-bold text-white hover:bg-[#166fe5]"
+                  >
+                    <span className="text-lg font-black">
+                      f
+                    </span>
+                    Continuar con Facebook
+                  </button>
+                </div>
               )}
 
               <Link

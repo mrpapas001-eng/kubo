@@ -1,4 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
 
 // Lee una variable de entorno tolerando espacios, saltos de línea (\r) y
 // comillas pegadas al pegar valores a mano en .env.local.
@@ -18,6 +19,11 @@ export const authOptions = {
     GoogleProvider({
       clientId: cleanEnv("GOOGLE_CLIENT_ID"),
       clientSecret: cleanEnv("GOOGLE_CLIENT_SECRET"),
+    }),
+
+    FacebookProvider({
+      clientId: cleanEnv("FACEBOOK_CLIENT_ID"),
+      clientSecret: cleanEnv("FACEBOOK_CLIENT_SECRET"),
     }),
   ],
   secret: cleanEnv("NEXTAUTH_SECRET"),
