@@ -1098,7 +1098,7 @@ if (!session) {
                   </div>
 
                   <div className="mt-2 text-xl font-black text-slate-900">
-                    Gratis por 24 horas
+                    Gratis por 48 horas
                   </div>
 
                   <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -1124,7 +1124,7 @@ if (!session) {
                   </div>
 
                   <div className="mt-2 text-xl font-black text-slate-900">
-                    Gratis por 24 horas
+                    Gratis por 48 horas
                   </div>
 
                   <p className="mt-2 text-sm leading-6 text-slate-600">

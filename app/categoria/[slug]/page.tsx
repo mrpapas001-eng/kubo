@@ -122,8 +122,8 @@ function getSubcategoryImage(categorySlug: string, subSlug: string) {
 
 if (categorySlug === "celulares") {
   if (subSlug === "celulares") return "/celulares-card.jpg";
-  if (subSlug === "repuestos") return "/celulares-hero.jpg";
-  if (subSlug === "telefono-fijo") return "/celulares-hero.jpg";
+  if (subSlug === "repuestos") return "/celulares-repuestos-hero.jpg";
+  if (subSlug === "telefono-fijo") return "/celulares-fijo-hero.jpg";
 }
 
   if (categorySlug === "electrodomesticos") {

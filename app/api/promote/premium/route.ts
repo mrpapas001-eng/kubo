@@ -12,7 +12,7 @@ const messages: Record<string, string> = {
   NOT_TODAY: "Los cupos gratuitos son solo para anuncios publicados hoy.",
   ALREADY_PROMOTED: "Este anuncio ya tiene una promoción activa.",
   USER_DAILY_LIMIT: "Ya utilizaste tu promoción gratuita de hoy.",
-  SOLD_OUT: "Los 5 cupos Premium de hoy ya se agotaron. Mañana habrá nuevos cupos para anuncios nuevos.",
+  SOLD_OUT: "Los 2 cupos Premium de hoy ya se agotaron. Mañana habrá nuevos cupos para anuncios nuevos.",
 };
 
 export async function GET(request: Request) {

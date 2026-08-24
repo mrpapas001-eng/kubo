@@ -92,7 +92,7 @@ export async function claimLaunchPromotion(
     });
     if (used >= limit) throw new Error("SOLD_OUT");
 
-    const until = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const until = new Date(Date.now() + 48 * 60 * 60 * 1000);
     return tx.listing.update({
       where: { id: listingId },
       data:

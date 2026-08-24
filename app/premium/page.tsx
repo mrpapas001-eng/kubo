@@ -35,7 +35,7 @@ export default async function PremiumPage({ searchParams }: Props) {
 
         <div className="mx-auto mt-7 flex max-w-2xl items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-900">
           <Clock3 className="mt-0.5 h-5 w-5 shrink-0" />
-          <span>La promoción dura 24 horas. Cada cuenta puede conseguir solo una promoción gratuita al día: Destacado o Premium.</span>
+          <span>La promoción dura 48 horas. Cada cuenta puede conseguir solo una promoción gratuita al día: Destacado o Premium.</span>
         </div>
 
         {!listingId || !listing ? <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-sm font-bold text-red-700">No se encontró el anuncio. Vuelve a “Mis anuncios” y pulsa “Promocionar este anuncio”.</div> : null}
@@ -50,11 +50,11 @@ export default async function PremiumPage({ searchParams }: Props) {
               <div className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700">{quota.featuredRemaining} de 20 disponibles hoy</div>
             </div>
             <h2 className="mt-5 text-2xl font-black text-slate-900">Destacado</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">Más visibilidad durante 24 horas y posición por encima de los anuncios normales.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">Más visibilidad durante 48 horas y posición por encima de los anuncios normales.</p>
             <div className="mt-6 space-y-3">
               <div className="flex gap-2 text-sm font-semibold text-slate-700"><CheckCircle2 className="h-5 w-5 text-green-500" />Aparece por encima de anuncios normales</div>
               <div className="flex gap-2 text-sm font-semibold text-slate-700"><CheckCircle2 className="h-5 w-5 text-green-500" />Badge de Destacado</div>
-              <div className="flex gap-2 text-sm font-semibold text-slate-700"><CheckCircle2 className="h-5 w-5 text-green-500" />20 cupos nuevos cada día</div>
+              <div className="flex gap-2 text-sm font-semibold text-slate-700"><CheckCircle2 className="h-5 w-5 text-green-500" />3 cupos nuevos cada día</div>
             </div>
             <Link href={`/api/promote/featured?listingId=${listingId ?? ""}`} className={`mt-7 flex h-12 items-center justify-center rounded-2xl text-sm font-black ${baseEligible && quota.featuredRemaining > 0 ? "bg-slate-900 text-white hover:bg-slate-700" : "pointer-events-none bg-slate-200 text-slate-400"}`}>
               {quota.featuredRemaining > 0 ? "Conseguir Destacado GRATIS" : "Cupos de hoy agotados"}
@@ -67,11 +67,11 @@ export default async function PremiumPage({ searchParams }: Props) {
               <div className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-slate-900">{quota.premiumRemaining} de 5 disponibles hoy</div>
             </div>
             <h2 className="mt-5 text-2xl font-black text-slate-900">Premium</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">La opción más exclusiva: máxima prioridad y diseño Premium durante 24 horas.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">La opción más exclusiva: máxima prioridad y diseño Premium durante 48 horas.</p>
             <div className="mt-6 space-y-3">
               <div className="flex gap-2 text-sm font-semibold text-slate-800"><CheckCircle2 className="h-5 w-5 text-green-500" />Aparece primero en resultados</div>
               <div className="flex gap-2 text-sm font-semibold text-slate-800"><CheckCircle2 className="h-5 w-5 text-green-500" />Card dorada Premium</div>
-              <div className="flex gap-2 text-sm font-semibold text-slate-800"><CheckCircle2 className="h-5 w-5 text-green-500" />Solo 5 cupos nuevos cada día</div>
+              <div className="flex gap-2 text-sm font-semibold text-slate-800"><CheckCircle2 className="h-5 w-5 text-green-500" />Solo 2 cupos nuevos cada día</div>
             </div>
             <Link href={`/api/promote/premium?listingId=${listingId ?? ""}`} className={`mt-7 flex h-12 items-center justify-center rounded-2xl text-sm font-black ${baseEligible && quota.premiumRemaining > 0 ? "bg-yellow-400 text-slate-900 hover:bg-yellow-500" : "pointer-events-none bg-slate-200 text-slate-400"}`}>
               {quota.premiumRemaining > 0 ? "Conseguir Premium GRATIS 👑" : "Cupos de hoy agotados"}

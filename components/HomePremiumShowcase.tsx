@@ -22,7 +22,7 @@ export default function HomePremiumShowcase({ listings }: Props) {
 
       return new Date(item.premiumUntil) > now;
     })
-    .slice(0, 3);
+    .slice(0, 2);
 
   if (premium.length === 0) return null;
 
