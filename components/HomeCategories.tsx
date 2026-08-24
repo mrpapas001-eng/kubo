@@ -9,6 +9,7 @@ import {
   Wrench,
   BarChart3,
   Laptop,
+  Dumbbell,
   Shirt,
   Baby,
   PawPrint,
@@ -31,13 +32,18 @@ const categories = [
   { slug: "servicios", name: "Servicios", icon: Wrench },
   { slug: "negocios", name: "Negocios", icon: BarChart3 },
   { slug: "informatica", name: "Informática", icon: Laptop },
+  { slug: "deportes", name: "Deportes", icon: Dumbbell },
   { slug: "moda", name: "Moda", icon: Shirt },
   { slug: "bebes", name: "Bebés", icon: Baby },
   { slug: "mascotas", name: "Mascotas", icon: PawPrint },
   { slug: "regalos-celebraciones", name: "Regalos y celebraciones", icon: Gift },
   { slug: "juguetes", name: "Juguetes", icon: ToyBrick },
   { slug: "papeleria-oficina", name: "Papelería y Oficina", icon: Paperclip },
-  { slug: "herramientas-ferreteria", name: "Herramientas y Ferretería", icon: Hammer },
+  {
+    slug: "herramientas-ferreteria",
+    name: "Herramientas y Ferretería",
+    icon: Hammer,
+  },
   { slug: "salud-belleza", name: "Salud y Belleza", icon: Sparkles },
 ];
 
