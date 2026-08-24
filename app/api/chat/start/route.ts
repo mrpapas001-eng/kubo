@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { sendPushToUser } from "@/lib/push";
 
 export async function POST(req: Request) {
   try {
@@ -94,6 +95,19 @@ export async function POST(req: Request) {
           body: message,
         },
       });
+
+      try {
+        await sendPushToUser(sellerEmail, {
+          title: "Nuevo mensaje en Kubo",
+          body: `${userName?.trim() || "Alguien"}: ${message}`,
+          url: `/chat/${conversation.id}`,
+        });
+      } catch (pushError) {
+        console.error(
+          "No se pudo enviar la notificación push inicial:",
+          pushError
+        );
+      }
     }
 
     return NextResponse.json({
