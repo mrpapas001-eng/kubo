@@ -810,6 +810,74 @@ if (step === 4 || nextStep === 4) {
     setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
   }
 
+  async function compressImage(file: File): Promise<File> {
+  // Si no es una imagen compatible, la dejamos como está
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  // WEBP/JPEG/PNG se procesan en el navegador
+  const bitmap = await createImageBitmap(file);
+
+  const MAX_WIDTH = 1600;
+  const MAX_HEIGHT = 1600;
+
+  let width = bitmap.width;
+  let height = bitmap.height;
+
+  const scale = Math.min(
+    1,
+    MAX_WIDTH / width,
+    MAX_HEIGHT / height
+  );
+
+  width = Math.round(width * scale);
+  height = Math.round(height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    bitmap.close();
+    return file;
+  }
+
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(
+      resolve,
+      "image/jpeg",
+      0.78
+    );
+  });
+
+  if (!blob) {
+    return file;
+  }
+
+  // Si por algún motivo la conversión queda más pesada,
+  // conservamos el archivo original.
+  if (blob.size >= file.size) {
+    return file;
+  }
+
+  const originalName =
+    file.name.replace(/\.[^/.]+$/, "") || "foto";
+
+  return new File(
+    [blob],
+    `${originalName}.jpg`,
+    {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    }
+  );
+}
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -830,7 +898,14 @@ if (step === 4 || nextStep === 4) {
 
       if (imageFiles.length) {
         const fd = new FormData();
-        imageFiles.slice(0, 10).forEach((f) => fd.append("files", f));
+
+        const filesToUpload = await Promise.all(
+          imageFiles.slice(0, 10).map((file) => compressImage(file))
+        );
+
+        filesToUpload.forEach((file) => {
+          fd.append("files", file);
+        });
 
         const up = await fetch("/api/upload", {
           method: "POST",
@@ -1746,17 +1821,40 @@ if (!session) {
                   ) : null}
 
                   {previewUrls.length ? (
-                    <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-5">
-                      {previewUrls.map((u, i) => (
-                        <img
-                          key={`${u}-${i}`}
-                          src={u}
-                          alt={`preview-${i}`}
-                          className="aspect-square w-full rounded-xl border border-slate-200 object-cover"
-                        />
-                      ))}
-                    </div>
-                  ) : null}
+  <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-5">
+    {previewUrls.map((u, i) => (
+      <div
+        key={`${u}-${i}`}
+        className="relative overflow-hidden rounded-xl border border-slate-200"
+      >
+        <img
+          src={u}
+          alt={`preview-${i}`}
+          className="aspect-square w-full object-cover"
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            URL.revokeObjectURL(u);
+
+            setImageFiles((prev) =>
+              prev.filter((_, index) => index !== i)
+            );
+
+            setPreviewUrls((prev) =>
+              prev.filter((_, index) => index !== i)
+            );
+          }}
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-sm font-black text-white shadow-md hover:bg-black"
+          aria-label={`Eliminar foto ${i + 1}`}
+        >
+          ×
+        </button>
+      </div>
+    ))}
+  </div>
+) : null}
                 </div>
 
                 <div>
