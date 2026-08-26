@@ -63,15 +63,14 @@ export default function HomeSponsorMain({
                 <img
                   src={sponsor.imageUrl}
                   alt={sponsor.title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"
-                  loading="lazy"
+className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"                  loading="lazy"
                 />
 
-                <div className="absolute left-3 top-3 z-10 md:left-4 md:top-4">
-                  <span className="inline-flex items-center rounded-full bg-black/55 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white backdrop-blur-sm md:text-[11px]">
-                    Patrocinado
-                  </span>
-                </div>
+                <div className="absolute left-2 top-2 z-10 md:left-4 md:top-4">
+  <span className="inline-flex items-center rounded-full bg-black/45 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white backdrop-blur-sm md:px-3 md:py-1 md:text-[10px]">
+    Patrocinado
+  </span>
+</div>
               </div>
             </div>
           ) : (

@@ -300,7 +300,7 @@ export default function AdminSponsorForm({
             <img
               src={imageUrl}
               alt="Vista previa"
-              className="max-h-[260px] w-full object-cover"
+              className="max-h-[260px] w-full object-contain"
             />
           </div>
         ) : null}
