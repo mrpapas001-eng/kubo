@@ -897,28 +897,28 @@ if (step === 4 || nextStep === 4) {
       let uploadedUrls: string[] = [];
 
       if (imageFiles.length) {
-        const fd = new FormData();
-
         const filesToUpload = await Promise.all(
           imageFiles.slice(0, 10).map((file) => compressImage(file))
         );
 
-        filesToUpload.forEach((file) => {
+        for (const file of filesToUpload) {
+          const fd = new FormData();
           fd.append("files", file);
-        });
 
-        const up = await fetch("/api/upload", {
-          method: "POST",
-          body: fd,
-        });
+          const up = await fetch("/api/upload", {
+            method: "POST",
+            body: fd,
+          });
 
-        const upData = await up.json();
+          const upData = await up.json();
 
-        if (!up.ok || !upData?.ok) {
-          throw new Error(upData?.error ?? "No se pudo subir imágenes");
+          if (!up.ok || !upData?.ok) {
+            throw new Error(upData?.error ?? "No se pudo subir imágenes");
+          }
+
+          const urls = Array.isArray(upData.urls) ? upData.urls : [];
+          uploadedUrls.push(...urls);
         }
-
-        uploadedUrls = Array.isArray(upData.urls) ? upData.urls : [];
       }
 
 const details: any = {
