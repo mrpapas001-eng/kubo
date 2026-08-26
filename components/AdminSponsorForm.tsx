@@ -32,6 +32,7 @@ type Props = {
   sponsor: SponsorData;
   businesses: BusinessOption[];
   listings: ListingOption[];
+  mode?: "create" | "edit";
 };
 
 type DestinationType =
@@ -55,6 +56,7 @@ export default function AdminSponsorForm({
   sponsor,
   businesses,
   listings,
+  mode = "edit",
 }: Props) {
   const router = useRouter();
 
@@ -166,11 +168,15 @@ export default function AdminSponsorForm({
     setMessage("");
 
     try {
-      const response = await fetch(`/api/admin/sponsors/${sponsor.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const isCreate = mode === "create";
+
+      const response = await fetch(
+        isCreate ? "/api/admin/sponsors" : `/api/admin/sponsors/${sponsor.id}`,
+        {
+          method: isCreate ? "POST" : "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
         body: JSON.stringify({
           title,
           subtitle,
@@ -186,13 +192,20 @@ export default function AdminSponsorForm({
           startAt,
           endAt,
           isActive,
-        }),
-      });
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data?.error || "No se pudo guardar el sponsor.");
+      }
+
+      if (mode === "create" && data?.sponsor?.id) {
+        router.push(`/admin/sponsors/${data.sponsor.id}`);
+        router.refresh();
+        return;
       }
 
       setMessage("Sponsor guardado correctamente.");
@@ -201,7 +214,7 @@ export default function AdminSponsorForm({
       setMessage(
         error instanceof Error
           ? error.message
-          : "OcurriÃ³ un error al guardar."
+          : "Ocurrió un error al guardar."
       );
     } finally {
       setSaving(false);
@@ -213,7 +226,7 @@ export default function AdminSponsorForm({
       <div className="grid gap-5 md:grid-cols-2">
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            TÃtulo
+            Título
           </span>
           <input
             value={title}
@@ -224,12 +237,12 @@ export default function AdminSponsorForm({
 
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            Texto del botÃ³n
+            Texto del botón
           </span>
           <input
             value={ctaText}
             onChange={(e) => setCtaText(e.target.value)}
-            placeholder="Ver mÃ¡s"
+            placeholder="Ver más"
             className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 font-bold outline-none focus:border-[#0f3c8c]"
           />
         </label>
@@ -237,7 +250,7 @@ export default function AdminSponsorForm({
 
       <label className="block">
         <span className="text-xs font-black uppercase text-slate-500">
-          SubtÃtulo
+          Subtítulo
         </span>
         <textarea
           value={subtitle}
@@ -295,7 +308,7 @@ export default function AdminSponsorForm({
 
       <div className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
         <h2 className="text-lg font-black text-[#0f3c8c]">
-          Â¿A dÃ³nde lleva este sponsor?
+          ¿A dónde lleva este sponsor?
         </h2>
 
         <select
@@ -305,10 +318,10 @@ export default function AdminSponsorForm({
           }
           className="mt-4 h-12 w-full rounded-2xl border border-blue-200 bg-white px-4 font-black text-slate-800"
         >
-          <option value="business">PÃ¡gina de empresa</option>
+          <option value="business">Página de empresa</option>
           <option value="listing">Anuncio de Kubo</option>
-          <option value="reels">SecciÃ³n de Reels</option>
-          <option value="external">PÃ¡gina web externa</option>
+          <option value="reels">Sección de Reels</option>
+          <option value="external">Página web externa</option>
           <option value="custom">Ruta personalizada</option>
         </select>
 
@@ -344,7 +357,7 @@ export default function AdminSponsorForm({
 
         {destinationType === "reels" ? (
           <div className="mt-4 rounded-2xl bg-white p-4 text-sm font-bold text-slate-600">
-            El usuario irÃ¡ directamente a la secciÃ³n de Reels de Kubo.
+            El usuario irá directamente a la secciÃ³n de Reels de Kubo.
           </div>
         ) : null}
 
@@ -377,7 +390,7 @@ export default function AdminSponsorForm({
       <div className="grid gap-5 md:grid-cols-2">
         <label>
           <span className="text-xs font-black uppercase text-slate-500">
-            UbicaciÃ³n
+            Ubicación
           </span>
 
           <select
@@ -388,8 +401,8 @@ export default function AdminSponsorForm({
             <option value="home-main">Principal de Home</option>
             <option value="home-side">Lateral de Home</option>
             <option value="home-feed">Feed de Home</option>
-            <option value="category">CategorÃa</option>
-            <option value="category-feed">Feed de categorÃa</option>
+            <option value="category">Categoría</option>
+            <option value="category-feed">Feed de categoría</option>
           </select>
         </label>
 
@@ -409,7 +422,7 @@ export default function AdminSponsorForm({
       {placement === "category" || placement === "category-feed" ? (
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            CategorÃa
+            Categoría
           </span>
           <input
             value={categorySlug}
@@ -470,7 +483,13 @@ export default function AdminSponsorForm({
         onClick={saveSponsor}
         className="h-13 w-full rounded-2xl bg-[#0f3c8c] px-6 py-4 font-black text-white shadow-sm hover:bg-[#0c2f6d] disabled:opacity-50"
       >
-        {saving ? "Guardando..." : "Guardar sponsor"}
+        {saving
+          ? mode === "create"
+            ? "Creando..."
+            : "Guardando..."
+          : mode === "create"
+            ? "Crear sponsor"
+            : "Guardar sponsor"}
       </button>
     </div>
   );
