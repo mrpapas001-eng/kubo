@@ -94,6 +94,7 @@ export default function AdminSponsorForm({
   );
 
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState("");
 
   const finalCtaUrl = useMemo(() => {
@@ -121,6 +122,44 @@ export default function AdminSponsorForm({
     externalUrl,
     customUrl,
   ]);
+
+  async function uploadSponsorImage(file: File) {
+    setUploadingImage(true);
+    setMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "No se pudo subir la imagen.");
+      }
+
+      const uploadedUrl = Array.isArray(data.urls) ? data.urls[0] : null;
+
+      if (!uploadedUrl) {
+        throw new Error("No se recibió la URL de la imagen.");
+      }
+
+      setImageUrl(uploadedUrl);
+      setMessage("Imagen subida correctamente.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al subir la imagen."
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  }
 
   async function saveSponsor() {
     setSaving(true);
@@ -162,7 +201,7 @@ export default function AdminSponsorForm({
       setMessage(
         error instanceof Error
           ? error.message
-          : "Ocurrió un error al guardar."
+          : "OcurriÃ³ un error al guardar."
       );
     } finally {
       setSaving(false);
@@ -174,7 +213,7 @@ export default function AdminSponsorForm({
       <div className="grid gap-5 md:grid-cols-2">
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            Título
+            TÃtulo
           </span>
           <input
             value={title}
@@ -185,12 +224,12 @@ export default function AdminSponsorForm({
 
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            Texto del botón
+            Texto del botÃ³n
           </span>
           <input
             value={ctaText}
             onChange={(e) => setCtaText(e.target.value)}
-            placeholder="Ver más"
+            placeholder="Ver mÃ¡s"
             className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 font-bold outline-none focus:border-[#0f3c8c]"
           />
         </label>
@@ -198,7 +237,7 @@ export default function AdminSponsorForm({
 
       <label className="block">
         <span className="text-xs font-black uppercase text-slate-500">
-          Subtítulo
+          SubtÃtulo
         </span>
         <textarea
           value={subtitle}
@@ -208,16 +247,40 @@ export default function AdminSponsorForm({
         />
       </label>
 
-      <label className="block">
+      <div className="block">
         <span className="text-xs font-black uppercase text-slate-500">
           Imagen del sponsor
         </span>
-        <input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://..."
-          className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 font-medium outline-none focus:border-[#0f3c8c]"
-        />
+
+        <div className="mt-2 grid gap-3 md:grid-cols-[1fr_auto]">
+          <input
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://..."
+            className="h-12 w-full rounded-2xl border border-slate-200 px-4 font-medium outline-none focus:border-[#0f3c8c]"
+          />
+
+          <label className={`flex h-12 cursor-pointer items-center justify-center rounded-2xl bg-[#0f3c8c] px-5 font-black text-white hover:bg-[#0c2f6d] ${uploadingImage ? "pointer-events-none opacity-50" : ""}`}>
+            {uploadingImage ? "Subiendo..." : "Subir imagen"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              disabled={uploadingImage}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  void uploadSponsorImage(file);
+                }
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+        </div>
+
+        <p className="mt-2 text-xs font-medium text-slate-500">
+          Puedes pegar una URL o elegir una imagen desde tu computador o celular.
+        </p>
 
         {imageUrl ? (
           <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
@@ -228,11 +291,11 @@ export default function AdminSponsorForm({
             />
           </div>
         ) : null}
-      </label>
+      </div>
 
       <div className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
         <h2 className="text-lg font-black text-[#0f3c8c]">
-          ¿A dónde lleva este sponsor?
+          Â¿A dÃ³nde lleva este sponsor?
         </h2>
 
         <select
@@ -242,10 +305,10 @@ export default function AdminSponsorForm({
           }
           className="mt-4 h-12 w-full rounded-2xl border border-blue-200 bg-white px-4 font-black text-slate-800"
         >
-          <option value="business">Página de empresa</option>
+          <option value="business">PÃ¡gina de empresa</option>
           <option value="listing">Anuncio de Kubo</option>
-          <option value="reels">Sección de Reels</option>
-          <option value="external">Página web externa</option>
+          <option value="reels">SecciÃ³n de Reels</option>
+          <option value="external">PÃ¡gina web externa</option>
           <option value="custom">Ruta personalizada</option>
         </select>
 
@@ -281,7 +344,7 @@ export default function AdminSponsorForm({
 
         {destinationType === "reels" ? (
           <div className="mt-4 rounded-2xl bg-white p-4 text-sm font-bold text-slate-600">
-            El usuario irá directamente a la sección de Reels de Kubo.
+            El usuario irÃ¡ directamente a la secciÃ³n de Reels de Kubo.
           </div>
         ) : null}
 
@@ -314,7 +377,7 @@ export default function AdminSponsorForm({
       <div className="grid gap-5 md:grid-cols-2">
         <label>
           <span className="text-xs font-black uppercase text-slate-500">
-            Ubicación
+            UbicaciÃ³n
           </span>
 
           <select
@@ -325,8 +388,8 @@ export default function AdminSponsorForm({
             <option value="home-main">Principal de Home</option>
             <option value="home-side">Lateral de Home</option>
             <option value="home-feed">Feed de Home</option>
-            <option value="category">Categoría</option>
-            <option value="category-feed">Feed de categoría</option>
+            <option value="category">CategorÃa</option>
+            <option value="category-feed">Feed de categorÃa</option>
           </select>
         </label>
 
@@ -346,7 +409,7 @@ export default function AdminSponsorForm({
       {placement === "category" || placement === "category-feed" ? (
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
-            Categoría
+            CategorÃa
           </span>
           <input
             value={categorySlug}
