@@ -44,3 +44,34 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Android signing keys
+android.keystore
+*.keystore
+*.jks
+
+# Android / Bubblewrap local
+.gradle/
+app/build/
+app/build.gradle
+app/src/
+build.gradle
+gradle.properties
+gradle/
+gradlew
+gradlew.bat
+manifest-checksum.txt
+settings.gradle
+store_icon.png
+twa-manifest.json
+
+# Android build outputs
+app-release-*.apk
+app-release-*.apk.idsig
+app-release-*.aab
+
+# Android signing keys
+android.keystore
+android.keystore.compromised
+*.keystore
+*.jks
