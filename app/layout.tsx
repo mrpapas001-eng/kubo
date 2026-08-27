@@ -1,5 +1,6 @@
 import { Nunito } from "next/font/google";
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -42,6 +43,8 @@ export default function RootLayout({
 
           <MobileBottomNav />
         </AuthProvider>
+
+        <Analytics />
       </body>
     </html>
   );
