@@ -216,9 +216,10 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const title = String(body?.title ?? "").trim();
-    const description = String(body?.description ?? "").trim();
-    const phone = String(body?.phone ?? "").replace(/\D/g, "").slice(0, 10);
-    const city = String(body?.city ?? "").trim();
+const description = String(body?.description ?? "").trim();
+const phone = String(body?.phone ?? "").replace(/\D/g, "").slice(0, 10);
+const contactUrl = String(body?.contactUrl ?? "").trim();
+const city = String(body?.city ?? "").trim();
     const location = String(body?.location ?? "").trim();
     const categorySlug = String(body?.categorySlug ?? "").trim();
     const subcategorySlug = String(body?.subcategorySlug ?? "").trim();
@@ -251,7 +252,8 @@ export async function POST(req: Request) {
     const isDonation = details?.kuboAyuda?.type === "DONATION";
 
     let finalPhone = phone;
-    let finalPrice = parsedPrice;
+let finalContactUrl = contactUrl || null;
+let finalPrice = parsedPrice;
 
     if (isDonation) {
       if (sellerType !== "PARTICULAR") {
@@ -298,7 +300,8 @@ export async function POST(req: Request) {
       }
 
       finalPhone = verifiedPhone;
-      finalPrice = 0;
+finalContactUrl = null;
+finalPrice = 0;
     }
 
     const businessName = String(body?.businessName ?? "").trim();
@@ -336,12 +339,39 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!finalPhone || finalPhone.length < 7) {
+    if (!isDonation) {
+  if (!finalPhone && !finalContactUrl) {
+    return NextResponse.json(
+      { ok: false, error: "Debes indicar un teléfono o un enlace de contacto." },
+      { status: 400 }
+    );
+  }
+
+  if (finalPhone && finalPhone.length < 7) {
+    return NextResponse.json(
+      { ok: false, error: "El teléfono no es válido." },
+      { status: 400 }
+    );
+  }
+
+  if (finalContactUrl) {
+    try {
+      const parsedContactUrl = new URL(finalContactUrl);
+
+      if (!["http:", "https:"].includes(parsedContactUrl.protocol)) {
+        return NextResponse.json(
+          { ok: false, error: "El enlace de contacto no es válido." },
+          { status: 400 }
+        );
+      }
+    } catch {
       return NextResponse.json(
-        { ok: false, error: "El teléfono no es válido." },
+        { ok: false, error: "El enlace de contacto no es válido." },
         { status: 400 }
       );
     }
+  }
+}
 
     if (!city) {
       return NextResponse.json(
@@ -531,8 +561,9 @@ export async function POST(req: Request) {
       data: {
         title,
         description,
-        phone: finalPhone,
-        price: finalPrice,
+phone: finalPhone,
+contactUrl: finalContactUrl,
+price: finalPrice,
         currency,
         city,
         location,

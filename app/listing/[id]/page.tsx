@@ -273,15 +273,17 @@ export default async function ListingDetail({ params }: PageProps) {
   const publishedDate = formatPublishedDate(listing.createdAt);
 
   const phone = String((listing as any).phone ?? "");
-  const cleanPhone = phone.replace(/\D/g, "");
+const cleanPhone = phone.replace(/\D/g, "");
 
-  const whatsappHref = cleanPhone
-    ? `https://wa.me/57${cleanPhone}?text=${encodeURIComponent(
-        `: ${listing.title}`
-      )}`
-    : "#";
+const contactUrl = String((listing as any).contactUrl ?? "").trim();
 
-  const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
+const whatsappHref = cleanPhone
+  ? `https://wa.me/57${cleanPhone}?text=${encodeURIComponent(
+      `: ${listing.title}`
+    )}`
+  : "#";
+
+const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
   const accountVerificationType = listingWithVerification.accountVerificationType;
   const sellerLabel =
     accountVerificationType === "EMPRESA"
@@ -506,37 +508,48 @@ const visibilityDescription = isPremiumListing
 ) : null}
 
                 <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`flex h-13 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white ${
-                      !cleanPhone ? "pointer-events-none opacity-50" : "hover:bg-green-600"
-                    }`}
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                    WhatsApp
-                  </a>
+  {cleanPhone ? (
+    <>
+      <a
+        href={whatsappHref}
+        target="_blank"
+        rel="noreferrer"
+        className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white hover:bg-green-600"
+      >
+        <MessageCircle className="h-5 w-5" />
+        WhatsApp
+      </a>
 
-                  <a
-                    href={callHref}
-                    className={`flex h-13 items-center justify-center gap-2 rounded-2xl border border-[#4f32c8]/40 bg-white text-sm font-black text-[#4f32c8] ${
-                      !cleanPhone ? "pointer-events-none opacity-50" : "hover:bg-slate-50"
-                    }`}
-                  >
-                    <Phone className="h-5 w-5" />
-                    Llamar
-                  </a>
-                  {reelUrl ? (
-  <a
-    href={reelUrl}
-    target="_blank"
-    rel="noreferrer"
-    className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-black text-sm font-black text-white hover:bg-slate-800 sm:col-span-2"
-  >
-    ▶ Ver reel
-  </a>
-) : null}
+      <a
+        href={callHref}
+        className="flex h-13 items-center justify-center gap-2 rounded-2xl border border-[#4f32c8]/40 bg-white text-sm font-black text-[#4f32c8] hover:bg-slate-50"
+      >
+        <Phone className="h-5 w-5" />
+        Llamar
+      </a>
+    </>
+  ) : contactUrl ? (
+    <a
+      href={contactUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-[#4f32c8] text-sm font-black text-white hover:bg-[#3f28a8] sm:col-span-2"
+    >
+      <MessageCircle className="h-5 w-5" />
+      Contactar al vendedor
+    </a>
+  ) : null}
+
+  {reelUrl ? (
+    <a
+      href={reelUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-black text-sm font-black text-white hover:bg-slate-800 sm:col-span-2"
+    >
+      ▶ Ver reel
+    </a>
+  ) : null}
 </div>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -650,6 +663,7 @@ const visibilityDescription = isPremiumListing
           url={pageUrl}
           whatsappHref={whatsappHref}
           canUseWhatsapp={Boolean(cleanPhone)}
+          contactUrl={contactUrl}
         />
       </div>
     );
@@ -927,17 +941,27 @@ const visibilityDescription = isPremiumListing
             ) : null}
 
 <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-  <a
-    href={whatsappHref}
-    target="_blank"
-    rel="noreferrer"
-    className={`flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white ${
-      !cleanPhone ? "pointer-events-none opacity-50" : "hover:bg-green-600"
-    }`}
-  >
-    <MessageCircle className="h-4 w-4" />
-    WhatsApp
-  </a>
+  {cleanPhone ? (
+    <a
+      href={whatsappHref}
+      target="_blank"
+      rel="noreferrer"
+      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white hover:bg-green-600"
+    >
+      <MessageCircle className="h-4 w-4" />
+      WhatsApp
+    </a>
+  ) : contactUrl ? (
+    <a
+      href={contactUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#4f32c8] text-sm font-black text-white hover:bg-[#3f28a8] sm:col-span-2"
+    >
+      <MessageCircle className="h-4 w-4" />
+      Contactar al vendedor
+    </a>
+  ) : null}
 
   <StartChatButton listingId={listing.id} />
 
@@ -994,35 +1018,48 @@ const visibilityDescription = isPremiumListing
               </h3>
 
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl bg-slate-50 px-4 py-4">
-                  <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-                    WhatsApp
-                  </div>
-                  <div className="mt-1 text-sm font-black text-slate-900">
-                    {phone || "No disponible"}
-                  </div>
-                </div>
+  {cleanPhone ? (
+    <>
+      <div className="rounded-2xl bg-slate-50 px-4 py-4">
+        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+          WhatsApp
+        </div>
+        <div className="mt-1 text-sm font-black text-slate-900">
+          {phone}
+        </div>
+      </div>
 
-                <div className="rounded-2xl bg-slate-50 px-4 py-4">
-                  <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-                    Llamadas
-                  </div>
-                  <div className="mt-1 text-sm font-black text-slate-900">
-                    {phone || "No disponible"}
-                  </div>
-                </div>
+      <div className="rounded-2xl bg-slate-50 px-4 py-4">
+        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+          Llamadas
+        </div>
+        <div className="mt-1 text-sm font-black text-slate-900">
+          {phone}
+        </div>
+      </div>
+    </>
+  ) : contactUrl ? (
+    <div className="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
+      <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+        Contacto
+      </div>
+      <div className="mt-1 text-sm font-black text-slate-900">
+        Contacto directo con el vendedor
+      </div>
+    </div>
+  ) : null}
 
-                <div className="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-                  <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-                    Ubicación
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-sm font-black text-slate-900">
-                    <MapPin className="h-4 w-4 text-[#0f3c8c]" />
-                    {listing.city ?? "No disponible"}
-                  </div>
-                </div>
-              </div>
-            </div>
+  <div className="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
+    <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+      Ubicación
+    </div>
+    <div className="mt-1 flex items-center gap-2 text-sm font-black text-slate-900">
+      <MapPin className="h-4 w-4 text-[#0f3c8c]" />
+      {listing.city ?? "No disponible"}
+    </div>
+  </div>
+</div>
+</div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
   <BackToResultsButton className="h-12 px-6" />
@@ -1059,6 +1096,7 @@ const visibilityDescription = isPremiumListing
         url={pageUrl}
         whatsappHref={whatsappHref}
         canUseWhatsapp={Boolean(cleanPhone)}
+        contactUrl={contactUrl}
       />
     </div>
   );

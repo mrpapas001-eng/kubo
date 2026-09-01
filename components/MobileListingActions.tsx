@@ -10,6 +10,7 @@ type Props = {
   url: string;
   whatsappHref: string;
   canUseWhatsapp: boolean;
+  contactUrl?: string;
 };
 
 export default function MobileListingActions({
@@ -18,6 +19,7 @@ export default function MobileListingActions({
   url,
   whatsappHref,
   canUseWhatsapp,
+  contactUrl,
 }: Props) {
   const [shared, setShared] = useState(false);
 
@@ -33,19 +35,29 @@ export default function MobileListingActions({
     } catch {}
   }
 
+  const sellerContactHref = canUseWhatsapp
+    ? whatsappHref
+    : contactUrl || "#";
+
+  const canContactSeller = canUseWhatsapp || Boolean(contactUrl);
+
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pb-[calc(max(env(safe-area-inset-bottom),0.5rem)+4.75rem)] pt-2 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] backdrop-blur md:hidden">
       <div className="mx-auto grid max-w-md grid-cols-[1fr_1fr_44px] gap-2">
         <a
-          href={whatsappHref}
+          href={sellerContactHref}
           target="_blank"
-          rel="noreferrer"
-          className={`flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white ${
-            canUseWhatsapp ? "hover:bg-green-600" : "pointer-events-none opacity-50"
+          rel="noopener noreferrer"
+          className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-black text-white ${
+            !canContactSeller
+              ? "pointer-events-none bg-slate-400 opacity-50"
+              : canUseWhatsapp
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-[#4f32c8] hover:bg-[#3f28a8]"
           }`}
         >
           <MessageCircle className="h-4 w-4" />
-          WhatsApp
+          {canUseWhatsapp ? "WhatsApp" : "Contactar"}
         </a>
 
         <StartChatButton listingId={listingId} />

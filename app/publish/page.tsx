@@ -430,6 +430,7 @@ export default function PublishPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [phone, setPhone] = useState("");
+  const [contactUrl, setContactUrl] = useState("");
   const [city, setCity] = useState<string>("Pereira");
   const [location, setLocation] = useState<string>("");
   const [manualCity, setManualCity] = useState("");
@@ -501,6 +502,7 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
       if (draft.title !== undefined) setTitle(draft.title);
       if (draft.description !== undefined) setDescription(draft.description);
       if (draft.phone !== undefined) setPhone(draft.phone);
+      if (draft.contactUrl !== undefined) setContactUrl(draft.contactUrl);
       if (draft.city !== undefined) setCity(draft.city);
       if (draft.manualCity !== undefined) setManualCity(draft.manualCity);
       if (draft.category !== undefined) setCategory(draft.category);
@@ -543,6 +545,7 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
       title,
       description,
       phone,
+      contactUrl,
       city,
       manualCity,
       category,
@@ -579,6 +582,7 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
     title,
     description,
     phone,
+    contactUrl,
     city,
     manualCity,
     category,
@@ -780,12 +784,29 @@ if (step === 4 || nextStep === 4) {
     return "Debes subir al menos una foto.";
   }
 
-  if (!phone.trim()) return "Ingresa un teléfono de contacto.";
+  if (!phone.trim() && !contactUrl.trim()) {
+  return "Ingresa un teléfono o un enlace de contacto.";
+}
 
+if (phone.trim()) {
   const cleanPhone = phone.replace(/\D/g, "");
+
   if (cleanPhone.length < 7 || cleanPhone.length > 10) {
     return "El teléfono debe tener entre 7 y 10 dígitos.";
   }
+}
+
+if (contactUrl.trim()) {
+  try {
+    const url = new URL(contactUrl.trim());
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return "El enlace de contacto no es válido.";
+    }
+  } catch {
+    return "El enlace de contacto no es válido.";
+  }
+}
 
   if (sellerType === "EMPRESA" && !businessName.trim()) {
     return "Ingresa el nombre de la empresa.";
@@ -981,8 +1002,9 @@ if (isMoto) {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim(),
-          phone: phone.replace(/\D/g, ""),
-          price: normalizedPrice ? Number(normalizedPrice) : null,
+phone: phone.trim() ? phone.replace(/\D/g, "") : null,
+contactUrl: contactUrl.trim() || null,
+price: normalizedPrice ? Number(normalizedPrice) : null,
           currency: "COP",
           city: finalCity,
           location: location.trim(),
@@ -1993,18 +2015,44 @@ if (!session) {
     </div>
   </div>
 ) : null}
-                  <label className="text-sm font-bold text-slate-700">Telefono</label>
-                  <input
-                    value={phone}
-                    onChange={(e) =>
-                      setPhone(e.target.value.replace(/[^\d]/g, "").slice(0, 10))
-                    }
-                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
-                    placeholder="Ej: 3001234567"
-                    inputMode="numeric"
-                    required
-                  />
-                </div>
+                 <div>
+  <label className="text-sm font-bold text-slate-700">
+    Teléfono de contacto (opcional)
+  </label>
+
+  <input
+    value={phone}
+    onChange={(e) =>
+      setPhone(e.target.value.replace(/[^\d]/g, "").slice(0, 10))
+    }
+    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+    placeholder="Ej: 3001234567"
+    inputMode="numeric"
+  />
+
+  <p className="mt-2 text-xs font-medium text-slate-500">
+    Puedes indicar un teléfono o usar un enlace de contacto.
+  </p>
+</div>
+
+<div>
+  <label className="text-sm font-bold text-slate-700">
+    Enlace para contactar al vendedor (opcional)
+  </label>
+
+  <input
+    type="url"
+    value={contactUrl}
+    onChange={(e) => setContactUrl(e.target.value)}
+    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
+    placeholder="https://..."
+  />
+
+  <p className="mt-2 text-xs font-medium text-slate-500">
+    Si no quieres mostrar un teléfono, pega aquí el enlace donde quieres recibir
+    los contactos.
+  </p>
+</div> 
                 <div>
   <label className="text-sm font-bold text-slate-700">
     Enlace del reel o video corto (opcional)
@@ -2019,6 +2067,7 @@ if (!session) {
     Puedes pegar un enlace de Instagram, TikTok, YouTube Shorts u otro video.
   </p>
 </div>
+              </div>
               </div>
             ) : null}
 

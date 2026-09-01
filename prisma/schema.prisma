@@ -82,6 +82,7 @@ model Listing {
   title           String
   description     String
   phone           String?
+  contactUrl      String?
   price           Float?
   currency        String
   city            String
