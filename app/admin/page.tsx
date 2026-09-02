@@ -358,6 +358,24 @@ export default async function AdminDashboardPage() {
   </div>
 </div>
         </div>
+{/* KUBO EMPRESAS */}
+<div className="mt-8">
+  <div className="mb-3 flex items-center gap-3">
+    <Building2 className="h-5 w-5 text-[#0f3c8c]" />
+
+    <h2 className="text-xl font-black text-slate-900">
+      Kubo Empresas
+    </h2>
+  </div>
+
+  <AdminLink
+    href="/admin/businesses"
+    title="Administrar empresas"
+    description="Crea y administra empresas, concesionarios, inmobiliarias y comercios que publican en Kubo."
+    icon={Building2}
+    actionLabel="Abrir Kubo Empresas"
+  />
+</div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <AdminLink

@@ -911,15 +911,49 @@ const visibilityDescription = isPremiumListing
 
                 <div className="grid grid-cols-2 gap-3">
                   {isCar ? (
-                    <>
-                      <StatCard label="Marca" value={car?.brand ?? null} />
-                      <StatCard label="Modelo" value={car?.model ?? null} />
-                      <StatCard label="Año" value={car?.year ?? null} />
-                      <StatCard label="Kilometraje" value={kmFormatted} />
-                      <StatCard label="Combustible" value={car?.fuel ?? null} />
-                      <StatCard label="Transmisión" value={car?.transmission ?? null} />
-                    </>
-                  ) : null}
+  <>
+    <StatCard label="Marca" value={car?.brand ?? null} />
+    <StatCard label="Modelo" value={car?.model ?? null} />
+    <StatCard label="Versión" value={car?.version ?? null} />
+    <StatCard label="Año" value={car?.year ?? null} />
+    <StatCard label="Kilometraje" value={kmFormatted} />
+    <StatCard label="Combustible" value={car?.fuel ?? null} />
+    <StatCard label="Transmisión" value={car?.transmission ?? null} />
+    <StatCard label="Tracción" value={car?.traction ?? null} />
+    {car?.equipment ? (
+  <>
+    <StatCard
+      label="Aire acondicionado"
+      value={car.equipment.airConditioning ? "Sí" : "No"}
+    />
+    <StatCard
+      label="Vidrios eléctricos"
+      value={car.equipment.powerWindows ? "Sí" : "No"}
+    />
+    <StatCard
+      label="Airbags"
+      value={car.equipment.airbags ? "Sí" : "No"}
+    />
+    <StatCard
+      label="ABS"
+      value={car.equipment.abs ? "Sí" : "No"}
+    />
+    <StatCard
+      label="Techo corredizo"
+      value={car.equipment.sunroof ? "Sí" : "No"}
+    />
+    <StatCard
+      label="Cámara de reversa"
+      value={car.equipment.reverseCamera ? "Sí" : "No"}
+    />
+    <StatCard
+      label="Retrovisores eléctricos"
+      value={car.equipment.electricMirrors ? "Sí" : "No"}
+    />
+  </>
+) : null}
+  </>
+) : null}
 
                   {isRealEstate ? (
                     <>

@@ -454,6 +454,17 @@ export default function PublishPage() {
   const [carFuel, setCarFuel] = useState<string>("Gasolina");
   const [carTransmission, setCarTransmission] = useState<string>("Mecánica");
 
+  const [carVersion, setCarVersion] = useState<string>("");
+const [carTraction, setCarTraction] = useState<string>("4x2");
+
+const [carAirConditioning, setCarAirConditioning] = useState(false);
+const [carPowerWindows, setCarPowerWindows] = useState(false);
+const [carAirbags, setCarAirbags] = useState(false);
+const [carABS, setCarABS] = useState(false);
+const [carSunroof, setCarSunroof] = useState(false);
+const [carReverseCamera, setCarReverseCamera] = useState(false);
+const [carElectricMirrors, setCarElectricMirrors] = useState(false);
+
   const [motoBrand, setMotoBrand] = useState<string>(MOTO_BRANDS[0]);
   const [motoModel, setMotoModel] = useState<string>("");
   const [motoYear, setMotoYear] = useState<string>("");
@@ -518,6 +529,15 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
       if (draft.carKm !== undefined) setCarKm(draft.carKm);
       if (draft.carFuel !== undefined) setCarFuel(draft.carFuel);
       if (draft.carTransmission !== undefined) setCarTransmission(draft.carTransmission);
+      if (draft.carVersion !== undefined) setCarVersion(draft.carVersion);
+if (draft.carTraction !== undefined) setCarTraction(draft.carTraction);
+if (draft.carAirConditioning !== undefined) setCarAirConditioning(draft.carAirConditioning);
+if (draft.carPowerWindows !== undefined) setCarPowerWindows(draft.carPowerWindows);
+if (draft.carAirbags !== undefined) setCarAirbags(draft.carAirbags);
+if (draft.carABS !== undefined) setCarABS(draft.carABS);
+if (draft.carSunroof !== undefined) setCarSunroof(draft.carSunroof);
+if (draft.carReverseCamera !== undefined) setCarReverseCamera(draft.carReverseCamera);
+if (draft.carElectricMirrors !== undefined) setCarElectricMirrors(draft.carElectricMirrors);
 
       if (draft.motoBrand !== undefined) setMotoBrand(draft.motoBrand);
       if (draft.motoModel !== undefined) setMotoModel(draft.motoModel);
@@ -560,6 +580,15 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
       carKm,
       carFuel,
       carTransmission,
+      carVersion,
+carTraction,
+carAirConditioning,
+carPowerWindows,
+carAirbags,
+carABS,
+carSunroof,
+carReverseCamera,
+carElectricMirrors,
       motoBrand,
       motoModel,
       motoYear,
@@ -597,6 +626,15 @@ const [promotionError, setPromotionError] = useState<string | null>(null);
     carKm,
     carFuel,
     carTransmission,
+    carVersion,
+carTraction,
+carAirConditioning,
+carPowerWindows,
+carAirbags,
+carABS,
+carSunroof,
+carReverseCamera,
+carElectricMirrors,
     motoBrand,
     motoModel,
     motoYear,
@@ -953,16 +991,28 @@ if (reelUrl && reelUrl.trim() !== "") {
 }
 
 if (isCar) {
-details.motor = {
-  type: "carro",
-  brand: carBrand,
-  model: carModel || null,
-  year: carYear ? Number(carYear) : null,
-  km: carKm ? Number(carKm) : null,
-  fuel: carFuel,
-  transmission: carTransmission,
-};
-      }
+  details.motor = {
+    type: "carro",
+    brand: carBrand,
+    model: carModel || null,
+    version: carVersion || null,
+    year: carYear ? Number(carYear) : null,
+    km: carKm ? Number(carKm) : null,
+    fuel: carFuel,
+    transmission: carTransmission,
+    traction: carTraction,
+
+    equipment: {
+      airConditioning: carAirConditioning,
+      powerWindows: carPowerWindows,
+      airbags: carAirbags,
+      abs: carABS,
+      sunroof: carSunroof,
+      reverseCamera: carReverseCamera,
+      electricMirrors: carElectricMirrors,
+    },
+  };
+}
 if (isMoto) {
   details.motor = {
     type: "moto",
@@ -998,6 +1048,9 @@ if (isMoto) {
 
       const normalizedPrice = String(price).replace(/\D/g, "");
 
+      const businessId =
+  new URLSearchParams(window.location.search).get("businessId");
+
       const res = await fetch("/api/listings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1019,6 +1072,9 @@ price: normalizedPrice ? Number(normalizedPrice) : null,
           details,
           // normalizamos el email para evitar problemas de mayúsculas/espacios
           ownerEmail: session?.user?.email?.toLowerCase().trim() ?? null,
+
+          businessId: businessId || null,
+
           businessName: businessName.trim(),
 businessDescription: businessDescription.trim(),
 businessWebsite: businessWebsite.trim(),
@@ -1499,7 +1555,17 @@ if (!session) {
           value={carModel}
           onChange={(e) => setCarModel(e.target.value)}
           className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-          placeholder="Ej: Q3, Duster, Mazda 3..."
+          placeholder="Ej: 316i F30, Duster, Mazda 3..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Versión</label>
+        <input
+          value={carVersion}
+          onChange={(e) => setCarVersion(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: Ejecutivo TP 1.6CC"
         />
       </div>
 
@@ -1515,12 +1581,12 @@ if (!session) {
       </div>
 
       <div>
-        <label className="text-sm font-bold text-slate-700">Km</label>
+        <label className="text-sm font-bold text-slate-700">Kilometraje</label>
         <input
           value={carKm}
           onChange={(e) => setCarKm(e.target.value.replace(/\D/g, ""))}
           className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-          placeholder="Ej: 45000"
+          placeholder="Ej: 138400"
           inputMode="numeric"
         />
       </div>
@@ -1550,6 +1616,97 @@ if (!session) {
           <option value="Mecánica">Mecánica</option>
           <option value="Automática">Automática</option>
         </select>
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">Tracción</label>
+        <select
+          value={carTraction}
+          onChange={(e) => setCarTraction(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="4x2">4x2</option>
+          <option value="4x4">4x4</option>
+          <option value="AWD">AWD</option>
+        </select>
+      </div>
+    </div>
+
+    <div className="mt-6">
+      <div className="text-sm font-black text-slate-900">
+        Equipamiento
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carAirConditioning}
+            onChange={(e) => setCarAirConditioning(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Aire acondicionado
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carPowerWindows}
+            onChange={(e) => setCarPowerWindows(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Vidrios eléctricos
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carAirbags}
+            onChange={(e) => setCarAirbags(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Airbags
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carABS}
+            onChange={(e) => setCarABS(e.target.checked)}
+            className="h-4 w-4"
+          />
+          ABS
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carSunroof}
+            onChange={(e) => setCarSunroof(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Techo corredizo
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carReverseCamera}
+            onChange={(e) => setCarReverseCamera(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Cámara de reversa
+        </label>
+
+        <label className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-700">
+          <input
+            type="checkbox"
+            checked={carElectricMirrors}
+            onChange={(e) => setCarElectricMirrors(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Retrovisores eléctricos
+        </label>
       </div>
     </div>
   </div>
