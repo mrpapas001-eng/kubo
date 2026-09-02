@@ -134,14 +134,16 @@ const CATEGORY_OPTIONS: Array<{
     label: "Inmobiliaria",
     subs: [
       { slug: "casa", label: "Casa" },
-      { slug: "apartamento", label: "Apartamento" },
-      { slug: "apartaestudio", label: "Apartaestudio" },
-      { slug: "local-comercial", label: "Local comercial" },
-      { slug: "finca", label: "Finca" },
-      { slug: "lote", label: "Lote" },
-      { slug: "casa-campestre", label: "Casa campestre" },
-      { slug: "bodega", label: "Bodega" },
-      { slug: "otros-inmuebles", label: "Otros inmuebles" },
+{ slug: "apartamento", label: "Apartamento" },
+{ slug: "apartaestudio", label: "Apartaestudio" },
+{ slug: "local-comercial", label: "Local comercial" },
+{ slug: "finca", label: "Finca" },
+{ slug: "finca-vacacional", label: "Finca vacacional" },
+{ slug: "glamping-cabanas", label: "Glamping y cabañas" },
+{ slug: "lote", label: "Lote" },
+{ slug: "casa-campestre", label: "Casa campestre" },
+{ slug: "bodega", label: "Bodega" },
+{ slug: "otros-inmuebles", label: "Otros inmuebles" },
     ],
   },
   {
@@ -1843,38 +1845,98 @@ if (!session) {
                   ) : null}
 
                   {previewUrls.length ? (
-  <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-5">
-    {previewUrls.map((u, i) => (
-      <div
-        key={`${u}-${i}`}
-        className="relative overflow-hidden rounded-xl border border-slate-200"
-      >
-        <img
-          src={u}
-          alt={`preview-${i}`}
-          className="aspect-square w-full object-cover"
-        />
+  <div>
+    <p className="mt-3 text-xs font-bold text-slate-500">
+      Mantén pulsada una foto y arrástrala para cambiar el orden.
+      La primera foto será la portada del anuncio.
+    </p>
 
-        <button
-          type="button"
-          onClick={() => {
-            URL.revokeObjectURL(u);
-
-            setImageFiles((prev) =>
-              prev.filter((_, index) => index !== i)
-            );
-
-            setPreviewUrls((prev) =>
-              prev.filter((_, index) => index !== i)
-            );
+    <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-5">
+      {previewUrls.map((u, i) => (
+        <div
+          key={u}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData("text/plain", String(i));
+            e.dataTransfer.effectAllowed = "move";
           }}
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-sm font-black text-white shadow-md hover:bg-black"
-          aria-label={`Eliminar foto ${i + 1}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+
+            const fromIndex = Number(
+              e.dataTransfer.getData("text/plain")
+            );
+
+            const toIndex = i;
+
+            if (
+              Number.isNaN(fromIndex) ||
+              fromIndex === toIndex
+            ) {
+              return;
+            }
+
+            setImageFiles((prev) => {
+              const next = [...prev];
+              const [moved] = next.splice(fromIndex, 1);
+              next.splice(toIndex, 0, moved);
+              return next;
+            });
+
+            setPreviewUrls((prev) => {
+              const next = [...prev];
+              const [moved] = next.splice(fromIndex, 1);
+              next.splice(toIndex, 0, moved);
+              return next;
+            });
+          }}
+          className={`relative cursor-grab overflow-hidden rounded-xl border-2 active:cursor-grabbing ${
+            i === 0
+              ? "border-[#0f3c8c]"
+              : "border-slate-200"
+          }`}
         >
-          ×
-        </button>
-      </div>
-    ))}
+          <img
+            src={u}
+            alt={`preview-${i}`}
+            className="aspect-square w-full object-cover"
+          />
+
+          {i === 0 ? (
+            <div className="absolute bottom-2 left-2 rounded-full bg-[#0f3c8c] px-2.5 py-1 text-[10px] font-black text-white shadow-md">
+              ⭐ PORTADA
+            </div>
+          ) : (
+            <div className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">
+              {i + 1}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              URL.revokeObjectURL(u);
+
+              setImageFiles((prev) =>
+                prev.filter((_, index) => index !== i)
+              );
+
+              setPreviewUrls((prev) =>
+                prev.filter((_, index) => index !== i)
+              );
+            }}
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-sm font-black text-white shadow-md hover:bg-black"
+            aria-label={`Eliminar foto ${i + 1}`}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
   </div>
 ) : null}
                 </div>
