@@ -212,7 +212,7 @@ export default function HomeListingsClient({
 
       try {
         const res = await fetch(
-          `/api/listings?take=12&skip=0&city=${encodeURIComponent(selectedCity)}`,
+          `/api/listings?take=12&skip=0&city=${encodeURIComponent(selectedCity)}&balanced=1`,
           {
             cache: "no-store",
           }

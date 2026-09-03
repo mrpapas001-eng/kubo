@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Search, ChevronDown, ArrowRight } from "lucide-react";
+import {
+  MapPin,
+  Search,
+  ChevronDown,
+  ArrowRight,
+} from "lucide-react";
 import Link from "next/link";
 
 const CATEGORY_OPTIONS = [
@@ -14,13 +19,38 @@ const CATEGORY_OPTIONS = [
   { value: "servicios", label: "Servicios" },
   { value: "negocios", label: "Negocios" },
   { value: "informatica", label: "Informática" },
+  {
+    value: "electrodomesticos",
+    label: "Electrodomésticos",
+  },
   { value: "moda", label: "Moda" },
   { value: "bebes", label: "Bebés" },
   { value: "mascotas", label: "Mascotas" },
   { value: "juguetes", label: "Juguetes" },
-  { value: "papeleria-oficina", label: "Papelería y Oficina" },
-  { value: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
-  { value: "salud-belleza", label: "Salud y Belleza" },
+  {
+    value: "papeleria-oficina",
+    label: "Papelería y Oficina",
+  },
+  {
+    value: "herramientas-ferreteria",
+    label: "Herramientas y Ferretería",
+  },
+  {
+    value: "salud-belleza",
+    label: "Salud y Belleza",
+  },
+];
+
+const CITY_OPTIONS = [
+  "Pereira",
+  "Dosquebradas",
+  "Santa Rosa de Cabal",
+  "La Virginia",
+  "Cartago",
+  "Armenia",
+  "Bogotá",
+  "Medellín",
+  "Cali",
 ];
 
 export default function HomeHero() {
@@ -29,26 +59,39 @@ export default function HomeHero() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [city, setCity] = useState("Pereira");
+  const [showCityPicker, setShowCityPicker] = useState(false);
 
   function handleSearch() {
     const params = new URLSearchParams();
 
-    if (query.trim()) params.set("q", query.trim());
-    if (category) params.set("category", category);
-    if (city) params.set("city", city);
+    if (query.trim()) {
+      params.set("q", query.trim());
+    }
+
+    if (category) {
+      params.set("category", category);
+    }
+
+    if (city) {
+      params.set("city", city);
+    }
 
     const qs = params.toString();
+
     router.push(qs ? `/buscar?${qs}` : "/buscar");
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) {
     if (e.key === "Enter") {
       handleSearch();
     }
   }
 
-  function handleChipClick(value: string) {
-    router.push(`/categoria/${value}`);
+  function selectCity(value: string) {
+    setCity(value);
+    setShowCityPicker(false);
   }
 
   return (
@@ -77,7 +120,8 @@ export default function HomeHero() {
               </h1>
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/85 md:text-base">
-                Compra, vende o encuentra servicios en tu ciudad con total confianza.
+                Compra, vende o encuentra servicios en tu ciudad
+                con total confianza.
               </p>
             </div>
 
@@ -89,18 +133,56 @@ export default function HomeHero() {
                 <span className="text-[10px] font-black text-[#0f3c8c] md:text-xs">
                   🇨🇴 CON KUBO AYUDA ❤️
                 </span>
+
                 <span className="hidden text-xs font-semibold text-[#0f3c8c] md:inline">
                   Personas ayudando a personas
                 </span>
+
                 <ArrowRight className="h-3.5 w-3.5 text-[#0f3c8c] transition group-hover:translate-x-0.5 md:h-4 md:w-4" />
               </Link>
 
-              <div className="rounded-[20px] border border-white/10 bg-slate-900/35 px-5 py-4 backdrop-blur-md">
-                <div className="flex items-center gap-2 text-sm font-black text-white">
-                  <MapPin className="h-4 w-4 text-rose-300" />
-                  {city}, Colombia
+              <div className="relative">
+                <div className="rounded-[20px] border border-white/10 bg-slate-900/35 px-5 py-4 backdrop-blur-md">
+                  <div className="flex items-center gap-2 text-sm font-black text-white">
+                    <MapPin className="h-4 w-4 text-rose-300" />
+                    {city}, Colombia
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowCityPicker((prev) => !prev)
+                    }
+                    className="mt-1 flex items-center gap-1 text-sm text-white/75 transition hover:text-white"
+                  >
+                    Cambiar ciudad
+                    <ChevronDown
+                      className={`h-4 w-4 transition ${
+                        showCityPicker ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
                 </div>
-                <div className="mt-1 text-sm text-white/75">Cambiar ciudad</div>
+
+                {showCityPicker ? (
+                  <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-full min-w-[230px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-2xl">
+                    {CITY_OPTIONS.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => selectCity(item)}
+                        className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition hover:bg-slate-100 ${
+                          city === item
+                            ? "bg-blue-50 text-[#0f3c8c]"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        <MapPin className="h-4 w-4" />
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
@@ -109,6 +191,7 @@ export default function HomeHero() {
             <div className="flex flex-col overflow-hidden rounded-2xl border border-white/15 bg-white shadow-[0_18px_35px_rgba(15,23,42,0.18)] md:flex-row">
               <div className="flex h-14 items-center gap-3 px-4 md:flex-1">
                 <Search className="h-5 w-5 text-slate-400" />
+
                 <input
                   type="text"
                   value={query}
@@ -128,11 +211,15 @@ export default function HomeHero() {
                   className="h-full w-full appearance-none bg-transparent px-4 pr-10 text-sm font-semibold text-slate-700 outline-none"
                 >
                   {CATEGORY_OPTIONS.map((item) => (
-                    <option key={item.value} value={item.value}>
+                    <option
+                      key={item.value}
+                      value={item.value}
+                    >
                       {item.label}
                     </option>
                   ))}
                 </select>
+
                 <ChevronDown className="pointer-events-none absolute right-4 h-4 w-4 text-slate-400" />
               </div>
 
@@ -144,21 +231,19 @@ export default function HomeHero() {
                   onChange={(e) => setCity(e.target.value)}
                   className="h-full w-full appearance-none bg-transparent px-4 pl-10 pr-8 text-sm font-semibold text-slate-700 outline-none"
                 >
-                  <option value="Pereira">Pereira</option>
-                  <option value="Dosquebradas">Dosquebradas</option>
-                  <option value="Santa Rosa de Cabal">Santa Rosa de Cabal</option>
-                  <option value="La Virginia">La Virginia</option>
-                  <option value="Cartago">Cartago</option>
-                  <option value="Armenia">Armenia</option>
-                  <option value="Bogotá">Bogotá</option>
-                  <option value="Medellín">Medellín</option>
-                  <option value="Cali">Cali</option>
+                  {CITY_OPTIONS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
                 </select>
+
                 <MapPin className="pointer-events-none absolute left-4 h-4 w-4 text-slate-400" />
               </div>
 
               <div className="p-2 md:pl-0">
                 <button
+                  type="button"
                   onClick={handleSearch}
                   className="h-10 w-full rounded-xl bg-[#0f3c8c] px-6 text-sm font-black text-white transition hover:bg-[#0c2f6d] md:w-auto"
                 >

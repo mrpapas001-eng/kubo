@@ -106,6 +106,19 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "varios",
   ],
 
+electrodomesticos: [
+  "neveras",
+  "lavadoras",
+  "secadoras",
+  "cocinas",
+  "hornos",
+  "microondas",
+  "aires-acondicionados",
+  "pequenos-electrodomesticos",
+  "industrial",
+  "otros",
+],
+
   moda: [
     "moda-hombre",
     "moda-mujer",
@@ -193,6 +206,9 @@ export async function GET(req: Request) {
     const skipParam = Number(url.searchParams.get("skip") ?? 0);
     const cityParam = String(url.searchParams.get("city") ?? "").trim();
 
+    const balanced =
+      url.searchParams.get("balanced") === "1";
+
     const take = Number.isNaN(takeParam)
       ? 12
       : Math.max(1, Math.min(takeParam, 24));
@@ -209,6 +225,77 @@ export async function GET(req: Request) {
       ],
       ...(cityParam ? { city: cityParam } : {}),
     };
+
+    // =====================================================
+    // HOME VARIADA
+    // =====================================================
+
+    if (balanced) {
+      // Tomamos un grupo amplio de anuncios recientes.
+      const pool = await prisma.listing.findMany({
+        where,
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 200,
+      });
+
+      const groups = new Map<string, any[]>();
+
+      for (const item of pool) {
+        const category = String(
+          item.categorySlug ?? "otros"
+        );
+
+        if (!groups.has(category)) {
+          groups.set(category, []);
+        }
+
+        groups.get(category)!.push(item);
+      }
+
+      const mixed: any[] = [];
+
+      while (
+        mixed.length < take &&
+        Array.from(groups.values()).some(
+          (items) => items.length > 0
+        )
+      ) {
+        for (const items of groups.values()) {
+          if (mixed.length >= take) break;
+
+          const next = items.shift();
+
+          if (next) {
+            mixed.push(next);
+          }
+        }
+      }
+
+      const itemsWithVerification =
+        await attachAccountVerification(mixed);
+
+      const total = await prisma.listing.count({
+        where,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        items: itemsWithVerification,
+
+        // Luego "Cargar más" puede continuar
+        // con el listado normal desde el comienzo.
+        nextSkip: 0,
+
+        hasMore: total > mixed.length,
+        fallbackUsed: false,
+      });
+    }
+
+    // =====================================================
+    // LISTADO NORMAL
+    // =====================================================
 
     const items = await prisma.listing.findMany({
       where,
@@ -237,7 +324,8 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: error?.message ?? "Error cargando anuncios.",
+        error:
+          error?.message ?? "Error cargando anuncios.",
       },
       {
         status: 500,
