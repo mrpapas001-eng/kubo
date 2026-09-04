@@ -35,6 +35,14 @@ type DealType = "venta" | "arriendo";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
+type PublishingBusiness = {
+  id: string;
+  name: string;
+  logo: string | null;
+  businessType: string | null;
+  isVerified: boolean;
+};
+
 const CAR_BRANDS = [
   "AUDI",
   "BMW",
@@ -496,15 +504,56 @@ const [sellerType, setSellerType] = useState<"PARTICULAR" | "EMPRESA">(
 );
 
 const [publishingForBusiness, setPublishingForBusiness] = useState(false);
+const [publishingBusiness, setPublishingBusiness] =
+  useState<PublishingBusiness | null>(null);
+const [businessLookupError, setBusinessLookupError] = useState<string | null>(
+  null
+);
 
 useEffect(() => {
   const businessId =
     new URLSearchParams(window.location.search).get("businessId");
 
-  if (businessId) {
-    setPublishingForBusiness(true);
-    setSellerType("EMPRESA");
+  if (!businessId) return;
+
+  const controller = new AbortController();
+
+  setPublishingForBusiness(true);
+  setSellerType("EMPRESA");
+  setBusinessLookupError(null);
+
+  async function loadBusiness() {
+    try {
+      const response = await fetch(
+        `/api/businesses/${encodeURIComponent(businessId ?? "")}`,
+        {
+          signal: controller.signal,
+          cache: "no-store",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok || !data?.business) {
+        setBusinessLookupError(
+          data?.error || "No se pudo cargar la empresa seleccionada."
+        );
+        return;
+      }
+
+      setPublishingBusiness(data.business);
+    } catch (error) {
+      if ((error as Error)?.name !== "AbortError") {
+        setBusinessLookupError(
+          "No se pudo cargar la empresa seleccionada."
+        );
+      }
+    }
   }
+
+  loadBusiness();
+
+  return () => controller.abort();
 }, []);
 
 
@@ -2055,14 +2104,40 @@ if (!session) {
                 <div>
   {publishingForBusiness ? (
     <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-      <div className="flex items-center gap-2 text-sm font-black text-emerald-800">
-        <CheckCircle2 className="h-5 w-5" />
-        Publicando para MOBILAUTOS
-      </div>
+      {businessLookupError ? (
+        <div className="text-sm font-black text-red-700">
+          {businessLookupError}
+        </div>
+      ) : publishingBusiness ? (
+        <div className="flex items-center gap-3">
+          {publishingBusiness.logo ? (
+            <img
+              src={publishingBusiness.logo}
+              alt={`Logo de ${publishingBusiness.name}`}
+              className="h-12 w-12 shrink-0 rounded-2xl border border-emerald-200 bg-white object-cover"
+            />
+          ) : (
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+          )}
 
-      <p className="mt-2 text-sm font-medium text-emerald-700">
-        Esta publicación quedará asociada automáticamente a MOBILAUTOS.
-      </p>
+          <div>
+            <div className="flex items-center gap-2 text-sm font-black text-emerald-800">
+              <CheckCircle2 className="h-5 w-5" />
+              Publicando para {publishingBusiness.name}
+            </div>
+
+            <p className="mt-1 text-sm font-medium text-emerald-700">
+              Esta publicación quedará asociada automáticamente a {publishingBusiness.name}.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="text-sm font-black text-emerald-800">
+          Cargando empresa...
+        </div>
+      )}
     </div>
   ) : (
     <>
