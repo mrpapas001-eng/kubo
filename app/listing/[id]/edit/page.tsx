@@ -221,14 +221,85 @@ setExistingImages(uniqueImages);
     setNewImages((current) => [selected, ...current]);
   }
 
-  async function uploadNewImages() {
-    if (newImages.length === 0) return [];
+  async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
 
+  const bitmap = await createImageBitmap(file);
+
+  const MAX_WIDTH = 1600;
+  const MAX_HEIGHT = 1600;
+
+  let width = bitmap.width;
+  let height = bitmap.height;
+
+  const scale = Math.min(
+    1,
+    MAX_WIDTH / width,
+    MAX_HEIGHT / height
+  );
+
+  width = Math.round(width * scale);
+  height = Math.round(height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    bitmap.close();
+    return file;
+  }
+
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(
+      resolve,
+      "image/jpeg",
+      0.78
+    );
+  });
+
+  if (!blob) {
+    return file;
+  }
+
+  if (blob.size >= file.size) {
+    return file;
+  }
+
+  const originalName =
+    file.name.replace(/\.[^/.]+$/, "") || "foto";
+
+  return new File(
+    [blob],
+    `${originalName}.jpg`,
+    {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    }
+  );
+}
+
+async function uploadNewImages() {
+  if (newImages.length === 0) return [];
+
+  const uploadedUrls: string[] = [];
+
+  const filesToUpload = await Promise.all(
+    newImages
+      .slice(0, MAX_IMAGES)
+      .map((item) => compressImage(item.file))
+  );
+
+  for (const file of filesToUpload) {
     const formData = new FormData();
-
-    newImages.forEach((item) => {
-      formData.append("files", item.file);
-    });
+    formData.append("files", file);
 
     const res = await fetch("/api/upload", {
       method: "POST",
@@ -237,14 +308,23 @@ setExistingImages(uniqueImages);
 
     const data = await res.json();
 
-    if (!res.ok || !data?.ok || !Array.isArray(data?.urls)) {
-      throw new Error(data?.error ?? "No se pudieron subir las imágenes.");
+    if (!res.ok || !data?.ok) {
+      throw new Error(
+        data?.error ?? "No se pudieron subir las imágenes."
+      );
     }
 
-    return data.urls
-      .map((url: unknown) => String(url ?? "").trim())
-      .filter(Boolean);
+    const urls = Array.isArray(data?.urls)
+      ? data.urls
+          .map((url: unknown) => String(url ?? "").trim())
+          .filter(Boolean)
+      : [];
+
+    uploadedUrls.push(...urls);
   }
+
+  return uploadedUrls;
+}
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -279,7 +359,7 @@ setExistingImages(uniqueImages);
           title: title.trim(),
           description: description.trim(),
           price: price.trim(),
-          phone: phone.replace(/\D/g, "").slice(0, 10),
+          phone: phone.replace(/\D/g, "").slice(0, 25),
           imageUrls: finalImages,
         }),
       });
@@ -542,7 +622,7 @@ setExistingImages(uniqueImages);
                 </label>
 
                 <p className="mt-2 text-xs text-slate-500">
-                  JPG, PNG o WEBP. Máximo 8 MB por imagen y 10 fotos
+                  JPG, PNG o WEBP. Máximo 8 MB por imagen y 25 fotos
                   por anuncio.
                 </p>
               </div>
