@@ -221,38 +221,53 @@ export default function HomeFeaturedSection({
   const hasMoreExtra = extraVisibleCount < extraPool.length;
 
   useEffect(() => {
-    const target = loadMoreRef.current;
+  const target = loadMoreRef.current;
 
-    if (!target) return;
+  if (!target) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0]?.isIntersecting) return;
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]?.isIntersecting) return;
 
-        if (hasMoreExtra) {
-          setExtraVisibleCount((prev) => Math.min(prev + 8, extraPool.length));
-          return;
-        }
+      if (hasMoreExtra) {
+        const nextVisibleCount = Math.min(
+          extraVisibleCount + 8,
+          extraPool.length,
+        );
 
-        if (hasMoreFromServer && !loadingMore) {
+        setExtraVisibleCount(nextVisibleCount);
+
+        if (
+          nextVisibleCount >= extraPool.length &&
+          hasMoreFromServer &&
+          !loadingMore
+        ) {
           loadMoreFromServer();
         }
-      },
-      {
-        rootMargin: "300px",
-      },
-    );
 
-    observer.observe(target);
+        return;
+      }
 
-    return () => observer.disconnect();
-  }, [
-    hasMoreExtra,
-    extraPool.length,
-    hasMoreFromServer,
-    loadingMore,
-    allListings.length,
-  ]);
+      if (hasMoreFromServer && !loadingMore) {
+        loadMoreFromServer();
+      }
+    },
+    {
+      rootMargin: "300px",
+    },
+  );
+
+  observer.observe(target);
+
+  return () => observer.disconnect();
+}, [
+  hasMoreExtra,
+  extraPool.length,
+  extraVisibleCount,
+  hasMoreFromServer,
+  loadingMore,
+  allListings.length,
+]);
 
   function clearFilters() {
     setSelectedCity("");
