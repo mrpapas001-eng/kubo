@@ -254,12 +254,23 @@ export default async function BusinessOwnerDashboardPage() {
                             <span>{listing.views || 0} visitas</span>
                           </div>
 
-                          <Link
-                            href={`/listing/${listing.id}`}
-                            className="mt-2 inline-flex text-xs font-black text-[#0f3c8c]"
-                          >
-                            Ver anuncio →
-                          </Link>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Link
+                              href={`/listing/${listing.id}`}
+                              className="inline-flex h-8 items-center justify-center rounded-lg bg-slate-100 px-3 text-xs font-black text-slate-700"
+                            >
+                              Ver anuncio
+                            </Link>
+
+                            {listing.status !== "deleted" ? (
+                              <Link
+                                href={`/listing/${listing.id}/edit`}
+                                className="inline-flex h-8 items-center justify-center rounded-lg bg-[#0f3c8c] px-3 text-xs font-black text-white"
+                              >
+                                Editar anuncio
+                              </Link>
+                            ) : null}
+                          </div>
                         </div>
                       </article>
                     ))}

@@ -11,6 +11,31 @@ type RouteContext = {
   }>;
 };
 
+async function isBusinessOwner(
+  sessionEmail: string | null,
+  businessId: string | null
+) {
+  if (!sessionEmail || !businessId) {
+    return false;
+  }
+
+  const business = await prisma.business.findFirst({
+    where: {
+      id: businessId,
+      ownerEmail: {
+        equals: sessionEmail,
+        mode: "insensitive",
+      },
+      isActive: true,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return Boolean(business);
+}
+
 export async function GET(_req: Request, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
@@ -43,12 +68,19 @@ export async function GET(_req: Request, context: RouteContext) {
     const ownerEmail =
       listing.ownerEmail?.toLowerCase().trim() ?? null;
 
+    const businessOwner = await isBusinessOwner(
+      sessionEmail,
+      listing.businessId
+    );
+
     const canViewPrivate =
       Boolean(
         sessionEmail &&
           ownerEmail &&
           sessionEmail === ownerEmail
-      ) || isAdmin;
+      ) ||
+      businessOwner ||
+      isAdmin;
 
     if (listing.status !== "active" && !canViewPrivate) {
       return NextResponse.json(
@@ -117,8 +149,14 @@ export async function PUT(req: Request, context: RouteContext) {
 
     const isAdmin = isAdminEmail(sessionEmail);
 
+    const businessOwner = await isBusinessOwner(
+      sessionEmail,
+      existing.businessId
+    );
+
     const canEdit =
       Boolean(ownerEmail && ownerEmail === sessionEmail) ||
+      businessOwner ||
       isAdmin;
 
     if (!canEdit) {
@@ -278,8 +316,14 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     const isAdmin = isAdminEmail(sessionEmail);
 
+    const businessOwner = await isBusinessOwner(
+      sessionEmail,
+      existing.businessId
+    );
+
     const canChangeStatus =
       Boolean(ownerEmail && ownerEmail === sessionEmail) ||
+      businessOwner ||
       isAdmin;
 
     if (!canChangeStatus) {
@@ -391,8 +435,14 @@ export async function DELETE(_req: Request, context: RouteContext) {
 
     const isAdmin = isAdminEmail(sessionEmail);
 
+    const businessOwner = await isBusinessOwner(
+      sessionEmail,
+      existing.businessId
+    );
+
     const canDelete =
       Boolean(ownerEmail && ownerEmail === sessionEmail) ||
+      businessOwner ||
       isAdmin;
 
     if (!canDelete) {
