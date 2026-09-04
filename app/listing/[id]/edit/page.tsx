@@ -359,7 +359,7 @@ async function uploadNewImages() {
           title: title.trim(),
           description: description.trim(),
           price: price.trim(),
-          phone: phone.replace(/\D/g, "").slice(0, 25),
+          phone: phone.replace(/\D/g, "").slice(0, 10),
           imageUrls: finalImages,
         }),
       });

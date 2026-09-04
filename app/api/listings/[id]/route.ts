@@ -157,7 +157,7 @@ export async function PUT(req: Request, context: RouteContext) {
       ? body.imageUrls
           .map((url: unknown) => String(url ?? "").trim())
           .filter(Boolean)
-          .slice(0, 10)
+          .slice(0, 25)
       : null;
 
     if (imageUrls && imageUrls.length === 0) {
