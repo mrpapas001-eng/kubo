@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import {
+  ArrowLeft,
   Building2,
   CheckCircle2,
   Eye,
@@ -14,6 +15,7 @@ import {
 import { authOptions } from "@/lib/authOptions";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import BusinessListingActions from "@/components/BusinessListingActions";
 
 export default async function BusinessOwnerDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -91,6 +93,14 @@ export default async function BusinessOwnerDashboardPage() {
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-24 pt-6 md:px-6 md:py-10">
       <div className="mx-auto max-w-[1180px] space-y-8">
         <header>
+          <Link
+            href="/mi-cuenta"
+            className="mb-5 inline-flex items-center gap-2 text-sm font-black text-[#0f3c8c]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver a mi cuenta
+          </Link>
+
           <p className="text-xs font-black uppercase tracking-wide text-[#0f3c8c]">
             Kubo Empresas
           </p>
@@ -270,6 +280,12 @@ export default async function BusinessOwnerDashboardPage() {
                                 Editar anuncio
                               </Link>
                             ) : null}
+
+                            <BusinessListingActions
+                              listingId={listing.id}
+                              status={listing.status}
+                              hiddenReason={listing.hiddenReason}
+                            />
                           </div>
                         </div>
                       </article>
