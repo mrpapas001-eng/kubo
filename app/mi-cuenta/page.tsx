@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
+  Building2,
   HandHeart,
   Heart,
   Home,
@@ -12,6 +13,8 @@ import {
   UserRound,
   Settings,
 } from "lucide-react";
+import { authOptions } from "@/lib/authOptions";
+import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
 const accountLinks = [
@@ -61,7 +64,7 @@ const accountLinks = [
 ];
 
 export default async function MiCuentaPage() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect("/api/auth/signin");
@@ -69,7 +72,24 @@ export default async function MiCuentaPage() {
 
   const myEmail = session.user.email?.toLowerCase().trim() ?? null;
 
-  const isAdmin = myEmail === "contacto.kuboanuncios@gmail.com";
+  const isAdmin = isAdminEmail(myEmail);
+
+  const ownedBusiness = myEmail
+    ? await prisma.business.findFirst({
+        where: {
+          ownerEmail: {
+            equals: myEmail,
+            mode: "insensitive",
+          },
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          isVerified: true,
+        },
+      })
+    : null;
 
   const businessListings = myEmail
     ? await prisma.listing.findMany({
@@ -81,11 +101,11 @@ export default async function MiCuentaPage() {
       })
     : [];
 
-  const hasBusiness = businessListings.length > 0;
+  const hasBusiness = businessListings.length > 0 || Boolean(ownedBusiness);
 
   const hasVerifiedBusiness = businessListings.some(
     (item) => item.businessVerified
-  );
+  ) || Boolean(ownedBusiness?.isVerified);
 
   const accountVerifications = myEmail
     ? await prisma.accountVerification.findMany({
@@ -157,6 +177,29 @@ export default async function MiCuentaPage() {
               </p>
             </div>
           </Link>
+
+          {ownedBusiness || isAdmin ? (
+            <Link
+              href="/empresa"
+              className="mt-4 flex items-center gap-4 rounded-3xl border border-indigo-200 bg-indigo-50 px-5 py-5 text-[#0f3c8c] shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-100 hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
+                <Building2 className="h-6 w-6" />
+              </div>
+
+              <div className="min-w-0">
+                <div className="text-lg font-black">
+                  {ownedBusiness ? "Mi empresa" : "Panel de empresas"}
+                </div>
+
+                <p className="mt-1 text-sm font-medium text-[#0f3c8c]/80">
+                  {ownedBusiness
+                    ? `Administra las publicaciones y estadísticas de ${ownedBusiness.name}.`
+                    : "Consulta los paneles privados de las empresas de Kubo."}
+                </p>
+              </div>
+            </Link>
+          ) : null}
 
           {verificationSummary ? (
             <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
