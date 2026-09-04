@@ -98,7 +98,7 @@ export default function HomeHero({ initialCity }: Props) {
 
   return (
     <section className="mt-4 w-full">
-      <div className="relative w-full overflow-hidden rounded-[32px] border border-white/40 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+      <div className="relative w-full overflow-visible rounded-[32px] border border-white/40 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
         <img
           src="/hero-pereira.png"
           alt="Kubo"
