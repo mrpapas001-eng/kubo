@@ -9,7 +9,6 @@ import {
   Facebook,
   Globe,
   Instagram,
-  Mail,
   MapPin,
   MessageCircle,
   Phone,
@@ -37,35 +36,41 @@ export default async function CompanyPage({ params }: PageProps) {
 
   if (!slug) return notFound();
 
-  const listings = await prisma.listing.findMany({
+  const business = await prisma.business.findUnique({
     where: {
-      businessSlug: slug,
-      isBusiness: true,
-      status: "active",
+      slug,
     },
-    orderBy: {
-      createdAt: "desc",
+    include: {
+      listings: {
+        where: {
+          status: "active",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
-  if (listings.length === 0) return notFound();
+  if (!business || !business.isActive) return notFound();
+
+  const listings = business.listings;
 
   const listingsWithVerification = await attachAccountVerification(listings);
-  const first = listingsWithVerification[0];
 
-  const businessName = first.businessName || "Empresa verificada";
-  const businessType = first.businessType || "Empresa";
-  const businessLogo = first.businessLogo || "";
-  const isVerified = first.accountVerificationType === "EMPRESA";
-  const city = first.city || "Colombia";
-  const phone = first.phone || "";
-  const ownerEmail = first.ownerEmail || "";
+  const businessName = business.name;
+  const businessType = business.businessType || "Empresa";
+  const businessLogo = business.logo || "";
+  const isVerified = business.isVerified;
+  const city = business.city || listings[0]?.city || "Colombia";
+  const address = business.address || "";
+  const phone = business.phone || "";
   const businessDescription =
-    first.businessDescription || "Empresa verificada en Kubo Anuncios.";
-  const businessWebsite = normalizeExternalUrl(first.businessWebsite || "");
-  const businessInstagram = normalizeExternalUrl(first.businessInstagram || "");
-  const businessFacebook = normalizeExternalUrl(first.businessFacebook || "");
-  const businessWhatsapp = first.businessWhatsapp || "";
+    business.description || "Empresa en Kubo Anuncios.";
+  const businessWebsite = normalizeExternalUrl(business.website || "");
+  const businessInstagram = normalizeExternalUrl(business.instagram || "");
+  const businessFacebook = normalizeExternalUrl(business.facebook || "");
+  const businessWhatsapp = business.whatsapp || "";
 
   const totalViews = listings.reduce((sum, item) => {
     return sum + Number(item.views || 0);
@@ -73,7 +78,11 @@ export default async function CompanyPage({ params }: PageProps) {
 
   const whatsappNumber = businessWhatsapp || phone;
   const cleanWhatsapp = String(whatsappNumber).replace(/\D/g, "");
-  const whatsappHref = cleanWhatsapp ? `https://wa.me/57${cleanWhatsapp}` : "#";
+  const whatsappCountryNumber =
+    cleanWhatsapp.length === 10 ? `57${cleanWhatsapp}` : cleanWhatsapp;
+  const whatsappHref = whatsappCountryNumber
+    ? `https://wa.me/${whatsappCountryNumber}`
+    : "#";
   const hasSocialLinks =
     Boolean(businessWebsite) ||
     Boolean(businessInstagram) ||
@@ -218,7 +227,7 @@ export default async function CompanyPage({ params }: PageProps) {
                   </h2>
 
                   <p className="mt-2 text-sm font-medium text-slate-500">
-                    Publicaciones verificadas de esta empresa dentro de Kubo.
+                    Publicaciones activas de esta empresa dentro de Kubo.
                   </p>
                 </div>
 
@@ -227,11 +236,23 @@ export default async function CompanyPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {listingsWithVerification.length > 0 ? (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                   {listingsWithVerification.map((item) => (
-                  <ListingCard key={item.id} item={item} />
-                ))}
-              </div>
+                    <ListingCard key={item.id} item={item} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                  <h3 className="text-lg font-black text-slate-900">
+                    No hay anuncios activos en este momento
+                  </h3>
+
+                  <p className="mt-2 text-sm font-medium text-slate-500">
+                    Vuelve pronto para consultar nuevas publicaciones de {businessName}.
+                  </p>
+                </div>
+              )}
             </div>
 
             <aside className="space-y-4">
@@ -258,16 +279,11 @@ export default async function CompanyPage({ params }: PageProps) {
                     </div>
                   ) : null}
 
-                  {ownerEmail ? (
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 shrink-0 text-[#0f3c8c]" />
-                      <span className="break-all">{ownerEmail}</span>
-                    </div>
-                  ) : null}
-
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 shrink-0 text-[#0f3c8c]" />
-                    {city}
+                    <span>
+                      {address ? `${address}, ${city}` : city}
+                    </span>
                   </div>
                 </div>
 
