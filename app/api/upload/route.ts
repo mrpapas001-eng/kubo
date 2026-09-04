@@ -8,7 +8,7 @@ import { authOptions } from "@/lib/authOptions";
 
 export const runtime = "nodejs";
 
-const MAX_IMAGE_FILES = 10;
+const MAX_IMAGE_FILES = 25;
 const MAX_IMAGE_SIZE_MB = 8;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 

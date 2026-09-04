@@ -24,6 +24,11 @@ export const CATEGORIES: Category[] = [
       { slug: "carros", label: "Carros", template: "VEHICLE" },
       { slug: "motos", label: "Motos", template: "VEHICLE" },
       { slug: "repuestos", label: "Repuestos", template: "PRODUCT" },
+      {
+  slug: "remolques-traileres",
+  label: "Remolques y tráileres",
+  template: "PRODUCT",
+},
     ],
   },
   {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { isAdminEmail } from "@/lib/admin";
 import { attachAccountVerification } from "@/lib/accountVerification";
 
 type RouteContext = {
@@ -102,15 +103,21 @@ export async function PUT(req: Request, context: RouteContext) {
     }
 
     const ownerEmail = String(existing.ownerEmail ?? "")
-      .toLowerCase()
-      .trim();
+  .toLowerCase()
+  .trim();
 
-    if (!ownerEmail || ownerEmail !== sessionEmail) {
-      return NextResponse.json(
-        { ok: false, error: "No tienes permisos para editar este anuncio." },
-        { status: 403 }
-      );
-    }
+const isAdmin = isAdminEmail(sessionEmail);
+
+const canEdit =
+  Boolean(ownerEmail && ownerEmail === sessionEmail) ||
+  isAdmin;
+
+if (!canEdit) {
+  return NextResponse.json(
+    { ok: false, error: "No tienes permisos para editar este anuncio." },
+    { status: 403 }
+  );
+}
 
     if (existing.status === "deleted") {
       return NextResponse.json(

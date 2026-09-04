@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-const MAX_IMAGES = 10;
+const MAX_IMAGES = 25;
 
 type NewImage = {
   file: File;

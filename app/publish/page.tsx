@@ -11,6 +11,7 @@ type CategoryKey =
   | "motor"
   | "inmobiliaria"
   | "celulares"
+  | "electrodomesticos"
   | "empleo"
   | "servicios"
   | "negocios"
@@ -121,14 +122,15 @@ const CATEGORY_OPTIONS: Array<{
   subs: Array<{ slug: string; label: string }>;
 }> = [
   {
-    key: "motor",
-    label: "Motor",
-    subs: [
-      { slug: "carros", label: "Carros" },
-      { slug: "motos", label: "Motos" },
-      { slug: "repuestos", label: "Repuestos" },
-    ],
-  },
+  key: "motor",
+  label: "Motor",
+  subs: [
+    { slug: "carros", label: "Carros" },
+    { slug: "motos", label: "Motos" },
+    { slug: "repuestos", label: "Repuestos" },
+    { slug: "remolques-traileres", label: "Remolques y tráileres" },
+  ],
+},
   {
     key: "inmobiliaria",
     label: "Inmobiliaria",
@@ -269,6 +271,28 @@ const CATEGORY_OPTIONS: Array<{
       { slug: "varios", label: "Varios" },
     ],
   },
+  {
+  key: "electrodomesticos",
+  label: "Electrodomésticos",
+  subs: [
+    { slug: "neveras", label: "Neveras" },
+    { slug: "lavadoras", label: "Lavadoras" },
+    { slug: "secadoras", label: "Secadoras" },
+    { slug: "cocinas", label: "Cocinas" },
+    { slug: "hornos", label: "Hornos" },
+    { slug: "microondas", label: "Microondas" },
+    { slug: "aires-acondicionados", label: "Aires acondicionados" },
+    {
+      slug: "pequenos-electrodomesticos",
+      label: "Pequeños electrodomésticos",
+    },
+    {
+      slug: "industrial",
+      label: "Industrial y restauración",
+    },
+    { slug: "otros", label: "Otros" },
+  ],
+},
   {
     key: "moda",
     label: "Moda y complementos",
@@ -485,6 +509,19 @@ const [reelUrl, setReelUrl] = useState("");
 const [sellerType, setSellerType] = useState<"PARTICULAR" | "EMPRESA">(
   "PARTICULAR"
 );
+
+const [publishingForBusiness, setPublishingForBusiness] = useState(false);
+
+useEffect(() => {
+  const businessId =
+    new URLSearchParams(window.location.search).get("businessId");
+
+  if (businessId) {
+    setPublishingForBusiness(true);
+    setSellerType("EMPRESA");
+  }
+}, []);
+
 
 const [businessName, setBusinessName] = useState("");
 const [businessDescription, setBusinessDescription] = useState("");
@@ -848,9 +885,13 @@ if (contactUrl.trim()) {
   }
 }
 
-  if (sellerType === "EMPRESA" && !businessName.trim()) {
-    return "Ingresa el nombre de la empresa.";
-  }
+  if (
+  sellerType === "EMPRESA" &&
+  !publishingForBusiness &&
+  !businessName.trim()
+) {
+  return "Ingresa el nombre de la empresa.";
+}
 }
 
     return null;
@@ -959,7 +1000,7 @@ if (contactUrl.trim()) {
 
       if (imageFiles.length) {
         const filesToUpload = await Promise.all(
-          imageFiles.slice(0, 10).map((file) => compressImage(file))
+          imageFiles.slice(0, 25).map((file) => compressImage(file))
         );
 
         for (const file of filesToUpload) {
@@ -1050,6 +1091,7 @@ if (isMoto) {
 
       const businessId =
   new URLSearchParams(window.location.search).get("businessId");
+  
 
       const res = await fetch("/api/listings", {
         method: "POST",
@@ -1228,80 +1270,7 @@ if (!session) {
             </div>
           )}
 
-          {sellerType === "EMPRESA" ? (
-            <div className="mt-6 space-y-4">
-              <div>
-                <h2 className="text-lg font-black text-slate-900">
-                  Dale más visibilidad a tu anuncio
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Durante el lanzamiento de Kubo, las promociones para empresas
-                  son gratuitas y tienen cupos diarios limitados.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => activatePromotion("featured")}
-                  disabled={promotionLoading !== null}
-                  className="rounded-2xl border border-[#0f3c8c]/20 bg-blue-50 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#0f3c8c]/40 hover:shadow-md disabled:opacity-60"
-                >
-                  <div className="text-xs font-black uppercase tracking-wide text-[#0f3c8c]">
-                    Destacado
-                  </div>
-
-                  <div className="mt-2 text-xl font-black text-slate-900">
-                    Gratis por 48 horas
-                  </div>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Tu anuncio obtiene más visibilidad y se diferencia
-                    visualmente del resto.
-                  </p>
-
-                  <div className="mt-4 text-sm font-black text-[#0f3c8c]">
-                    {promotionLoading === "featured"
-                      ? "Activando..."
-                      : "Activar Destacado"}
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => activatePromotion("premium")}
-                  disabled={promotionLoading !== null}
-                  className="rounded-2xl border border-amber-300 bg-gradient-to-b from-amber-50 to-white p-5 text-left transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
-                >
-                  <div className="text-xs font-black uppercase tracking-wide text-amber-700">
-                    Premium
-                  </div>
-
-                  <div className="mt-2 text-xl font-black text-slate-900">
-                    Gratis por 48 horas
-                  </div>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Máxima visibilidad durante el lanzamiento, con apariencia
-                    Premium y cupos diarios limitados.
-                  </p>
-
-                  <div className="mt-4 text-sm font-black text-amber-700">
-                    {promotionLoading === "premium"
-                      ? "Activando..."
-                      : "Activar Premium"}
-                  </div>
-                </button>
-              </div>
-
-              {promotionError ? (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">
-                  {promotionError}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          
 
           <button
             type="button"
@@ -1979,7 +1948,7 @@ if (!session) {
               <div className="space-y-5">
                 <div>
                   <label className="text-sm font-bold text-slate-700">
-                    Fotos (hasta 10)
+                    Fotos (hasta 25)
                   </label>
                   <input
                     type="file"
@@ -1988,7 +1957,7 @@ if (!session) {
                     className="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-[#0f3c8c] file:px-4 file:py-2 file:text-sm file:font-black file:text-white"
                     onChange={(e) => {
                       previewUrls.forEach((u) => URL.revokeObjectURL(u));
-                      const list = Array.from(e.target.files ?? []).slice(0, 10);
+                      const list = Array.from(e.target.files ?? []).slice(0, 25);
                       setImageFiles(list);
                       const urls = list.map((f) => URL.createObjectURL(f));
                       setPreviewUrls(urls);
@@ -2099,7 +2068,20 @@ if (!session) {
                 </div>
 
                 <div>
-                  <div className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
+  {publishingForBusiness ? (
+    <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+      <div className="flex items-center gap-2 text-sm font-black text-emerald-800">
+        <CheckCircle2 className="h-5 w-5" />
+        Publicando para MOBILAUTOS
+      </div>
+
+      <p className="mt-2 text-sm font-medium text-emerald-700">
+        Esta publicación quedará asociada automáticamente a MOBILAUTOS.
+      </p>
+    </div>
+  ) : (
+    <>
+      <div className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
   <div className="text-sm font-black text-[#0f3c8c]">
     Publicas como particular o empresa?
   </div>
@@ -2234,6 +2216,8 @@ if (!session) {
     </div>
   </div>
 ) : null}
+    </>
+  )}
                  <div>
   <label className="text-sm font-bold text-slate-700">
     Teléfono de contacto (opcional)

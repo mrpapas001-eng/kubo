@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { SponsorAd } from "@prisma/client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListingCard from "@/components/ListingCard";
@@ -29,8 +29,8 @@ const CITY_COORDS: Record<string, [number, number]> = {
   "La Virginia": [4.8997, -75.8828],
   Cartago: [4.7464, -75.9117],
   Armenia: [4.5339, -75.6811],
-  "Bogotá": [4.711, -74.0721],
-  "Medellín": [6.2442, -75.5812],
+  Bogotá: [4.711, -74.0721],
+  Medellín: [6.2442, -75.5812],
   Cali: [3.4516, -76.532],
   Barranquilla: [10.9685, -74.7813],
   Cartagena: [10.391, -75.4794],
@@ -67,18 +67,24 @@ export default function HomeFeaturedSection({
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [extraVisibleCount, setExtraVisibleCount] = useState(8);
 
+  const [allListings, setAllListings] = useState<any[]>(listings ?? []);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreFromServer, setHasMoreFromServer] = useState(true);
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
   const activeCity = selectedCity || "Pereira";
   const center = CITY_COORDS[activeCity] ?? [4.8133, -75.6961];
 
   const categories = useMemo(() => {
     const unique = new Set<string>();
 
-    listings?.forEach((item: any) => {
+    allListings?.forEach((item: any) => {
       if (item?.category) unique.add(item.category);
     });
 
     return Array.from(unique).sort();
-  }, [listings]);
+  }, [allListings]);
 
   const sortedListings = useMemo(() => {
     const selected = normalizeText(selectedCity);
@@ -86,7 +92,7 @@ export default function HomeFeaturedSection({
     const min = minPrice ? Number(minPrice) : null;
     const max = maxPrice ? Number(maxPrice) : null;
 
-    const result = [...(listings ?? [])].filter((item: any) => {
+    const result = [...(allListings ?? [])].filter((item: any) => {
       const itemCity = normalizeText(item?.city ?? "");
       const itemCategory = normalizeText(item?.category ?? "");
       const itemPrice = Number(item?.price ?? 0);
@@ -122,7 +128,14 @@ export default function HomeFeaturedSection({
     });
 
     return result;
-  }, [listings, selectedCity, selectedCategory, minPrice, maxPrice, sortMode]);
+  }, [
+    allListings,
+    selectedCity,
+    selectedCategory,
+    minPrice,
+    maxPrice,
+    sortMode,
+  ]);
 
   const mapListings = useMemo(() => {
     return sortedListings.slice(0, 6).map((item: any, index: number) => ({
@@ -139,16 +152,14 @@ export default function HomeFeaturedSection({
   const topListings = sortedListings.slice(0, 6);
   const extraPool = sortedListings.slice(6);
   const extraListings = extraPool.slice(0, extraVisibleCount);
-  const sideSponsor =
-    sideSponsors?.[0] ??
-    {
-      id: "side-demo",
-      title: "Claro hogar",
-      subtitle: "Fibra óptica para tu hogar con mayor velocidad.",
-      imageUrl: "/placeholders/claro-demo.jpg",
-      ctaText: "Ver oferta",
-      ctaUrl: "#",
-    };
+  const sideSponsor = sideSponsors?.[0] ?? {
+    id: "side-demo",
+    title: "Claro hogar",
+    subtitle: "Fibra óptica para tu hogar con mayor velocidad.",
+    imageUrl: "/placeholders/claro-demo.jpg",
+    ctaText: "Ver oferta",
+    ctaUrl: "#",
+  };
 
   const demoFeedSponsors =
     feedSponsors?.length > 0
@@ -164,7 +175,84 @@ export default function HomeFeaturedSection({
           },
         ];
 
+  async function loadMoreFromServer() {
+    if (loadingMore || !hasMoreFromServer) return;
+
+    try {
+      setLoadingMore(true);
+
+      const res = await fetch(
+        `/api/listings?take=12&skip=${allListings.length}&balanced=1`,
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.ok) {
+        throw new Error("No se pudieron cargar más anuncios");
+      }
+
+      const newListings = Array.isArray(data.items) ? data.items : [];
+
+      if (newListings.length === 0) {
+        setHasMoreFromServer(false);
+        return;
+      }
+
+      setAllListings((prev) => {
+        const existingIds = new Set(prev.map((item: any) => item.id));
+
+        const uniqueNew = newListings.filter(
+          (item: any) => !existingIds.has(item.id),
+        );
+
+        return [...prev, ...uniqueNew];
+      });
+
+      if (newListings.length < 12 || data.hasMore === false) {
+        setHasMoreFromServer(false);
+      }
+    } catch (error) {
+      console.error("Error cargando más anuncios:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
   const hasMoreExtra = extraVisibleCount < extraPool.length;
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+
+        if (hasMoreExtra) {
+          setExtraVisibleCount((prev) => Math.min(prev + 8, extraPool.length));
+          return;
+        }
+
+        if (hasMoreFromServer && !loadingMore) {
+          loadMoreFromServer();
+        }
+      },
+      {
+        rootMargin: "300px",
+      },
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [
+    hasMoreExtra,
+    extraPool.length,
+    hasMoreFromServer,
+    loadingMore,
+    allListings.length,
+  ]);
 
   function clearFilters() {
     setSelectedCity("");
@@ -201,15 +289,27 @@ export default function HomeFeaturedSection({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setSortMode("recent")} className={getTabClass("recent")}>
+            <button
+              type="button"
+              onClick={() => setSortMode("recent")}
+              className={getTabClass("recent")}
+            >
               Recientes
             </button>
 
-            <button type="button" onClick={() => setSortMode("popular")} className={getTabClass("popular")}>
+            <button
+              type="button"
+              onClick={() => setSortMode("popular")}
+              className={getTabClass("popular")}
+            >
               Populares
             </button>
 
-            <button type="button" onClick={() => setSortMode("nearby")} className={getTabClass("nearby")}>
+            <button
+              type="button"
+              onClick={() => setSortMode("nearby")}
+              className={getTabClass("nearby")}
+            >
               Cerca de ti
             </button>
           </div>
@@ -280,7 +380,8 @@ export default function HomeFeaturedSection({
         </div>
 
         <div className="mt-4 text-sm font-semibold text-slate-500">
-          {sortedListings.length} anuncio{sortedListings.length === 1 ? "" : "s"} encontrado
+          {sortedListings.length} anuncio
+          {sortedListings.length === 1 ? "" : "s"} encontrado
           {sortedListings.length === 1 ? "" : "s"}
         </div>
 
@@ -371,7 +472,9 @@ export default function HomeFeaturedSection({
             {extraListings.map((item, idx) => {
               const sponsor =
                 demoFeedSponsors.length > 0 && (idx + 1) % 8 === 0
-                  ? demoFeedSponsors[(Math.floor(idx / 8)) % demoFeedSponsors.length]
+                  ? demoFeedSponsors[
+                      Math.floor(idx / 8) % demoFeedSponsors.length
+                    ]
                   : null;
 
               return [
@@ -388,28 +491,7 @@ export default function HomeFeaturedSection({
         </div>
       ) : null}
 
-      <div className="mt-6 flex justify-center">
-        {hasMoreExtra ? (
-          <button
-            type="button"
-            onClick={() => setExtraVisibleCount((prev) => prev + 8)}
-            className="h-11 rounded-xl bg-[#0f3c8c] px-6 text-sm font-bold text-white shadow-sm transition hover:bg-[#0c2f6d]"
-          >
-            Cargar más
-          </button>
-        ) : null}
-      </div>
+      <div ref={loadMoreRef} className="h-1 w-full" aria-hidden="true" />
     </section>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

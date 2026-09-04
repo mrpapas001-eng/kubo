@@ -216,26 +216,37 @@ export default async function AdminBusinessDetailPage({ params }: Props) {
             ) : (
               <div className="mt-5 space-y-3">
                 {business.listings.map((listing) => (
-                  <Link
-                    key={listing.id}
-                    href={`/listing/${listing.id}`}
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 transition hover:bg-slate-50"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate font-black text-slate-900">
-                        {listing.title}
-                      </div>
+  <div
+    key={listing.id}
+    className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 transition hover:bg-slate-50"
+  >
+    <div className="min-w-0">
+      <div className="truncate font-black text-slate-900">
+        {listing.title}
+      </div>
 
-                      <div className="mt-1 text-xs font-medium text-slate-500">
-                        {listing.city} · {listing.views || 0} visitas
-                      </div>
-                    </div>
+      <div className="mt-1 text-xs font-medium text-slate-500">
+        {listing.city} · {listing.views || 0} visitas
+      </div>
+    </div>
 
-                    <div className="text-sm font-black text-[#0f3c8c]">
-                      Ver →
-                    </div>
-                  </Link>
-                ))}
+    <div className="flex shrink-0 items-center gap-2">
+      <Link
+        href={`/listing/${listing.id}`}
+        className="rounded-xl px-3 py-2 text-xs font-black text-[#0f3c8c] hover:bg-blue-50"
+      >
+        Ver →
+      </Link>
+
+      <Link
+        href={`/listing/${listing.id}/edit`}
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:border-[#0f3c8c] hover:text-[#0f3c8c]"
+      >
+        Editar
+      </Link>
+    </div>
+  </div>
+))}
               </div>
             )}
           </section>
