@@ -13,9 +13,7 @@ import {
   Fuel,
   Settings,
   CalendarDays,
-  Crown,
   Camera,
-  Heart,
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
@@ -24,10 +22,7 @@ import ListingGallery from "@/components/ListingGallery";
 import ListingCard from "@/components/ListingCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ListingMapClient from "@/components/ListingMapClient";
-import StartChatButton from "@/components/StartChatButton";
-import ReportListingModal from "@/components/ReportListingModal";
 import MobileListingActions from "@/components/MobileListingActions";
-import FavoriteButton from "@/components/FavoriteButton";
 import BackToResultsButton from "@/components/BackToResultsButton";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -284,23 +279,43 @@ const whatsappHref = cleanPhone
   : "#";
 
 const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
-  const accountVerificationType = listingWithVerification.accountVerificationType;
-  const sellerLabel =
-    accountVerificationType === "EMPRESA"
-      ? "Empresa verificada"
-      : accountVerificationType === "PARTICULAR"
-        ? "Usuario verificado"
-        : "Vendedor en Kubo";
 
-  const trustDescription =
-    accountVerificationType === "EMPRESA"
-      ? "Kubo verificó esta empresa."
-      : accountVerificationType === "PARTICULAR"
-        ? "Kubo verificó esta cuenta."
-        : "Esta cuenta aún no tiene una verificación aprobada.";
 
-  const showBusinessVerificationCta =
-    Boolean(isOwner && listing.isBusiness && accountVerificationType !== "EMPRESA");
+  
+    const linkedBusiness = listing.businessId
+  ? await prisma.business.findUnique({
+      where: { id: listing.businessId },
+      select: {
+        isVerified: true,
+      },
+    })
+  : null;
+
+const isVerifiedBusiness = Boolean(linkedBusiness?.isVerified);
+
+const accountVerificationType =
+  listingWithVerification.accountVerificationType;
+
+const sellerLabel =
+  isVerifiedBusiness || accountVerificationType === "EMPRESA"
+    ? "Empresa verificada"
+    : accountVerificationType === "PARTICULAR"
+      ? "Usuario verificado"
+      : "Vendedor en Kubo";
+
+const trustDescription =
+  isVerifiedBusiness || accountVerificationType === "EMPRESA"
+    ? "Empresa verificada por Kubo."
+    : accountVerificationType === "PARTICULAR"
+      ? "Kubo verificó esta cuenta."
+      : "Esta cuenta aún no tiene una verificación aprobada.";
+
+const showBusinessVerificationCta = Boolean(
+  isOwner &&
+    listing.isBusiness &&
+    !isVerifiedBusiness &&
+    accountVerificationType !== "EMPRESA"
+);
 
   const cityCoords: Record<string, [number, number]> = {
     pereira: [4.8143, -75.6946],
@@ -348,35 +363,12 @@ const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
     },
     areaServed: listing.city ?? "Colombia",
   };
-const now = new Date();
-
-const isPremiumListing =
-  Boolean((listing as any).isPremium) &&
-  Boolean((listing as any).premiumUntil) &&
-  new Date((listing as any).premiumUntil).getTime() > now.getTime();
-
-const isFeaturedListing =
-  Boolean((listing as any).isFeatured) &&
-  Boolean((listing as any).featuredUntil) &&
-  new Date((listing as any).featuredUntil).getTime() > now.getTime();
-
-const visibilityLabel = isPremiumListing
-  ? "Premium"
-  : isFeaturedListing
-    ? "Destacado"
-    : "Normal";
-
-const visibilityDescription = isPremiumListing
-  ? "Este anuncio pago por mayor visibilidad."
-  : isFeaturedListing
-    ? "Este anuncio aparece destacado por mayor visibilidad."
-    : "Este anuncio no tiene promocion activa.";
 
   const motorFuel = car?.fuel || car?.fuelType || "Gasolina";
   const motorTransmission = car?.transmission || "Mecánica";
   const motorYear = car?.year || "—";
 
-  if (isPremiumListing) {
+  {
     return (
       <div className="min-h-screen bg-[#F8F9FB] px-4 py-6 md:px-6 md:py-10">
         <script
@@ -394,15 +386,10 @@ const visibilityDescription = isPremiumListing
     <BackToResultsButton />
   </div>
 
-          <div className="premium-shell overflow-hidden rounded-[32px] shadow-[0_28px_90px_rgba(245,158,11,0.28)]">
+          <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
             <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="premium-photo-shine relative min-h-[420px] overflow-hidden bg-slate-100">
+              <div className="relative min-h-[420px] overflow-hidden bg-slate-100">
                 <ListingGallery images={images.length ? images : [fallback]} />
-
-                <div className="premium-ribbon pointer-events-none absolute left-0 top-0 z-20 rounded-br-[30px] bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 px-8 py-4 text-xl font-black uppercase text-slate-900 shadow-[0_18px_45px_rgba(245,158,11,0.42)]">
-                  <Crown className="mr-2 inline h-6 w-6" />
-                  Premium
-                </div>
 
                 <div className="pointer-events-none absolute bottom-5 left-5 z-20 inline-flex items-center gap-2 rounded-xl bg-black/70 px-4 py-2 text-sm font-black text-white backdrop-blur">
                   <Camera className="h-4 w-4" />
@@ -410,16 +397,8 @@ const visibilityDescription = isPremiumListing
                 </div>
               </div>
 
-              <div className="relative overflow-hidden bg-[radial-gradient(circle_at_90%_0%,rgba(250,204,21,0.22),transparent_34%),linear-gradient(180deg,#fffaf0,#ffffff_42%)] p-6 md:p-8">
-                <div className="pointer-events-none absolute right-6 top-6 h-24 w-24 rounded-full border border-yellow-300/40 opacity-60" />
-                <div className="pointer-events-none absolute right-12 top-12 h-10 w-10 rounded-full bg-yellow-300/20 blur-md" />
+              <div className="relative overflow-hidden bg-white p-6 md:p-8">
                 <div className="mb-4 flex flex-wrap gap-2">
-                  {isPremiumListing ? (
-  <span className="premium-badge-pulse inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-slate-900">
-    <Crown className="h-3.5 w-3.5" />
-    Anuncio premium
-  </span>
-) : null}
 
 
                   {listing.categorySlug ? (
@@ -445,7 +424,7 @@ const visibilityDescription = isPremiumListing
     .join(" · ")}
 </p>
 
-<div className="mt-5 bg-gradient-to-r from-[#4f32c8] via-[#7c3aed] to-[#d97706] bg-clip-text text-4xl font-black text-transparent">
+<div className="mt-5 text-4xl font-black text-[#4f32c8]">
   {formattedPrice}
 </div>
 
@@ -552,7 +531,7 @@ const visibilityDescription = isPremiumListing
   ) : null}
 </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-6">
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
                     <div className="text-[11px] font-black uppercase tracking-wide text-emerald-700">
                       Confianza del vendedor
@@ -574,42 +553,24 @@ const visibilityDescription = isPremiumListing
                       {trustDescription}
                     </p>
                   </div>
-
-                  <div className="rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-4">
-                    <div className="text-[11px] font-black uppercase tracking-wide text-yellow-700">
-                      Visibilidad del anuncio
-                    </div>
-                    <div className="mt-2 flex items-center gap-2 text-sm font-black text-slate-900">
-                      <Crown className="h-4 w-4 text-yellow-700" />
-                      {visibilityLabel}
-                    </div>
-                    <p className="mt-2 text-xs font-medium leading-relaxed text-slate-600">
-                      {visibilityDescription}
-                    </p>
-                  </div>
+                </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid gap-3 border-t border-yellow-200 bg-yellow-50 px-6 py-4 text-sm font-bold text-slate-700 md:grid-cols-4">
+            <div className="grid gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 text-sm font-bold text-slate-700 md:grid-cols-3">
               <div className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
+                <Eye className="h-5 w-5 text-[#4f32c8]" />
                 Visto {formattedViews} veces
               </div>
 
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
+                <MapPin className="h-5 w-5 text-[#4f32c8]" />
                 {listing.city ?? "Colombia"}
               </div>
 
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5" />
+                <CalendarDays className="h-5 w-5 text-[#4f32c8]" />
                 {publishedDate || "Publicado recientemente"}
-              </div>
-
-              <div className="flex items-center gap-2 font-black text-yellow-800">
-                <Crown className="h-5 w-5" />
-                Anuncio premium
               </div>
             </div>
           </div>
@@ -668,470 +629,4 @@ const visibilityDescription = isPremiumListing
       </div>
     );
   }
-
-  return (
-    <div className="min-h-screen bg-[#F8F9FB] px-4 py-6 md:px-6 md:py-10">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
-      <div className="mx-auto max-w-[1100px]">
-        <Breadcrumbs
-          category={listing.categorySlug}
-          subcategory={listing.subcategorySlug}
-          title={listing.title}
-        />
-
-  <div className="mb-5">
-    <BackToResultsButton />
-  </div>
-
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
-          <div className="order-1 space-y-5 md:space-y-6">
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-sm md:p-4">
-              <ListingGallery images={images.length ? images : [fallback]} />
-            </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
-  {/* 🔥 BLOQUE BENEFICIOS PREMIUM */}
-  {isOwner && listing.isBusiness ? (
-  <div className="mb-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-5">
-    <div className="mb-3 text-sm font-black text-yellow-800">
-      🚀 Destaca tu anuncio
-    </div>
-
-    <div className="grid grid-cols-1 gap-2 text-sm font-semibold text-slate-700">
-      <div>🔥 Aparece primero en resultados</div>
-      <div>👀 Más visibilidad en la plataforma</div>
-      <div>📞 Recibe más contactos de compradores</div>
-    </div>
-
-    {showBusinessVerificationCta ? (
-      <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4">
-        <div className="text-sm font-black text-slate-900">
-          ¿Quieres verificar tu empresa?
-        </div>
-        <p className="mt-1 text-xs font-medium text-slate-600">
-          Obtén el sello Empresa verificada enviando tu RUT.
-        </p>
-        <Link
-          href="/verificar-empresa"
-          className="mt-3 inline-flex h-10 items-center justify-center rounded-xl bg-[#0f3c8c] px-4 text-xs font-black text-white hover:bg-[#0c2f6d]"
-        >
-          Verificar mi empresa
-        </Link>
-      </div>
-    ) : null}
-  </div>
-  ) : null}
-
-  <h2 className="text-xl font-black text-slate-900">Descripción</h2>
-  <p className="mt-4 whitespace-pre-line leading-relaxed text-slate-700">
-    {listing.description || "El vendedor no agregó una descripción."}
-  </p>
-</div>
-
-            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-black text-slate-900">
-                  Ubicación aproximada
-                </h3>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-500">
-                  {listing.city ?? "Colombia"}
-                </span>
-              </div>
-
-              <div className="h-[160px] overflow-hidden rounded-2xl md:h-[180px]">
-                <ListingMapClient
-                  lat={coords[0]}
-                  lng={coords[1]}
-                  title={listing.title}
-                />
-              </div>
-            </div>
-
-            {isOwner && listing.isBusiness ? (
-            <div className="rounded-3xl border border-blue-100 bg-gradient-to-br from-[#0f3c8c] to-[#071a3e] p-5 text-white shadow-sm">
-              <div className="inline-flex rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-wide">
-                Patrocinado
-              </div>
-              <h3 className="mt-3 text-lg font-black">
-                ¿Quieres que tu anuncio destaque?
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/80">
-                Publica o impulsa tu anuncio para llegar a más personas cerca de ti.
-              </p>
-              <Link
-                href="/publish"
-                className="mt-4 inline-flex h-11 items-center justify-center rounded-2xl bg-white px-5 text-sm font-black text-[#0f3c8c] hover:bg-slate-100"
-              >
-                Publicar anuncio
-              </Link>
-            </div>
-            ) : null}
-          </div>
-
-          <div className="order-2 h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:sticky lg:top-24">
-            <div className="mb-4 flex flex-wrap gap-2">
-              {isDonation ? (
-                <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-900 shadow-sm">
-                  💛 Kubo Ayuda - Donación
-                </span>
-              ) : null}
-
-              {listing.categorySlug ? (
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700">
-                  {listing.categorySlug}
-                </span>
-              ) : null}
-
-              {listing.subcategorySlug ? (
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700">
-                  {listing.subcategorySlug}
-                </span>
-              ) : null}
-
-              <span className="rounded-full bg-[#e8f0ff] px-3 py-1 text-[11px] font-black uppercase tracking-wide text-[#0f3c8c]">
-                {sellerLabel}
-              </span>
-
-              {isFeaturedListing ? (
-                <span className="rounded-full bg-yellow-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-yellow-800">
-                  Destacado
-                </span>
-              ) : null}
-            </div>
-
-            <h1 className="text-3xl font-black leading-tight text-slate-900 md:text-4xl">
-              {listing.title}
-            </h1>
-
-            <div className="mt-3 space-y-1">
-              <p className="text-base font-bold text-slate-500">
-                {listing.city ?? "—"}
-              </p>
-
-              {publishedDate ? (
-                <p className="text-sm font-medium text-slate-400">
-                  Publicado el {publishedDate}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">
-              <Eye className="h-4 w-4 text-[#0f3c8c]" />
-              {formattedViews} visita
-              {Number(formattedViews.replace(/\D/g, "")) === 1 ? "" : "s"}
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-                <div className="text-[11px] font-black uppercase tracking-wide text-emerald-700">
-                  Confianza del vendedor
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm font-black text-slate-900">
-                  <ShieldCheck className="h-4 w-4 text-emerald-700" />
-                  {listing.sellerType !== "PARTICULAR" && listing.businessSlug ? (
-                    <Link
-                      href={`/company/${listing.businessSlug}`}
-                      className="text-[#0f3c8c] hover:underline"
-                    >
-                      {listing.businessName || sellerLabel}
-                    </Link>
-                  ) : (
-                    <span>{sellerLabel}</span>
-                  )}
-                </div>
-                <p className="mt-2 text-xs font-medium leading-relaxed text-slate-600">
-                  {trustDescription}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-4">
-                <div className="text-[11px] font-black uppercase tracking-wide text-yellow-700">
-                  Visibilidad del anuncio
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm font-black text-slate-900">
-                  <Crown className="h-4 w-4 text-yellow-700" />
-                  {visibilityLabel}
-                </div>
-                <p className="mt-2 text-xs font-medium leading-relaxed text-slate-600">
-                  {visibilityDescription}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl bg-[#0b1736] px-5 py-5 text-white">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-300">
-                {isDonation ? "Valor" : "Precio"}
-              </div>
-              <div className="mt-1 text-3xl font-black">{formattedPrice}</div>
-            </div>
-
-            {isDonation ? (
-              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Heart className="h-5 w-5 text-amber-600" />
-                  <span className="text-sm font-black text-slate-900">INFORMACIÓN DE LA DONACIÓN</span>
-                </div>
-                
-                <div className="space-y-3">
-                  {details.kuboAyuda?.condition && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600 font-medium">Estado:</span>
-                      <span className="text-slate-900 font-bold">
-                        {details.kuboAyuda.condition === "NEW" ? "NUEVO" : 
-                         details.kuboAyuda.condition === "GOOD" ? "BUEN ESTADO" : "USADO FUNCIONAL"}
-                      </span>
-                    </div>
-                  )}
-                  {details.kuboAyuda?.deliveryMethod && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600 font-medium">Entrega:</span>
-                      <span className="text-slate-900 font-bold">
-                        {details.kuboAyuda.deliveryMethod === "PICKUP" ? "Lo recoge la persona" : 
-                         details.kuboAyuda.deliveryMethod === "DELIVERY" ? "Puedo entregarlo" : "Acordar entrega"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-amber-200 text-xs font-bold text-amber-800 leading-relaxed italic">
-                  &ldquo;Este artículo se entrega gratuitamente a través de Kubo Ayuda.&rdquo;
-                </div>
-              </div>
-            ) : null}
-
-            {isCar || isRealEstate ? (
-              <div className="mt-6">
-                <div className="mb-3 text-sm font-black text-slate-900">
-                  Características
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {isCar ? (
-  <>
-    <StatCard label="Marca" value={car?.brand ?? null} />
-    <StatCard label="Modelo" value={car?.model ?? null} />
-    <StatCard label="Versión" value={car?.version ?? null} />
-    <StatCard label="Año" value={car?.year ?? null} />
-    <StatCard label="Kilometraje" value={kmFormatted} />
-    <StatCard label="Combustible" value={car?.fuel ?? null} />
-    <StatCard label="Transmisión" value={car?.transmission ?? null} />
-    <StatCard label="Tracción" value={car?.traction ?? null} />
-    {car?.equipment ? (
-  <>
-    <StatCard
-      label="Aire acondicionado"
-      value={car.equipment.airConditioning ? "Sí" : "No"}
-    />
-    <StatCard
-      label="Vidrios eléctricos"
-      value={car.equipment.powerWindows ? "Sí" : "No"}
-    />
-    <StatCard
-      label="Airbags"
-      value={car.equipment.airbags ? "Sí" : "No"}
-    />
-    <StatCard
-      label="ABS"
-      value={car.equipment.abs ? "Sí" : "No"}
-    />
-    <StatCard
-      label="Techo corredizo"
-      value={car.equipment.sunroof ? "Sí" : "No"}
-    />
-    <StatCard
-      label="Cámara de reversa"
-      value={car.equipment.reverseCamera ? "Sí" : "No"}
-    />
-    <StatCard
-      label="Retrovisores eléctricos"
-      value={car.equipment.electricMirrors ? "Sí" : "No"}
-    />
-  </>
-) : null}
-  </>
-) : null}
-
-                  {isRealEstate ? (
-                    <>
-                      <StatCard label="Tipo" value={dealText} />
-                      <StatCard label="Alcobas" value={re?.rooms ?? null} />
-                      <StatCard label="Baños" value={re?.baths ?? null} />
-                      <StatCard
-                        label="Metros²"
-                        value={re?.sqm ? `${re.sqm} m²` : null}
-                      />
-                      <StatCard
-                        label="Parqueadero"
-                        value={re?.parking ? "Sí" : "No"}
-                      />
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
-
-<div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-  {cleanPhone ? (
-    <a
-      href={whatsappHref}
-      target="_blank"
-      rel="noreferrer"
-      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-500 text-sm font-black text-white hover:bg-green-600"
-    >
-      <MessageCircle className="h-4 w-4" />
-      WhatsApp
-    </a>
-  ) : contactUrl ? (
-    <a
-      href={contactUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#4f32c8] text-sm font-black text-white hover:bg-[#3f28a8] sm:col-span-2"
-    >
-      <MessageCircle className="h-4 w-4" />
-      Contactar al vendedor
-    </a>
-  ) : null}
-
-  <StartChatButton listingId={listing.id} />
-
-  <FavoriteButton listingId={listing.id} variant="inline" />
-
-  {reelUrl ? (
-    <a
-      href={reelUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-black text-sm font-black text-white hover:bg-slate-800"
-    >
-      ▶ Ver reel
-    </a>
-  ) : null}
-</div>
-
-{/* 🔥 BOTÓN PROMOCIONAR */}
-{isOwner && !isPremiumListing && listing.isBusiness && (
-  <Link
-    href={`/premium?listingId=${listing.id}`}
-    className="mt-4 flex w-full items-center justify-center rounded-2xl bg-yellow-400 px-4 py-3 text-sm font-black text-slate-900 hover:bg-yellow-500"
-  >
-    🚀 Promocionar este anuncio
-  </Link>
-)}
-
-<div className="mt-8 border-t border-slate-100 pt-6">
-  <h3 className="text-lg font-black text-slate-900">
-    Información del anuncio
-  </h3>
-
-  <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-2">
-    <StatCard label="Categoría" value={listing.categorySlug ?? "—"} />
-    <StatCard
-      label="Subcategoría"
-      value={listing.subcategorySlug ?? "—"}
-    />
-    <div className="hidden sm:block">
-      <StatCard label="Ciudad" value={listing.city ?? "—"} />
-    </div>
-    <StatCard label="Publicado" value={publishedDate} />
-    <StatCard
-      label="Tipo de vendedor"
-      value={sellerLabel}
-    />
-    <StatCard label="Visitas" value={formattedViews} />
-  </div>
-</div>
-
-            <div className="mt-8 border-t border-slate-100 pt-6 hidden sm:block">
-              <h3 className="text-lg font-black text-slate-900">
-                Contacto rápido
-              </h3>
-
-              <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-  {cleanPhone ? (
-    <>
-      <div className="rounded-2xl bg-slate-50 px-4 py-4">
-        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-          WhatsApp
-        </div>
-        <div className="mt-1 text-sm font-black text-slate-900">
-          {phone}
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-slate-50 px-4 py-4">
-        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-          Llamadas
-        </div>
-        <div className="mt-1 text-sm font-black text-slate-900">
-          {phone}
-        </div>
-      </div>
-    </>
-  ) : contactUrl ? (
-    <div className="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-      <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-        Contacto
-      </div>
-      <div className="mt-1 text-sm font-black text-slate-900">
-        Contacto directo con el vendedor
-      </div>
-    </div>
-  ) : null}
-
-  <div className="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-    <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
-      Ubicación
-    </div>
-    <div className="mt-1 flex items-center gap-2 text-sm font-black text-slate-900">
-      <MapPin className="h-4 w-4 text-[#0f3c8c]" />
-      {listing.city ?? "No disponible"}
-    </div>
-  </div>
-</div>
-</div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-  <BackToResultsButton className="h-12 px-6" />
-
-  <ReportListingModal listingId={listing.id} />
-</div>
-          </div>
-        </div>
-        {similarListings.length > 0 ? (
-          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-black text-slate-900">
-                  Anuncios similares
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Más anuncios en {listing.city ?? "tu zona"} de la categoría{" "}
-                  {listing.categorySlug ?? "relacionada"}.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {similarListings.map((item) => (
-                <ListingCard key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </div>
-      <MobileListingActions
-        listingId={listing.id}
-        title={listing.title}
-        url={pageUrl}
-        whatsappHref={whatsappHref}
-        canUseWhatsapp={Boolean(cleanPhone)}
-        contactUrl={contactUrl}
-      />
-    </div>
-  );
 }
