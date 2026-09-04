@@ -383,7 +383,7 @@ async function buildFinalImageUrls() {
         return;
       }
 
-      router.push(`/listing/${id}`);
+      router.replace(`/listing/${id}`);
       router.refresh();
     } catch (error: any) {
       setFormError(
