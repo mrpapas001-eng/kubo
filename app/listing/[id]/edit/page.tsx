@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 const MAX_IMAGES = 25;
 
-type NewImage = {
-  file: File;
-  preview: string;
-};
+type EditableImage =
+  | {
+      id: string;
+      type: "existing";
+      url: string;
+    }
+  | {
+      id: string;
+      type: "new";
+      url: string;
+      file: File;
+    };
 
 export default function EditListingPage() {
   const router = useRouter();
@@ -27,25 +35,15 @@ export default function EditListingPage() {
   const [price, setPrice] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [newImages, setNewImages] = useState<NewImage[]>([]);
+  const [images, setImages] = useState<EditableImage[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const imagesRef = useRef<EditableImage[]>([]);
 
-  const totalImages = existingImages.length + newImages.length;
+  const totalImages = images.length;
 
-  const allImages = useMemo(
-    () => [
-      ...existingImages.map((url) => ({
-        type: "existing" as const,
-        url,
-      })),
-      ...newImages.map((item, index) => ({
-        type: "new" as const,
-        url: item.preview,
-        index,
-      })),
-    ],
-    [existingImages, newImages]
-  );
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
 
   useEffect(() => {
     if (!id) {
@@ -103,7 +101,13 @@ export default function EditListingPage() {
   new Set<string>(loadedImages)
 ).slice(0, MAX_IMAGES);
 
-setExistingImages(uniqueImages);
+        setImages(
+          uniqueImages.map((url, index) => ({
+            id: `existing-${index}-${url}`,
+            type: "existing" as const,
+            url,
+          }))
+        );
       } catch {
         setLoadError("Error al cargar el anuncio. Intenta nuevamente.");
       } finally {
@@ -116,9 +120,13 @@ setExistingImages(uniqueImages);
 
   useEffect(() => {
     return () => {
-      newImages.forEach((item) => URL.revokeObjectURL(item.preview));
+      imagesRef.current.forEach((item) => {
+        if (item.type === "new") {
+          URL.revokeObjectURL(item.url);
+        }
+      });
     };
-  }, [newImages]);
+  }, []);
 
   function handleAddImages(e: React.ChangeEvent<HTMLInputElement>) {
     setFormError(null);
@@ -160,12 +168,18 @@ setExistingImages(uniqueImages);
       return;
     }
 
-    const prepared = selected.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    const prepared: EditableImage[] = selected.map((file) => {
+      const url = URL.createObjectURL(file);
 
-    setNewImages((current) => [...current, ...prepared]);
+      return {
+        id: `new-${crypto.randomUUID()}`,
+        type: "new",
+        url,
+        file,
+      };
+    });
+
+    setImages((current) => [...current, ...prepared]);
 
     if (files.length > available) {
       setFormError(
@@ -176,49 +190,50 @@ setExistingImages(uniqueImages);
     e.target.value = "";
   }
 
-  function removeExistingImage(url: string) {
-    setFormError(null);
-    setExistingImages((current) =>
-      current.filter((image) => image !== url)
-    );
-  }
-
-  function removeNewImage(index: number) {
+  function removeImage(index: number) {
     setFormError(null);
 
-    setNewImages((current) => {
+    setImages((current) => {
       const target = current[index];
 
-      if (target?.preview) {
-        URL.revokeObjectURL(target.preview);
+      if (target?.type === "new") {
+        URL.revokeObjectURL(target.url);
       }
 
       return current.filter((_, i) => i !== index);
     });
   }
 
-  function makeExistingImagePrimary(url: string) {
+  function makeImagePrimary(index: number) {
     setFormError(null);
 
-    setExistingImages((current) => [
-      url,
-      ...current.filter((image) => image !== url),
-    ]);
+    setImages((current) => {
+      const selected = current[index];
+      if (!selected) return current;
+
+      return [selected, ...current.filter((_, i) => i !== index)];
+    });
   }
 
-  function makeNewImagePrimary(index: number) {
+  function moveImage(fromIndex: number, toIndex: number) {
     setFormError(null);
 
-    const selected = newImages[index];
-    if (!selected) return;
+    setImages((current) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= current.length ||
+        toIndex >= current.length
+      ) {
+        return current;
+      }
 
-    setNewImages((current) =>
-      current.filter((_, i) => i !== index)
-    );
-
-    setExistingImages((current) => current);
-
-    setNewImages((current) => [selected, ...current]);
+      const reordered = [...current];
+      const [moved] = reordered.splice(fromIndex, 1);
+      reordered.splice(toIndex, 0, moved);
+      return reordered;
+    });
   }
 
   async function compressImage(file: File): Promise<File> {
@@ -286,18 +301,16 @@ setExistingImages(uniqueImages);
   );
 }
 
-async function uploadNewImages() {
-  if (newImages.length === 0) return [];
+async function buildFinalImageUrls() {
+  const finalUrls: string[] = [];
 
-  const uploadedUrls: string[] = [];
+  for (const item of images.slice(0, MAX_IMAGES)) {
+    if (item.type === "existing") {
+      finalUrls.push(item.url);
+      continue;
+    }
 
-  const filesToUpload = await Promise.all(
-    newImages
-      .slice(0, MAX_IMAGES)
-      .map((item) => compressImage(item.file))
-  );
-
-  for (const file of filesToUpload) {
+    const file = await compressImage(item.file);
     const formData = new FormData();
     formData.append("files", file);
 
@@ -314,16 +327,20 @@ async function uploadNewImages() {
       );
     }
 
-    const urls = Array.isArray(data?.urls)
+    const uploadedUrl = Array.isArray(data?.urls)
       ? data.urls
           .map((url: unknown) => String(url ?? "").trim())
-          .filter(Boolean)
-      : [];
+          .find(Boolean)
+      : "";
 
-    uploadedUrls.push(...urls);
+    if (!uploadedUrl) {
+      throw new Error("No se pudo obtener la dirección de una imagen.");
+    }
+
+    finalUrls.push(uploadedUrl);
   }
 
-  return uploadedUrls;
+  return finalUrls;
 }
 
   async function handleSave(e: React.FormEvent) {
@@ -338,12 +355,7 @@ async function uploadNewImages() {
         return;
       }
 
-      const uploadedUrls = await uploadNewImages();
-
-      const finalImages = [
-        ...existingImages,
-        ...uploadedUrls,
-      ].slice(0, MAX_IMAGES);
+      const finalImages = await buildFinalImageUrls();
 
       if (finalImages.length === 0) {
         setFormError("El anuncio debe tener al menos una imagen.");
@@ -511,7 +523,7 @@ async function uploadNewImages() {
                 </h2>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Puedes añadir, eliminar o cambiar la foto principal.
+                  Arrastra las fotos o usa las flechas para cambiar el orden.
                 </p>
               </div>
 
@@ -520,17 +532,43 @@ async function uploadNewImages() {
               </span>
             </div>
 
-            {allImages.length > 0 ? (
+            {images.length > 0 ? (
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                {existingImages.map((url, index) => (
+                {images.map((item, index) => (
                   <div
-                    key={`existing-${url}-${index}`}
-                    className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                    key={item.id}
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", String(index));
+                      setDraggedIndex(index);
+                    }}
+                    onDragEnd={() => setDraggedIndex(null)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+
+                      if (draggedIndex !== null) {
+                        moveImage(draggedIndex, index);
+                      }
+
+                      setDraggedIndex(null);
+                    }}
+                    className={`relative overflow-hidden rounded-2xl border bg-white transition ${
+                      item.type === "new"
+                        ? "border-blue-200"
+                        : "border-slate-200"
+                    } ${
+                      draggedIndex === index
+                        ? "opacity-50 ring-2 ring-[#0f3c8c]"
+                        : ""
+                    }`}
                   >
-                    <div className="aspect-square overflow-hidden bg-slate-100">
+                    <div className="aspect-square cursor-grab overflow-hidden bg-slate-100 active:cursor-grabbing">
                       <img
-                        src={url}
+                        src={item.url}
                         alt={`Imagen ${index + 1}`}
+                        draggable={false}
                         className="h-full w-full object-cover"
                       />
                     </div>
@@ -541,59 +579,48 @@ async function uploadNewImages() {
                       </div>
                     )}
 
+                    {item.type === "new" && (
+                      <div className="absolute right-2 top-2 rounded-full bg-blue-600 px-2 py-1 text-[10px] font-black text-white shadow">
+                        NUEVA
+                      </div>
+                    )}
+
                     <div className="space-y-1.5 p-2">
                       {index !== 0 && (
                         <button
                           type="button"
-                          onClick={() =>
-                            makeExistingImagePrimary(url)
-                          }
+                          onClick={() => makeImagePrimary(index)}
                           className="w-full rounded-lg bg-slate-100 px-2 py-2 text-[11px] font-bold text-slate-700"
                         >
                           Hacer principal
                         </button>
                       )}
 
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(url)}
-                        className="w-full rounded-lg bg-red-50 px-2 py-2 text-[11px] font-bold text-red-600"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => moveImage(index, index - 1)}
+                          disabled={index === 0}
+                          aria-label="Mover foto hacia atrás"
+                          className="rounded-lg bg-slate-100 px-2 py-2 text-sm font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          ←
+                        </button>
 
-                {newImages.map((item, index) => (
-                  <div
-                    key={`new-${item.preview}`}
-                    className="relative overflow-hidden rounded-2xl border border-blue-200 bg-white"
-                  >
-                    <div className="aspect-square overflow-hidden bg-slate-100">
-                      <img
-                        src={item.preview}
-                        alt={`Nueva imagen ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-
-                    <div className="absolute right-2 top-2 rounded-full bg-blue-600 px-2 py-1 text-[10px] font-black text-white shadow">
-                      NUEVA
-                    </div>
-
-                    <div className="space-y-1.5 p-2">
-                      <button
-                        type="button"
-                        onClick={() => makeNewImagePrimary(index)}
-                        className="w-full rounded-lg bg-slate-100 px-2 py-2 text-[11px] font-bold text-slate-700"
-                      >
-                        Hacer principal
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => moveImage(index, index + 1)}
+                          disabled={index === images.length - 1}
+                          aria-label="Mover foto hacia adelante"
+                          className="rounded-lg bg-slate-100 px-2 py-2 text-sm font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          →
+                        </button>
+                      </div>
 
                       <button
                         type="button"
-                        onClick={() => removeNewImage(index)}
+                        onClick={() => removeImage(index)}
                         className="w-full rounded-lg bg-red-50 px-2 py-2 text-[11px] font-bold text-red-600"
                       >
                         Eliminar
