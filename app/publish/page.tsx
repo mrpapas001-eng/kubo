@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { ChevronLeft, ChevronRight, CheckCircle2, Sparkles } from "lucide-react";
 import { recommendCategory } from "@/lib/catalog/recommendCategory";
+import { KUBO_CITIES } from "@/app/data/cities";
 
 type CategoryKey =
   | "motor"
@@ -98,23 +99,7 @@ const CELLPHONE_BRANDS = [
   "OTRA",
 ];
 
-const CITIES = [
-  "Pereira",
-  "Dosquebradas",
-  "Santa Rosa de Cabal",
-  "La Virginia",
-  "Cartago",
-  "Armenia",
-  "Bogotá",
-  "Medellín",
-  "Cali",
-  "Barranquilla",
-  "Cartagena",
-  "Bucaramanga",
-  "Manizales",
-  "Madrid, Cundinamarca",
-  "Otra",
-];
+
 
 const CATEGORY_OPTIONS: Array<{
   key: CategoryKey;
@@ -1472,7 +1457,7 @@ if (!session) {
                     onChange={(e) => setCity(e.target.value)}
                     className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
                   >
-                    {CITIES.map((c) => (
+                    {KUBO_CITIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
