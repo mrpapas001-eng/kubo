@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   MapPin,
@@ -9,6 +9,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { HOME_CITIES } from "@/app/data/cities";
 
 const CATEGORY_OPTIONS = [
   { value: "", label: "Todas las categorías" },
@@ -41,25 +42,21 @@ const CATEGORY_OPTIONS = [
   },
 ];
 
-const CITY_OPTIONS = [
-  "Pereira",
-  "Dosquebradas",
-  "Santa Rosa de Cabal",
-  "La Virginia",
-  "Cartago",
-  "Armenia",
-  "Bogotá",
-  "Medellín",
-  "Cali",
-];
+type Props = {
+  initialCity: string;
+};
 
-export default function HomeHero() {
+export default function HomeHero({ initialCity }: Props) {
   const router = useRouter();
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
-  const [city, setCity] = useState("Pereira");
+  const [city, setCity] = useState(initialCity);
   const [showCityPicker, setShowCityPicker] = useState(false);
+
+  useEffect(() => {
+    setCity(initialCity);
+  }, [initialCity]);
 
   function handleSearch() {
     const params = new URLSearchParams();
@@ -92,6 +89,11 @@ export default function HomeHero() {
   function selectCity(value: string) {
     setCity(value);
     setShowCityPicker(false);
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("city", value);
+
+    router.push(`/?${params.toString()}`, { scroll: false });
   }
 
   return (
@@ -156,6 +158,7 @@ export default function HomeHero() {
                     className="mt-1 flex items-center gap-1 text-sm text-white/75 transition hover:text-white"
                   >
                     Cambiar ciudad
+
                     <ChevronDown
                       className={`h-4 w-4 transition ${
                         showCityPicker ? "rotate-180" : ""
@@ -166,7 +169,7 @@ export default function HomeHero() {
 
                 {showCityPicker ? (
                   <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-full min-w-[230px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-2xl">
-                    {CITY_OPTIONS.map((item) => (
+                    {HOME_CITIES.map((item) => (
                       <button
                         key={item}
                         type="button"
@@ -231,7 +234,7 @@ export default function HomeHero() {
                   onChange={(e) => setCity(e.target.value)}
                   className="h-full w-full appearance-none bg-transparent px-4 pl-10 pr-8 text-sm font-semibold text-slate-700 outline-none"
                 >
-                  {CITY_OPTIONS.map((item) => (
+                  {HOME_CITIES.map((item) => (
                     <option key={item} value={item}>
                       {item}
                     </option>

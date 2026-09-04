@@ -18,6 +18,7 @@ type Props = {
   feedSponsors: SponsorAd[];
   reels: ReelItem[];
   cities: string[];
+  initialCity: string;
 };
 
 type SortMode = "recent" | "popular" | "nearby";
@@ -59,8 +60,9 @@ export default function HomeFeaturedSection({
   feedSponsors,
   reels,
   cities,
+  initialCity,
 }: Props) {
-  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState(initialCity);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -70,6 +72,11 @@ export default function HomeFeaturedSection({
   const [allListings, setAllListings] = useState<any[]>(listings ?? []);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreFromServer, setHasMoreFromServer] = useState(true);
+
+  useEffect(() => {
+  setSelectedCity(initialCity);
+  setExtraVisibleCount(8);
+}, [initialCity]);
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -97,12 +104,11 @@ export default function HomeFeaturedSection({
       const itemCategory = normalizeText(item?.category ?? "");
       const itemPrice = Number(item?.price ?? 0);
 
-      const matchesCity = !selected || itemCity === selected;
       const matchesCategory = !category || itemCategory === category;
-      const matchesMin = min === null || itemPrice >= min;
-      const matchesMax = max === null || itemPrice <= max;
+const matchesMin = min === null || itemPrice >= min;
+const matchesMax = max === null || itemPrice <= max;
 
-      return matchesCity && matchesCategory && matchesMin && matchesMax;
+return matchesCategory && matchesMin && matchesMax;
     });
 
     result.sort((a: any, b: any) => {
@@ -113,6 +119,17 @@ export default function HomeFeaturedSection({
         const viewsDiff = Number(b?.views ?? 0) - Number(a?.views ?? 0);
         if (viewsDiff !== 0) return viewsDiff;
       }
+if (selected) {
+  const aCityMatch =
+    normalizeText(a?.city ?? "") === selected ? 1 : 0;
+
+  const bCityMatch =
+    normalizeText(b?.city ?? "") === selected ? 1 : 0;
+
+  if (bCityMatch !== aCityMatch) {
+    return bCityMatch - aCityMatch;
+  }
+}
 
       if (sortMode === "nearby" && selected) {
         const aMatch = normalizeText(a?.city ?? "") === selected ? 1 : 0;

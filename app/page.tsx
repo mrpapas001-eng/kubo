@@ -7,53 +7,35 @@ import Footer from "@/components/Footer";
 import InstallKuboButton from "@/components/InstallKuboButton";
 import { getHomeListings, getHomeReels } from "@/lib/queries/home";
 import { getHomeSponsors } from "@/lib/queries/sponsors";
+import { HOME_CITIES } from "@/app/data/cities";
 
 export const revalidate = 60;
 
-const CITIES = [
-  "Pereira",
-  "Dosquebradas",
-  "Santa Rosa de Cabal",
-  "La Virginia",
-  "Cartago",
-  "Armenia",
-  "Bogotá",
-  "Medellín",
-  "Cali",
-  "Barranquilla",
-  "Cartagena",
-  "Bucaramanga",
-  "Manizales",
-  "Madrid, Cundinamarca",
-];
 
-const CATEGORY_OPTIONS = [
-  { slug: "", label: "Todas las categorías" },
-  { slug: "motor", label: "Motor" },
-  { slug: "inmobiliaria", label: "Inmobiliaria" },
-  { slug: "celulares", label: "Celulares" },
-  { slug: "electrodomesticos", label: "Electrodomésticos" },
-  { slug: "hogar", label: "Hogar" },
-  { slug: "empleo", label: "Empleo" },
-  { slug: "servicios", label: "Servicios" },
-  { slug: "negocios", label: "Negocios" },
-  { slug: "informatica", label: "Informática" },
-  { slug: "imagen-sonido", label: "Imagen y sonido" },
-  { slug: "juegos", label: "Juegos" },
-  { slug: "formacion", label: "Formación y libros" },
-  { slug: "deportes", label: "Deportes" },
-  { slug: "mascotas", label: "Mascotas" },
-  { slug: "bebes", label: "Bebés" },
-  { slug: "moda", label: "Moda y complementos" },
-  { slug: "juguetes", label: "Juguetes" },
-  { slug: "papeleria-oficina", label: "Papelería y Oficina" },
-  { slug: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
-  { slug: "salud-belleza", label: "Salud y Belleza" },
-];
 
-export default async function Home() {
+type HomeProps = {
+  searchParams: Promise<{
+    city?: string | string[];
+  }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+
+  const requestedCity =
+    typeof params.city === "string" ? params.city : "";
+
+  const initialCity = HOME_CITIES.includes(
+  requestedCity as (typeof HOME_CITIES)[number]
+)
+  ? requestedCity
+  : "Pereira";
+
   const sponsors = await getHomeSponsors();
-  const initialListings = await getHomeListings({ take: 24, skip: 0 });
+  const initialListings = await getHomeListings({
+    take: 24,
+    skip: 0,
+  });
   const reels = await getHomeReels();
 
   return (
@@ -65,11 +47,12 @@ export default async function Home() {
 
         <Header />
 
-
         <main className="relative pb-10 pt-3 md:pt-4">
           <div className="mx-auto max-w-[1440px] px-4 md:px-6 lg:px-8">
-            <HomeHero />
+            <HomeHero initialCity={initialCity} />
+
             <InstallKuboButton />
+
             <HomeCategories />
 
             <HomeSponsorMain sponsors={sponsors.main} />
@@ -79,9 +62,9 @@ export default async function Home() {
               sideSponsors={sponsors.side}
               feedSponsors={sponsors.feed}
               reels={reels}
-              cities={CITIES}
+              cities={[...HOME_CITIES]}
+              initialCity={initialCity}
             />
-
           </div>
         </main>
       </div>
