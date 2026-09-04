@@ -286,12 +286,16 @@ const callHref = cleanPhone ? `tel:${cleanPhone}` : "#";
   ? await prisma.business.findUnique({
       where: { id: listing.businessId },
       select: {
+        name: true,
+        slug: true,
         isVerified: true,
+        isActive: true,
       },
     })
   : null;
 
-const isVerifiedBusiness = Boolean(linkedBusiness?.isVerified);
+const publicBusiness = linkedBusiness?.isActive ? linkedBusiness : null;
+const isVerifiedBusiness = Boolean(publicBusiness?.isVerified);
 
 const accountVerificationType =
   listingWithVerification.accountVerificationType;
@@ -538,12 +542,12 @@ const showBusinessVerificationCta = Boolean(
                     </div>
                     <div className="mt-2 flex items-center gap-2 text-sm font-black text-slate-900">
                       <ShieldCheck className="h-4 w-4 text-emerald-700" />
-                      {listing.sellerType !== "PARTICULAR" && listing.businessSlug ? (
+                      {publicBusiness ? (
                         <Link
-                          href={`/company/${listing.businessSlug}`}
+                          href={`/company/${publicBusiness.slug}`}
                           className="text-[#0f3c8c] hover:underline"
                         >
-                          {listing.businessName || sellerLabel}
+                          {publicBusiness.name}
                         </Link>
                       ) : (
                         <span>{sellerLabel}</span>
@@ -552,6 +556,15 @@ const showBusinessVerificationCta = Boolean(
                     <p className="mt-2 text-xs font-medium leading-relaxed text-slate-600">
                       {trustDescription}
                     </p>
+
+                    {publicBusiness ? (
+                      <Link
+                        href={`/company/${publicBusiness.slug}`}
+                        className="mt-3 inline-flex h-9 items-center justify-center rounded-xl bg-white px-4 text-xs font-black text-[#0f3c8c] shadow-sm ring-1 ring-emerald-200 hover:bg-emerald-100"
+                      >
+                        Ver todos los vehículos de {publicBusiness.name} →
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
                 </div>
