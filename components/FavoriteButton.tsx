@@ -28,9 +28,7 @@ export default function FavoriteButton({ listingId, variant = "floating" }: Prop
         return;
       }
 
-      if (status === "loading") {
-        return;
-      }
+      if (status === "loading") return;
 
       if (!session?.user?.email) {
         if (!cancelled) {
@@ -57,17 +55,11 @@ export default function FavoriteButton({ listingId, variant = "floating" }: Prop
           data = null;
         }
 
-        if (!cancelled) {
-          setIsFav(Boolean(data?.isFavorite));
-        }
+        if (!cancelled) setIsFav(Boolean(data?.isFavorite));
       } catch {
-        if (!cancelled) {
-          setIsFav(false);
-        }
+        if (!cancelled) setIsFav(false);
       } finally {
-        if (!cancelled) {
-          setChecking(false);
-        }
+        if (!cancelled) setChecking(false);
       }
     }
 
@@ -94,9 +86,7 @@ export default function FavoriteButton({ listingId, variant = "floating" }: Prop
     try {
       const res = await fetch("/api/favorites/toggle", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listingId }),
       });
 
@@ -130,7 +120,7 @@ export default function FavoriteButton({ listingId, variant = "floating" }: Prop
       className={
         isInline
           ? "inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-          : "absolute right-3 top-3 z-20 rounded-full bg-white/90 p-2 shadow hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+          : "absolute right-2 top-2 z-20 rounded-full bg-white/90 p-1.5 shadow hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 md:right-3 md:top-3 md:p-2"
       }
       aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
       aria-pressed={isFav}
@@ -138,7 +128,7 @@ export default function FavoriteButton({ listingId, variant = "floating" }: Prop
       title={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
     >
       <Heart
-        className={`h-5 w-5 transition ${
+        className={`h-4 w-4 transition md:h-5 md:w-5 ${
           isFav ? "fill-red-500 text-red-500" : "text-slate-600"
         }`}
       />

@@ -253,12 +253,12 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
               window.open(reelUrl, "_blank", "noopener,noreferrer");
             }}
             aria-label="Ver video del anuncio"
-            className="group absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/75 p-1 pr-2.5 text-white shadow-md ring-1 ring-white/30 backdrop-blur transition hover:bg-black/90"
+            className="group absolute bottom-2 right-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-md ring-2 ring-white/90 transition hover:bg-red-700 md:bottom-3 md:right-3 md:h-auto md:w-auto md:gap-1.5 md:bg-black/75 md:p-1 md:pr-2.5 md:ring-1 md:ring-white/30 md:backdrop-blur md:hover:bg-black/90"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow-sm transition group-hover:bg-red-700">
-              <Play className="ml-0.5 h-3.5 w-3.5 fill-white" />
+            <span className="flex items-center justify-center rounded-full text-white md:h-7 md:w-7 md:bg-red-600 md:shadow-sm md:transition md:group-hover:bg-red-700">
+              <Play className="ml-0.5 h-3.5 w-3.5 fill-white md:h-3.5 md:w-3.5" />
             </span>
-            <span className="text-[9px] font-black uppercase tracking-wider md:text-[10px]">
+            <span className="hidden text-[10px] font-black uppercase tracking-wider md:inline">
               Video
             </span>
           </button>
