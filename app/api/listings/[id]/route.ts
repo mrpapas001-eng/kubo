@@ -43,6 +43,8 @@ export async function GET(_req: Request, context: RouteContext) {
       session?.user?.email?.toLowerCase().trim() ?? null;
 
     const isAdmin = isAdminEmail(sessionEmail);
+    const requestUrl = new URL(_req.url);
+    const isEditRequest = requestUrl.searchParams.get("mode") === "edit";
 
     const { id } = await context.params;
     const cleanId = String(id ?? "").trim();
@@ -81,6 +83,16 @@ export async function GET(_req: Request, context: RouteContext) {
       ) ||
       businessOwner ||
       isAdmin;
+
+    if (isEditRequest && !canViewPrivate) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "No tienes permiso para editar este anuncio.",
+        },
+        { status: 403 }
+      );
+    }
 
     if (listing.status !== "active" && !canViewPrivate) {
       return NextResponse.json(

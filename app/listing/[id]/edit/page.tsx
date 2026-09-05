@@ -56,7 +56,7 @@ export default function EditListingPage() {
       setLoadError(null);
 
       try {
-        const res = await fetch(`/api/listings/${id}`, {
+        const res = await fetch(`/api/listings/${id}?mode=edit`, {
           cache: "no-store",
         });
 
