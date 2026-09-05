@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -13,6 +13,7 @@ import {
   CalendarDays,
   Crown,
   BadgeCheck,
+  Play,
 } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
 
@@ -251,9 +252,15 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
               e.stopPropagation();
               window.open(reelUrl, "_blank", "noopener,noreferrer");
             }}
-            className="absolute bottom-3 right-3 z-20 rounded-full bg-black/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-white shadow-md backdrop-blur hover:bg-black"
+            aria-label="Ver video del anuncio"
+            className="group absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/75 p-1 pr-2.5 text-white shadow-md ring-1 ring-white/30 backdrop-blur transition hover:bg-black/90"
           >
-            ▶ Ver reel
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow-sm transition group-hover:bg-red-700">
+              <Play className="ml-0.5 h-3.5 w-3.5 fill-white" />
+            </span>
+            <span className="text-[9px] font-black uppercase tracking-wider md:text-[10px]">
+              Video
+            </span>
           </button>
         ) : null}
       </div>

@@ -6,9 +6,10 @@ import { MessageCircle } from "lucide-react";
 
 type Props = {
   listingId: string;
+  compact?: boolean;
 };
 
-export default function StartChatButton({ listingId }: Props) {
+export default function StartChatButton({ listingId, compact = false }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +46,9 @@ export default function StartChatButton({ listingId }: Props) {
       type="button"
       disabled={loading}
       onClick={startChat}
-      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+      className={`flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white font-black text-slate-700 hover:bg-slate-50 disabled:opacity-60 ${
+        compact ? "h-10 text-xs" : "h-12 text-sm"
+      }`}
     >
       <MessageCircle className="h-4 w-4" />
       {loading ? "Abriendo..." : "Chat interno"}

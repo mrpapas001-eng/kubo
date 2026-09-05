@@ -14,6 +14,7 @@ import {
   Settings,
   CalendarDays,
   Camera,
+  PlayCircle,
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
@@ -24,6 +25,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import ListingMapClient from "@/components/ListingMapClient";
 import MobileListingActions from "@/components/MobileListingActions";
 import TrackedContactLink from "@/components/TrackedContactLink";
+import StartChatButton from "@/components/StartChatButton";
 import BackToResultsButton from "@/components/BackToResultsButton";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -89,6 +91,55 @@ function parseDetails(details: unknown) {
   } catch {
     return {};
   }
+}
+
+function similarityScore(source: any, candidate: any) {
+  let score = 0;
+  const sourceDetails: any = parseDetails(source.details);
+  const candidateDetails: any = parseDetails(candidate.details);
+
+  if (normalizeCityKey(source.city) === normalizeCityKey(candidate.city)) {
+    score += 20;
+  }
+
+  if (source.template && source.template === candidate.template) {
+    score += 10;
+  }
+
+  const sourcePrice = Number(source.price);
+  const candidatePrice = Number(candidate.price);
+
+  if (sourcePrice > 0 && candidatePrice > 0) {
+    const difference = Math.abs(sourcePrice - candidatePrice) / sourcePrice;
+    score += Math.max(0, 50 - difference * 50);
+  }
+
+  if (source.categorySlug === "motor") {
+    const sourceMotor = sourceDetails?.motor ?? {};
+    const candidateMotor = candidateDetails?.motor ?? {};
+
+    if (
+      sourceMotor.brand &&
+      String(sourceMotor.brand).toLowerCase() ===
+        String(candidateMotor.brand ?? "").toLowerCase()
+    ) {
+      score += 15;
+    }
+
+    const sourceYear = Number(sourceMotor.year);
+    const candidateYear = Number(candidateMotor.year);
+    if (sourceYear > 0 && candidateYear > 0) {
+      score += Math.max(0, 10 - Math.abs(sourceYear - candidateYear));
+    }
+  }
+
+  if (source.categorySlug === "inmobiliaria") {
+    const sourceDeal = sourceDetails?.realEstate?.deal;
+    const candidateDeal = candidateDetails?.realEstate?.deal;
+    if (sourceDeal && sourceDeal === candidateDeal) score += 15;
+  }
+
+  return score;
 }
 
 function formatPublishedDate(date: Date | string | null | undefined) {
@@ -223,18 +274,24 @@ export default async function ListingDetail({ params }: PageProps) {
     }),
   ]);
 
-  const similarListings = await prisma.listing.findMany({
+  const similarCandidates = await prisma.listing.findMany({
     where: {
       id: { not: listing.id },
       categorySlug: listing.categorySlug,
-      city: listing.city,
+      subcategorySlug: listing.subcategorySlug,
       status: "active",
     },
     orderBy: {
       createdAt: "desc",
     },
-    take: 6,
+    take: 36,
   });
+  const similarListings = similarCandidates
+    .sort(
+      (a, b) =>
+        similarityScore(listing, b) - similarityScore(listing, a)
+    )
+    .slice(0, 6);
   const similarListingsWithVerification = await attachAccountVerification(similarListings);
 
   const fallback = "/placeholders/listing.jpg";
@@ -391,19 +448,38 @@ const showBusinessVerificationCta = Boolean(
         />
 
         <div className="mx-auto max-w-[1180px]">
-          <Breadcrumbs
-            category={listing.categorySlug}
-            subcategory={listing.subcategorySlug}
-            title={listing.title}
-          />
-            <div className="mb-5">
-    <BackToResultsButton />
-  </div>
+          <div className="hidden md:block">
+            <Breadcrumbs
+              category={listing.categorySlug}
+              subcategory={listing.subcategorySlug}
+              title={listing.title}
+            />
+          </div>
+          <div className="mb-3 origin-left scale-90 md:mb-5 md:scale-100">
+            <BackToResultsButton />
+          </div>
 
           <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
             <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
               <div className="relative min-h-[420px] overflow-hidden bg-slate-100">
                 <ListingGallery images={images.length ? images : [fallback]} />
+
+                {reelUrl ? (
+                  <a
+                    href={reelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Ver video del anuncio"
+                    className="group absolute left-3 top-3 z-30 inline-flex items-center gap-2 rounded-full bg-black/75 p-1.5 pr-3 text-white shadow-lg ring-1 ring-white/30 backdrop-blur transition hover:bg-black/90 md:left-5 md:top-5"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-md transition group-hover:bg-red-700">
+                      <PlayCircle className="h-5 w-5 fill-white/20" />
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-wider md:text-[11px]">
+                      Ver video
+                    </span>
+                  </a>
+                ) : null}
 
                 <div className="pointer-events-none absolute bottom-5 left-5 z-20 inline-flex items-center gap-2 rounded-xl bg-black/70 px-4 py-2 text-sm font-black text-white backdrop-blur">
                   <Camera className="h-4 w-4" />
@@ -411,7 +487,7 @@ const showBusinessVerificationCta = Boolean(
                 </div>
               </div>
 
-              <div className="relative overflow-hidden bg-white p-6 md:p-8">
+              <div className="relative overflow-hidden bg-white p-4 md:p-8">
                 <div className="mb-4 flex flex-wrap gap-2">
 
 
@@ -428,43 +504,43 @@ const showBusinessVerificationCta = Boolean(
                   ) : null}
                 </div>
 
-                <h1 className="text-4xl font-black leading-tight text-slate-900">
+                <h1 className="text-2xl font-black leading-tight text-slate-900 md:text-4xl">
                   {listing.title}
                 </h1>
 
-                <p className="mt-2 text-lg font-bold text-slate-500">
+                <p className="mt-2 text-sm font-bold text-slate-500 md:text-lg">
   {[listing.categorySlug, listing.subcategorySlug, listing.city]
     .filter(Boolean)
     .join(" · ")}
 </p>
 
-<div className="mt-5 text-4xl font-black text-[#4f32c8]">
+<div className="mt-4 text-3xl font-black text-[#4f32c8] md:mt-5 md:text-4xl">
   {formattedPrice}
 </div>
 
 {listing.categorySlug === "motor" ? (
-  <div className="mt-6 grid grid-cols-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-4 text-center">
-      <Gauge className="h-6 w-6 text-slate-800" />
+  <div className="mt-5 grid grid-cols-4 overflow-hidden rounded-2xl border border-slate-200 bg-white md:mt-6">
+    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-2 text-center md:p-4">
+      <Gauge className="h-5 w-5 text-slate-800 md:h-6 md:w-6" />
       <span className="text-xs font-black text-slate-700">
         {kmFormatted || "—"}
       </span>
     </div>
 
-    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-4 text-center">
-      <Fuel className="h-6 w-6 text-slate-800" />
+    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-2 text-center md:p-4">
+      <Fuel className="h-5 w-5 text-slate-800 md:h-6 md:w-6" />
       <span className="text-xs font-black text-slate-700">{motorFuel}</span>
     </div>
 
-    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-4 text-center">
-      <Settings className="h-6 w-6 text-slate-800" />
+    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-2 text-center md:p-4">
+      <Settings className="h-5 w-5 text-slate-800 md:h-6 md:w-6" />
       <span className="text-xs font-black text-slate-700">
         {motorTransmission}
       </span>
     </div>
 
-    <div className="flex flex-col items-center gap-1 p-4 text-center">
-      <CalendarDays className="h-6 w-6 text-slate-800" />
+    <div className="flex flex-col items-center gap-1 p-2 text-center md:p-4">
+      <CalendarDays className="h-5 w-5 text-slate-800 md:h-6 md:w-6" />
       <span className="text-xs font-black text-slate-700">{motorYear}</span>
     </div>
   </div>
@@ -500,7 +576,7 @@ const showBusinessVerificationCta = Boolean(
   </div>
 ) : null}
 
-                <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="mt-8 hidden gap-3 md:grid md:grid-cols-3">
   {cleanPhone ? (
     <>
       <TrackedContactLink
@@ -530,23 +606,14 @@ const showBusinessVerificationCta = Boolean(
       href={contactUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-[#4f32c8] text-sm font-black text-white hover:bg-[#3f28a8] sm:col-span-2"
+    className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#4f32c8] text-sm font-black text-white hover:bg-[#3f28a8] md:col-span-2"
     >
       <MessageCircle className="h-5 w-5" />
       Contactar al vendedor
     </a>
   ) : null}
 
-  {reelUrl ? (
-    <a
-      href={reelUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-black text-sm font-black text-white hover:bg-slate-800 sm:col-span-2"
-    >
-      ▶ Ver reel
-    </a>
-  ) : null}
+  <StartChatButton listingId={listing.id} />
 </div>
 
                 <div className="mt-6">

@@ -53,14 +53,14 @@ export default function MobileListingActions({
   const canContactSeller = canUseWhatsapp || Boolean(contactUrl);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pb-[calc(max(env(safe-area-inset-bottom),0.5rem)+4.75rem)] pt-2 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] backdrop-blur md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 pb-[calc(max(env(safe-area-inset-bottom),0.35rem)+4.75rem)] pt-1.5 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] backdrop-blur md:hidden">
       <div className="mx-auto grid max-w-md grid-cols-[1fr_1fr_44px] gap-2">
         <a
           href={sellerContactHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={trackSellerContact}
-          className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-black text-white ${
+          className={`flex h-10 items-center justify-center gap-1.5 rounded-xl text-xs font-black text-white ${
             !canContactSeller
               ? "pointer-events-none bg-slate-400 opacity-50"
               : canUseWhatsapp
@@ -72,13 +72,13 @@ export default function MobileListingActions({
           {canUseWhatsapp ? "WhatsApp" : "Contactar"}
         </a>
 
-        <StartChatButton listingId={listingId} />
+        <StartChatButton listingId={listingId} compact />
 
         <button
           type="button"
           onClick={handleShare}
           aria-label={shared ? "Enlace copiado" : "Compartir anuncio"}
-          className="flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm"
+          className="flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm"
         >
           <Share2 className="h-4 w-4" />
         </button>
