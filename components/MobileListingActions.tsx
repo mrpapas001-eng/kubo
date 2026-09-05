@@ -35,6 +35,17 @@ export default function MobileListingActions({
     } catch {}
   }
 
+  function trackSellerContact() {
+    if (!canUseWhatsapp) return;
+
+    void fetch(`/api/listings/${encodeURIComponent(listingId)}/analytics`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "WHATSAPP_CLICK" }),
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+
   const sellerContactHref = canUseWhatsapp
     ? whatsappHref
     : contactUrl || "#";
@@ -48,6 +59,7 @@ export default function MobileListingActions({
           href={sellerContactHref}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={trackSellerContact}
           className={`flex h-11 items-center justify-center gap-2 rounded-2xl text-sm font-black text-white ${
             !canContactSeller
               ? "pointer-events-none bg-slate-400 opacity-50"

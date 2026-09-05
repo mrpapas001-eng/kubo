@@ -19,6 +19,12 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ListingAnalyticsEventType {
+  VIEW
+  WHATSAPP_CLICK
+  PHONE_CLICK
+}
+
 model AccountVerification {
   id             String             @id @default(cuid())
   email          String
@@ -77,20 +83,14 @@ model AidRequest {
   @@index([ownerEmail])
 }
 
-// ======================================================
-// KUBO EMPRESAS
-// ======================================================
-
 model Business {
   id   String @id @default(cuid())
   name String
   slug String @unique
 
-  // Propietario / administrador principal
   ownerEmail String
   ownerName  String?
 
-  // Información pública
   description String?
   logo        String?
   phone       String?
@@ -99,34 +99,25 @@ model Business {
   instagram   String?
   facebook    String?
 
-  // Ubicación
   city    String?
   address String?
 
-  // Tipo de empresa:
-  // concesionario, inmobiliaria, tienda, restaurante, etc.
   businessType String?
 
-  // Estado
   isVerified Boolean @default(false)
   isActive   Boolean @default(true)
 
-  // Fechas
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Anuncios pertenecientes a esta empresa
-  listings Listing[]
+  listings       Listing[]
+  analyticsEvents ListingAnalyticsEvent[]
 
   @@index([ownerEmail])
   @@index([businessType])
   @@index([isVerified])
   @@index([isActive])
 }
-
-// ======================================================
-// ANUNCIOS
-// ======================================================
 
 model Listing {
   id              String  @id @default(cuid())
@@ -153,18 +144,11 @@ model Listing {
   premiumPlan   String?
   premiumUntil  DateTime?
 
-  // Estadísticas actuales
   views Int @default(0)
 
-  // Propietario particular / cuenta que publica
   ownerEmail String?
   ownerName  String?
   ownerImage String?
-
-  // ====================================================
-  // DATOS EMPRESARIALES ANTIGUOS
-  // Se mantienen para no romper anuncios existentes.
-  // ====================================================
 
   isBusiness          Boolean @default(false)
   businessName        String?
@@ -178,14 +162,9 @@ model Listing {
   businessWhatsapp    String?
   businessVerified    Boolean @default(false)
 
-  // ====================================================
-  // NUEVA RELACIÓN CON KUBO EMPRESAS
-  // ====================================================
-
   businessId String?
   business   Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
 
-  // Moderación / estado
   status        String  @default("active")
   hiddenReason  String?
   reportedCount Int     @default(0)
@@ -193,7 +172,8 @@ model Listing {
   createdAt DateTime @default(now())
   isPremium Boolean  @default(false)
 
-  reports ListingReport[]
+  reports         ListingReport[]
+  analyticsEvents ListingAnalyticsEvent[]
 
   @@index([categorySlug])
   @@index([subcategorySlug])
@@ -210,6 +190,21 @@ model Listing {
   @@index([businessId])
   @@index([status])
   @@index([reportedCount])
+}
+
+model ListingAnalyticsEvent {
+  id         String                    @id @default(cuid())
+  type       ListingAnalyticsEventType
+  listingId  String
+  businessId String?
+  createdAt  DateTime                  @default(now())
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  business Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, type, createdAt])
+  @@index([businessId, type, createdAt])
+  @@index([createdAt])
 }
 
 model ListingReport {

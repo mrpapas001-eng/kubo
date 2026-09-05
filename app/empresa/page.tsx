@@ -7,7 +7,9 @@ import {
   Building2,
   CheckCircle2,
   Eye,
+  MessageCircle,
   MapPin,
+  Phone,
   Plus,
   Store,
 } from "lucide-react";
@@ -17,7 +19,13 @@ import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import BusinessListingActions from "@/components/BusinessListingActions";
 
-export default async function BusinessOwnerDashboardPage() {
+type Period = "7d" | "30d" | "all";
+
+export default async function BusinessOwnerDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
 
@@ -26,6 +34,17 @@ export default async function BusinessOwnerDashboardPage() {
   }
 
   const isAdmin = isAdminEmail(email);
+  const resolvedSearchParams = await searchParams;
+  const period: Period =
+    resolvedSearchParams.period === "7d" || resolvedSearchParams.period === "30d"
+      ? resolvedSearchParams.period
+      : "all";
+  const periodStart =
+    period === "7d"
+      ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      : period === "30d"
+        ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        : null;
 
   const businesses = await prisma.business.findMany({
     where: isAdmin
@@ -43,6 +62,19 @@ export default async function BusinessOwnerDashboardPage() {
       listings: {
         orderBy: {
           createdAt: "desc",
+        },
+      },
+      analyticsEvents: {
+        where: periodStart
+          ? {
+              createdAt: {
+                gte: periodStart,
+              },
+            }
+          : undefined,
+        select: {
+          listingId: true,
+          type: true,
         },
       },
     },
@@ -89,6 +121,21 @@ export default async function BusinessOwnerDashboardPage() {
     );
   }
 
+  const listingIds = businesses.flatMap((business) =>
+    business.listings.map((listing) => listing.id)
+  );
+  const conversations = listingIds.length
+    ? await prisma.conversation.findMany({
+        where: {
+          listingId: { in: listingIds },
+          ...(periodStart ? { createdAt: { gte: periodStart } } : {}),
+        },
+        select: {
+          listingId: true,
+        },
+      })
+    : [];
+
   return (
     <div className="min-h-screen bg-[#F8F9FB] px-4 pb-24 pt-6 md:px-6 md:py-10">
       <div className="mx-auto max-w-[1180px] space-y-8">
@@ -119,6 +166,12 @@ export default async function BusinessOwnerDashboardPage() {
               Vista de administrador
             </div>
           ) : null}
+
+          <div className="mt-5 inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+            <PeriodLink period="7d" current={period}>7 días</PeriodLink>
+            <PeriodLink period="30d" current={period}>30 días</PeriodLink>
+            <PeriodLink period="all" current={period}>Todo</PeriodLink>
+          </div>
         </header>
 
         {businesses.map((business) => {
@@ -132,6 +185,33 @@ export default async function BusinessOwnerDashboardPage() {
             (total, listing) => total + (listing.views || 0),
             0
           );
+          const periodViews = business.analyticsEvents.filter(
+            (event) => event.type === "VIEW"
+          ).length;
+          const whatsappClicks = business.analyticsEvents.filter(
+            (event) => event.type === "WHATSAPP_CLICK"
+          ).length;
+          const phoneClicks = business.analyticsEvents.filter(
+            (event) => event.type === "PHONE_CLICK"
+          ).length;
+          const businessListingIds = new Set(
+            business.listings.map((listing) => listing.id)
+          );
+          const chatStarts = conversations.filter((conversation) =>
+            businessListingIds.has(conversation.listingId)
+          ).length;
+          const displayedViews = period === "all" ? totalViews : periodViews;
+          const eventCount = (
+            listingId: string,
+            type: "VIEW" | "WHATSAPP_CLICK" | "PHONE_CLICK"
+          ) =>
+            business.analyticsEvents.filter(
+              (event) => event.listingId === listingId && event.type === type
+            ).length;
+          const conversationCount = (listingId: string) =>
+            conversations.filter(
+              (conversation) => conversation.listingId === listingId
+            ).length;
 
           return (
             <section
@@ -191,11 +271,14 @@ export default async function BusinessOwnerDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 bg-slate-50 p-5 sm:grid-cols-2 md:grid-cols-4 md:p-7">
+              <div className="grid gap-3 bg-slate-50 p-5 sm:grid-cols-2 lg:grid-cols-4 md:p-7">
                 <MetricCard label="Anuncios totales" value={business.listings.length} />
                 <MetricCard label="Activos" value={activeListings.length} tone="green" />
                 <MetricCard label="No activos" value={hiddenListings.length} />
-                <MetricCard label="Visitas" value={totalViews} tone="blue" icon />
+                <MetricCard label="Visitas" value={displayedViews} tone="blue" icon="views" />
+                <MetricCard label="WhatsApp" value={whatsappClicks} tone="green" icon="whatsapp" />
+                <MetricCard label="Llamadas" value={phoneClicks} tone="blue" icon="phone" />
+                <MetricCard label="Conversaciones" value={chatStarts} icon="chat" />
               </div>
 
               <div className="p-5 md:p-7">
@@ -261,7 +344,26 @@ export default async function BusinessOwnerDashboardPage() {
                                 : "No activo"}
                             </span>
 
-                            <span>{listing.views || 0} visitas</span>
+                            <span>
+                              {period === "all"
+                                ? listing.views || 0
+                                : eventCount(listing.id, "VIEW")} visitas
+                            </span>
+                          </div>
+
+                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold text-slate-500">
+                            <span className="inline-flex items-center gap-1">
+                              <MessageCircle className="h-3 w-3 text-emerald-600" />
+                              {eventCount(listing.id, "WHATSAPP_CLICK")} WhatsApp
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Phone className="h-3 w-3 text-blue-600" />
+                              {eventCount(listing.id, "PHONE_CLICK")} llamadas
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <MessageCircle className="h-3 w-3 text-violet-600" />
+                              {conversationCount(listing.id)} chats
+                            </span>
                           </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
@@ -305,12 +407,12 @@ function MetricCard({
   label,
   value,
   tone = "slate",
-  icon = false,
+  icon,
 }: {
   label: string;
   value: number;
   tone?: "slate" | "green" | "blue";
-  icon?: boolean;
+  icon?: "views" | "whatsapp" | "phone" | "chat";
 }) {
   const colors = {
     slate: "border-slate-200 bg-white text-slate-900",
@@ -321,7 +423,11 @@ function MetricCard({
   return (
     <div className={`rounded-2xl border p-4 ${colors[tone]}`}>
       <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide opacity-70">
-        {icon ? <Eye className="h-4 w-4" /> : null}
+        {icon === "views" ? <Eye className="h-4 w-4" /> : null}
+        {icon === "whatsapp" || icon === "chat" ? (
+          <MessageCircle className="h-4 w-4" />
+        ) : null}
+        {icon === "phone" ? <Phone className="h-4 w-4" /> : null}
         {label}
       </div>
 
@@ -329,5 +435,28 @@ function MetricCard({
         {value.toLocaleString("es-CO")}
       </div>
     </div>
+  );
+}
+
+function PeriodLink({
+  period,
+  current,
+  children,
+}: {
+  period: Period;
+  current: Period;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={period === "all" ? "/empresa" : `/empresa?period=${period}`}
+      className={`rounded-xl px-4 py-2 text-xs font-black transition ${
+        period === current
+          ? "bg-[#0f3c8c] text-white"
+          : "text-slate-600 hover:bg-slate-100"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

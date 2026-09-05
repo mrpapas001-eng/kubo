@@ -23,6 +23,7 @@ import ListingCard from "@/components/ListingCard";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ListingMapClient from "@/components/ListingMapClient";
 import MobileListingActions from "@/components/MobileListingActions";
+import TrackedContactLink from "@/components/TrackedContactLink";
 import BackToResultsButton from "@/components/BackToResultsButton";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -204,14 +205,23 @@ export default async function ListingDetail({ params }: PageProps) {
   const [listingWithVerification] = await attachAccountVerification([listing]);
   listing = listingWithVerification;
 
-  await prisma.listing.update({
-    where: { id },
-    data: {
-      views: {
-        increment: 1,
+  await prisma.$transaction([
+    prisma.listing.update({
+      where: { id },
+      data: {
+        views: {
+          increment: 1,
+        },
       },
-    },
-  });
+    }),
+    prisma.listingAnalyticsEvent.create({
+      data: {
+        type: "VIEW",
+        listingId: listing.id,
+        businessId: listing.businessId,
+      },
+    }),
+  ]);
 
   const similarListings = await prisma.listing.findMany({
     where: {
@@ -493,7 +503,9 @@ const showBusinessVerificationCta = Boolean(
                 <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
   {cleanPhone ? (
     <>
-      <a
+      <TrackedContactLink
+        listingId={listing.id}
+        eventType="WHATSAPP_CLICK"
         href={whatsappHref}
         target="_blank"
         rel="noreferrer"
@@ -501,15 +513,17 @@ const showBusinessVerificationCta = Boolean(
       >
         <MessageCircle className="h-5 w-5" />
         WhatsApp
-      </a>
+      </TrackedContactLink>
 
-      <a
+      <TrackedContactLink
+        listingId={listing.id}
+        eventType="PHONE_CLICK"
         href={callHref}
         className="flex h-13 items-center justify-center gap-2 rounded-2xl border border-[#4f32c8]/40 bg-white text-sm font-black text-[#4f32c8] hover:bg-slate-50"
       >
         <Phone className="h-5 w-5" />
         Llamar
-      </a>
+      </TrackedContactLink>
     </>
   ) : contactUrl ? (
     <a
