@@ -5,13 +5,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { attachAccountVerification } from "@/lib/accountVerification";
 import { isAdminEmail } from "@/lib/admin";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
-const SMART_ORDER = [
-  { isPremium: "desc" as const },
-  { isFeatured: "desc" as const },
-  { imageUrl: "desc" as const },
-  { createdAt: "desc" as const },
-];
+const SMART_ORDER = VISIBILITY_PROMOTIONS_ENABLED
+  ? [
+      { isPremium: "desc" as const },
+      { isFeatured: "desc" as const },
+      { imageUrl: "desc" as const },
+      { createdAt: "desc" as const },
+    ]
+  : [
+      { imageUrl: "desc" as const },
+      { createdAt: "desc" as const },
+    ];
 
 // Mismo catálogo de categorías/subcategorías usado por
 // app/publish/page.tsx (CATEGORY_OPTIONS).
@@ -209,7 +215,9 @@ export async function GET(req: Request) {
 
     const where: any = {
       status: "active",
-      OR: [{ premiumUntil: null }, { premiumUntil: { gt: new Date() } }],
+      ...(VISIBILITY_PROMOTIONS_ENABLED
+        ? { OR: [{ premiumUntil: null }, { premiumUntil: { gt: new Date() } }] }
+        : {}),
       ...(cityParam ? { city: cityParam } : {}),
     };
 

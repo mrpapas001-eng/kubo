@@ -1,5 +1,6 @@
 import { prisma } from "../db";
 import { attachAccountVerification } from "../accountVerification";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "../features";
 
 type GetHomeListingsArgs = {
   take?: number;
@@ -17,11 +18,13 @@ function normalizePromotionStatus(listing: any) {
   const now = new Date();
 
   const isPremiumActive =
+    VISIBILITY_PROMOTIONS_ENABLED &&
     listing.isPremium &&
     listing.premiumUntil &&
     new Date(listing.premiumUntil).getTime() > now.getTime();
 
   const isFeaturedActive =
+    VISIBILITY_PROMOTIONS_ENABLED &&
     listing.isFeatured &&
     listing.featuredUntil &&
     new Date(listing.featuredUntil).getTime() > now.getTime();
@@ -40,8 +43,10 @@ function sortListings(a: any, b: any) {
     return a.businessVerified ? -1 : 1;
   }
 
-  if (a.isPremium !== b.isPremium) return a.isPremium ? -1 : 1;
-  if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+  if (VISIBILITY_PROMOTIONS_ENABLED) {
+    if (a.isPremium !== b.isPremium) return a.isPremium ? -1 : 1;
+    if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+  }
 
   return (
     new Date(b.createdAt ?? 0).getTime() -

@@ -1,6 +1,7 @@
 ﻿import Link from "next/link";
 import { Crown, Sparkles } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type HomeListing = {
   id?: string;
@@ -13,6 +14,8 @@ type Props = {
 };
 
 export default function HomePremiumShowcase({ listings }: Props) {
+  if (!VISIBILITY_PROMOTIONS_ENABLED) return null;
+
   const now = new Date();
 
   const premium = (listings ?? [])

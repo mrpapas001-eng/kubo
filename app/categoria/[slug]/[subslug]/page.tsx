@@ -6,6 +6,7 @@ import MotorFilters from "@/components/MotorFilters";
 import { getListings } from "@/lib/queries/home";
 import { CATEGORIES } from "@/data/categories";
 import BackButton from "@/components/BackButton";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type PageProps = {
   params: Promise<{
@@ -1019,12 +1020,14 @@ if (!category || !subcategory) {
 
 listings = listings.sort((a, b) => {
   // 1. Premium primero
-  if (a.isPremium && !b.isPremium) return -1;
-  if (!a.isPremium && b.isPremium) return 1;
+  if (VISIBILITY_PROMOTIONS_ENABLED) {
+    if (a.isPremium && !b.isPremium) return -1;
+    if (!a.isPremium && b.isPremium) return 1;
 
-  // 2. Destacados después
-  if (a.isFeatured && !b.isFeatured) return -1;
-  if (!a.isFeatured && b.isFeatured) return 1;
+    // 2. Destacados después
+    if (a.isFeatured && !b.isFeatured) return -1;
+    if (!a.isFeatured && b.isFeatured) return 1;
+  }
 
   // 3. Luego orden normal
   if (order === "price-asc") {

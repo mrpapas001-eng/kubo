@@ -2,10 +2,16 @@ import Link from "next/link";
 import { Crown, Flame, CheckCircle2, Clock3 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLaunchQuota } from "@/lib/launchPromotion";
+import { redirect } from "next/navigation";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type Props = { searchParams?: Promise<{ listingId?: string }> };
 
 export default async function PremiumPage({ searchParams }: Props) {
+  if (!VISIBILITY_PROMOTIONS_ENABLED) {
+    redirect("/mis-anuncios");
+  }
+
   const params = (await searchParams) ?? {};
   const listingId = params.listingId;
   const [listing, quota] = await Promise.all([

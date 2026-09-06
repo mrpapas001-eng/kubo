@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { recommendCategory } from "@/lib/catalog/recommendCategory";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type Props = {
   searchParams?: Promise<{
@@ -135,11 +136,13 @@ export default async function BuscarPage({ searchParams }: Props) {
 
   const allListings = listingsWithVerification.map((item: any) => {
     const isPremiumActive =
+      VISIBILITY_PROMOTIONS_ENABLED &&
       item.isPremium &&
       item.premiumUntil &&
       new Date(item.premiumUntil).getTime() > now.getTime();
 
     const isFeaturedActive =
+      VISIBILITY_PROMOTIONS_ENABLED &&
       item.isFeatured &&
       item.featuredUntil &&
       new Date(item.featuredUntil).getTime() > now.getTime();

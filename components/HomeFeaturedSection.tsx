@@ -9,6 +9,7 @@ import SponsoredCard from "@/components/SponsoredCard";
 import SponsorFeedCard from "@/components/SponsorFeedCard";
 import HomePremiumShowcase from "@/components/HomePremiumShowcase";
 import ReelsSection, { type ReelItem } from "@/components/ReelsSection";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 const RealMap = dynamic(() => import("@/components/RealMap"), { ssr: false });
 
@@ -49,6 +50,7 @@ function normalizeText(text: string) {
 }
 
 function getListingPriority(item: any) {
+  if (!VISIBILITY_PROMOTIONS_ENABLED) return 1;
   if (item?.isPremium) return 3;
   if (item?.isFeatured) return 2;
   return 1;
@@ -303,7 +305,9 @@ if (selected) {
   function getTitle() {
     if (sortMode === "popular") return "Anuncios populares";
     if (sortMode === "nearby") return "Anuncios cerca de ti";
-    return "Anuncios destacados";
+    return VISIBILITY_PROMOTIONS_ENABLED
+      ? "Anuncios destacados"
+      : "Anuncios recientes";
   }
 
   return (
@@ -312,7 +316,7 @@ if (selected) {
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#0f3c8c]">
-              Anuncios destacados
+              {VISIBILITY_PROMOTIONS_ENABLED ? "Anuncios destacados" : "Explora Kubo"}
             </div>
 
             <h2 className="mt-2 text-2xl font-black text-slate-900 md:text-3xl">
@@ -420,7 +424,9 @@ if (selected) {
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
             <p className="mb-5 text-sm text-slate-500">
-              Explora anuncios recientes y opciones destacadas cerca de ti.
+              {VISIBILITY_PROMOTIONS_ENABLED
+                ? "Explora anuncios recientes y opciones destacadas cerca de ti."
+                : "Explora anuncios recientes y encuentra opciones cerca de ti."}
             </p>
 
             {topListings.length > 0 ? (

@@ -16,6 +16,7 @@ import {
   Play,
 } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type ListingCardProps = {
   item: any;
@@ -91,11 +92,13 @@ export default function ListingCard({
   const now = new Date();
 
   const isPremium =
+    VISIBILITY_PROMOTIONS_ENABLED &&
     Boolean(item?.isPremium) &&
     Boolean(item?.premiumUntil) &&
     new Date(item.premiumUntil).getTime() > now.getTime();
 
   const isFeatured =
+    VISIBILITY_PROMOTIONS_ENABLED &&
     Boolean(item?.isFeatured) &&
     Boolean(item?.featuredUntil) &&
     new Date(item.featuredUntil).getTime() > now.getTime();

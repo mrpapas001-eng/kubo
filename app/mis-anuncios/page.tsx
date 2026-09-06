@@ -8,6 +8,7 @@ import ListingCard from "@/components/ListingCard";
 import DeleteListingButton from "@/components/DeleteListingButton";
 import ReactivateListingButton from "@/components/ReactivateListingButton";
 import HideListingButton from "@/components/HideListingButton";
+import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 export default async function MisAnunciosPage() {
   const session = await getServerSession(authOptions);
@@ -59,7 +60,9 @@ export default async function MisAnunciosPage() {
           <h1 className="text-3xl font-black text-slate-900">Mis anuncios</h1>
 
           <p className="mt-2 text-sm font-medium text-slate-500">
-            Gestiona, edita y promociona tus publicaciones.
+            {VISIBILITY_PROMOTIONS_ENABLED
+              ? "Gestiona, edita y promociona tus publicaciones."
+              : "Gestiona y edita tus publicaciones."}
           </p>
         </div>
 
@@ -87,11 +90,13 @@ export default async function MisAnunciosPage() {
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {listings.map((item: any) => {
               const premiumActive =
+                VISIBILITY_PROMOTIONS_ENABLED &&
                 item.isPremium &&
                 item.premiumUntil &&
                 new Date(item.premiumUntil).getTime() > now.getTime();
 
               const featuredActive =
+                VISIBILITY_PROMOTIONS_ENABLED &&
                 item.isFeatured &&
                 item.featuredUntil &&
                 new Date(item.featuredUntil).getTime() > now.getTime();
@@ -236,7 +241,7 @@ isHidden ? "grid-cols-1" : "grid-cols-[1fr_auto_auto_auto]"                     
                     >
                       {!isHidden ? (
                         <>
-                          {item.isBusiness ? (
+                          {VISIBILITY_PROMOTIONS_ENABLED && item.isBusiness ? (
                             <Link
                               href={`/premium?listingId=${item.id}`}
                               className="flex h-10 md:h-11 items-center justify-center rounded-2xl border border-yellow-200 bg-white text-sm font-black text-yellow-700 shadow-sm hover:bg-yellow-50"
