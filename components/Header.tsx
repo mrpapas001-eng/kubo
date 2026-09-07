@@ -235,7 +235,7 @@ export default function Header() {
                     <button
                       type="button"
                       onClick={loginWithFacebook}
-                      className="mt-1 flex w-full items-center gap-3 rounded-xl bg-[#1877F2] px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-[#166fe5]"
+                      className="hidden w-full items-center gap-3 rounded-xl bg-[#1877F2] px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-[#166fe5]"
                     >
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-black text-[#1877F2]">
                         f
@@ -399,7 +399,7 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={loginWithFacebook}
-                    className="flex h-12 items-center justify-center gap-3 rounded-xl bg-[#1877F2] px-4 text-sm font-bold text-white hover:bg-[#166fe5]"
+                    className="hidden h-12 items-center justify-center gap-3 rounded-xl bg-[#1877F2] px-4 text-sm font-bold text-white hover:bg-[#166fe5]"
                   >
                     <span className="text-lg font-black">
                       f
