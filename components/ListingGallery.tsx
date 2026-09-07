@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,6 +27,9 @@ export default function ListingGallery({ images }: Props) {
 
   const [active, setActive] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchMoved = useRef(false);
 
   useEffect(() => {
     setActive(0);
@@ -41,6 +44,67 @@ export default function ListingGallery({ images }: Props) {
 
   function goNext() {
     setActive((prev) => (prev === cleaned.length - 1 ? 0 : prev + 1));
+  }
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0];
+    touchStartX.current = touch?.clientX ?? null;
+    touchStartY.current = touch?.clientY ?? null;
+    touchMoved.current = false;
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const startX = touchStartX.current;
+    const startY = touchStartY.current;
+    const touch = e.touches[0];
+
+    if (startX === null || startY === null || !touch) return;
+
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      touchMoved.current = true;
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    const startX = touchStartX.current;
+    const startY = touchStartY.current;
+    const touch = e.changedTouches[0];
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    if (
+      cleaned.length <= 1 ||
+      startX === null ||
+      startY === null ||
+      !touch
+    ) {
+      return;
+    }
+
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX > 0) {
+      goPrev();
+    } else {
+      goNext();
+    }
+  }
+
+  function openLightbox() {
+    if (touchMoved.current) {
+      touchMoved.current = false;
+      return;
+    }
+
+    setIsOpen(true);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -92,10 +156,15 @@ export default function ListingGallery({ images }: Props) {
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <div className="relative h-[280px] w-full overflow-hidden bg-slate-100 md:h-[420px] lg:h-[480px]">
+        <div
+          className="relative h-[280px] w-full touch-pan-y overflow-hidden bg-slate-100 md:h-[420px] lg:h-[480px]"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <button
             type="button"
-            onClick={() => setIsOpen(true)}
+            onClick={openLightbox}
             className="block h-full w-full cursor-zoom-in"
             aria-label="Ampliar foto"
           >
@@ -198,7 +267,10 @@ export default function ListingGallery({ images }: Props) {
           </button>
 
           <div
-            className="relative flex h-full w-full items-center justify-center"
+            className="relative flex h-full w-full touch-pan-y items-center justify-center"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             onClick={(e) => e.stopPropagation()}
           >
             <img

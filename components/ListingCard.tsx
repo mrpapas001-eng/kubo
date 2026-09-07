@@ -207,7 +207,7 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
     >
 
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
+      <div className="relative aspect-square w-full overflow-hidden rounded-t-[22px] bg-slate-100 md:aspect-[4/3]">
         {item?.id ? <FavoriteButton listingId={item.id} /> : null}
 
     {isDonation ? (
@@ -268,10 +268,10 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col space-y-2.5 p-3 md:space-y-3 md:p-4">
+      <div className="flex flex-1 flex-col space-y-2 p-2.5 md:space-y-3 md:p-4">
         <div className="space-y-1.5">
           <h3
-            className={`line-clamp-2 min-h-[48px] text-[18px] font-extrabold leading-snug ${
+            className={`line-clamp-2 min-h-[38px] text-[15px] font-extrabold leading-tight md:min-h-[48px] md:text-[18px] md:leading-snug ${
               isPremium ? "text-slate-950" : "text-slate-900"
             }`}
           >
@@ -279,7 +279,7 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
           </h3>
 
           <div
-            className={`line-clamp-1 text-[11px] font-medium text-slate-500 md:text-sm ${
+            className={`hidden line-clamp-1 text-[11px] font-medium text-slate-500 md:block md:text-sm ${
               hideLocationBelowTitleOnMobile ? "hidden md:block" : ""
             }`}
           >
@@ -353,12 +353,12 @@ className={`group relative flex h-full flex-col overflow-hidden rounded-[24px] t
 ) : null}
 
         <div
-          className={`mt-auto flex flex-col items-start gap-1.5 border-t pt-3 md:flex-row md:items-end md:justify-between md:gap-3 ${
+          className={`mt-auto flex flex-col items-start gap-1.5 border-t pt-2.5 md:flex-row md:items-end md:justify-between md:gap-3 ${
             isPremium ? "border-yellow-200" : "border-slate-100"
           }`}
         >
           <div
-            className={`min-w-0 max-w-full truncate text-[18px] font-black tracking-tight md:max-w-[65%] md:text-[23px] ${
+            className={`min-w-0 max-w-full truncate text-[16px] font-black tracking-tight md:max-w-[65%] md:text-[23px] ${
               isPremium ? "text-amber-600" : "text-slate-900"
             }`}
             title={formattedPrice}
