@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kuboanuncios.app",
+      "sha256_cert_fingerprints": [
+        "EF:94:DD:75:95:E3:3E:30:E6:C3:98:7F:46:6D:19:D7:17:25:46:A3:32:E3:AC:42:E5:10:18:6E:F5:A7:CB:66"
+      ]
+    }
+  }
+]
