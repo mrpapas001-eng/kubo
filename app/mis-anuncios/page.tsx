@@ -28,13 +28,16 @@ export default async function MisAnunciosPage() {
   }
 
   const rawListings = await prisma.listing.findMany({
-    where: {
-      ownerEmail: myEmail,
+  where: {
+    ownerEmail: myEmail,
+    status: {
+      not: "deleted",
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  },
+  orderBy: {
+    createdAt: "desc",
+  },
+});
   const listings = await attachAccountVerification(rawListings);
 
   const now = new Date();
