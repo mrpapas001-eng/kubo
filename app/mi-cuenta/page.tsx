@@ -10,6 +10,7 @@ import {
   PlusCircle,
   ShieldCheck,
   Store,
+  Trash2,
   UserRound,
   Settings,
 } from "lucide-react";
@@ -54,6 +55,12 @@ const accountLinks = [
     title: "Verificar identidad",
     description: "Confirma tu identidad para generar más confianza.",
     icon: UserRound,
+  },
+    {
+    href: "/eliminar-cuenta",
+    title: "Eliminar mi cuenta",
+    description: "Solicita la eliminación de tu cuenta y tus datos.",
+    icon: Trash2,
   },
   {
     href: "/",
