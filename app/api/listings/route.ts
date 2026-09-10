@@ -202,8 +202,11 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
 
     const takeParam = Number(url.searchParams.get("take") ?? 12);
-    const skipParam = Number(url.searchParams.get("skip") ?? 0);
-    const cityParam = String(url.searchParams.get("city") ?? "").trim();
+const skipParam = Number(url.searchParams.get("skip") ?? 0);
+const cityParam = String(url.searchParams.get("city") ?? "").trim();
+const categoryParam = String(
+  url.searchParams.get("categorySlug") ?? ""
+).trim();
 
     const balanced = url.searchParams.get("balanced") === "1";
 
@@ -219,6 +222,7 @@ export async function GET(req: Request) {
         ? { OR: [{ premiumUntil: null }, { premiumUntil: { gt: new Date() } }] }
         : {}),
       ...(cityParam ? { city: cityParam } : {}),
+      ...(categoryParam ? { categorySlug: categoryParam } : {}),
     };
 
     // =====================================================

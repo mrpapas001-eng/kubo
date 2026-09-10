@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ListingCard from "@/components/ListingCard";
 import ListingCardSkeleton from "@/components/ListingCardSkeleton";
@@ -182,6 +182,7 @@ export default function HomeListingsClient({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [motorFuel, setMotorFuel] = useState("");
   const [motorTransmission, setMotorTransmission] = useState("");
   const [motorYearMin, setMotorYearMin] = useState("");
@@ -267,9 +268,14 @@ export default function HomeListingsClient({
     setIsLoadingMore(true);
 
     try {
-      const base = isCategoryView
-        ? `/api/listings?take=12&skip=${skip}`
-        : `/api/listings?take=12&skip=${skip}&city=${encodeURIComponent(selectedCity)}`;
+      const base =
+  isCategoryView && categorySlug
+    ? `/api/listings?take=12&skip=${skip}&categorySlug=${encodeURIComponent(
+        categorySlug
+      )}`
+    : `/api/listings?take=12&skip=${skip}&city=${encodeURIComponent(
+        selectedCity
+      )}`;
 
       const res = await fetch(base, {
         cache: "no-store",
@@ -302,6 +308,42 @@ export default function HomeListingsClient({
       setIsLoadingMore(false);
     }
   }
+
+useEffect(() => {
+  const target = loadMoreRef.current;
+
+  if (!target || !hasMore) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const firstEntry = entries[0];
+
+      if (
+        firstEntry?.isIntersecting &&
+        !isLoadingMore &&
+        !isRefreshing
+      ) {
+        loadMore();
+      }
+    },
+    {
+      rootMargin: "400px 0px",
+    }
+  );
+
+  observer.observe(target);
+
+  return () => {
+    observer.disconnect();
+  };
+}, [
+  hasMore,
+  isLoadingMore,
+  isRefreshing,
+  skip,
+  categorySlug,
+  selectedCity,
+]);
 
   const filteredListings = useMemo(() => {
     let result = [...listings];
@@ -769,21 +811,20 @@ export default function HomeListingsClient({
   </div>
 )}
 
-        <div className="flex justify-center pt-2">
-          {hasMore ? (
-            <button
-              onClick={loadMore}
-              disabled={isLoadingMore || isRefreshing}
-              className="h-11 rounded-xl bg-[#0f3c8c] px-6 text-sm font-bold text-white shadow-sm transition hover:bg-[#0c2f6d] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoadingMore ? "Cargando..." : "Cargar mÃ¡s"}
-            </button>
-          ) : filteredListings.length > 0 ? (
-            <div className="text-sm font-medium text-slate-500">
-              No hay mÃ¡s anuncios por ahora.
-            </div>
-          ) : null}
-        </div>
+        <div
+  ref={loadMoreRef}
+  className="flex min-h-12 items-center justify-center pt-2"
+>
+  {isLoadingMore || isRefreshing ? (
+    <div className="text-sm font-bold text-[#0f3c8c]">
+      Cargando más anuncios...
+    </div>
+  ) : !hasMore && filteredListings.length > 0 ? (
+    <div className="text-sm font-medium text-slate-500">
+      No hay más anuncios por ahora.
+    </div>
+  ) : null}
+</div>
       </div>
     </section>
   );
