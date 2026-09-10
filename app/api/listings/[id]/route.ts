@@ -202,6 +202,17 @@ export async function PUT(req: Request, context: RouteContext) {
 
     const rawPrice = String(body?.price ?? "").replace(/\D/g, "");
     const price = rawPrice ? Number(rawPrice) : null;
+    const isCellPhone =
+      existing.categorySlug === "celulares" &&
+      existing.subcategorySlug === "celulares";
+
+    const cellCondition = String(body?.cellCondition ?? "")
+      .trim()
+      .toLowerCase();
+
+    const cellColor = String(body?.cellColor ?? "")
+      .trim()
+      .slice(0, 100);
 
     const imageUrls = Array.isArray(body?.imageUrls)
       ? body.imageUrls
@@ -244,12 +255,59 @@ export async function PUT(req: Request, context: RouteContext) {
       );
     }
 
+    if (
+      isCellPhone &&
+      !["nuevo", "usado", "reacondicionado"].includes(cellCondition)
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Selecciona un estado válido para el celular.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (isCellPhone && !cellColor) {
+      return NextResponse.json(
+        { ok: false, error: "El color del celular es obligatorio." },
+        { status: 400 }
+      );
+    }
+
     const existingDetails =
       existing.details &&
       typeof existing.details === "object" &&
       !Array.isArray(existing.details)
-        ? (existing.details as Record<string, unknown>)
+        ? (existing.details as Record<string, any>)
         : {};
+
+    const existingCellphone =
+      existingDetails.cellphone &&
+      typeof existingDetails.cellphone === "object" &&
+      !Array.isArray(existingDetails.cellphone)
+        ? existingDetails.cellphone
+        : {};
+
+    const updatedDetails = {
+      ...existingDetails,
+
+      ...(imageUrls
+        ? {
+            images: imageUrls,
+          }
+        : {}),
+
+      ...(isCellPhone
+        ? {
+            cellphone: {
+              ...existingCellphone,
+              condition: cellCondition,
+              color: cellColor,
+            },
+          }
+        : {}),
+    };
 
     const updated = await prisma.listing.update({
       where: { id: cleanId },
@@ -258,14 +316,11 @@ export async function PUT(req: Request, context: RouteContext) {
         description,
         phone,
         price,
+        details: updatedDetails,
 
         ...(imageUrls
           ? {
               imageUrl: imageUrls[0],
-              details: {
-                ...existingDetails,
-                images: imageUrls,
-              },
             }
           : {}),
       },

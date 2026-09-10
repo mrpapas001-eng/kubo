@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -169,17 +169,30 @@ export default function ListingCard({
     if (sqm) parts.push(`${sqm} m²`);
 
     extraLine = parts.join(" · ");
-  } else if (
+    } else if (
     item?.categorySlug === "celulares" &&
     item?.subcategorySlug === "celulares"
   ) {
     const brand = details?.cellphone?.brand;
     const model = details?.cellphone?.model;
+    const condition = details?.cellphone?.condition;
+    const color = details?.cellphone?.color;
+
+    const conditionLabel =
+      condition === "nuevo"
+        ? "Nuevo"
+        : condition === "usado"
+          ? "Usado"
+          : condition === "reacondicionado"
+            ? "Reacondicionado"
+            : "";
 
     const parts: string[] = [];
 
     if (brand) parts.push(String(brand));
     if (model) parts.push(String(model));
+    if (conditionLabel) parts.push(conditionLabel);
+    if (color) parts.push(String(color));
 
     extraLine = parts.join(" · ");
   }

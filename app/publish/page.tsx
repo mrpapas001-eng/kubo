@@ -490,7 +490,9 @@ const [carElectricMirrors, setCarElectricMirrors] = useState(false);
   const [motoTransmission, setMotoTransmission] = useState<string>("Mecánica");
 
   const [cellBrand, setCellBrand] = useState<string>(CELLPHONE_BRANDS[0]);
-  const [cellModel, setCellModel] = useState<string>("");
+const [cellModel, setCellModel] = useState<string>("");
+const [cellCondition, setCellCondition] = useState<string>("");
+const [cellColor, setCellColor] = useState<string>("");
 
   const [deal, setDeal] = useState<DealType>("venta");
   const [rooms, setRooms] = useState<string>("");
@@ -618,7 +620,9 @@ if (draft.carElectricMirrors !== undefined) setCarElectricMirrors(draft.carElect
       if (draft.motoTransmission !== undefined) setMotoTransmission(draft.motoTransmission);
 
       if (draft.cellBrand !== undefined) setCellBrand(draft.cellBrand);
-      if (draft.cellModel !== undefined) setCellModel(draft.cellModel);
+if (draft.cellModel !== undefined) setCellModel(draft.cellModel);
+if (draft.cellCondition !== undefined) setCellCondition(draft.cellCondition);
+if (draft.cellColor !== undefined) setCellColor(draft.cellColor);
 
       if (draft.deal !== undefined) setDeal(draft.deal);
       if (draft.rooms !== undefined) setRooms(draft.rooms);
@@ -668,6 +672,9 @@ carElectricMirrors,
       motoTransmission,
       cellBrand,
       cellModel,
+      cellCondition,
+      
+      cellColor,
       deal,
       rooms,
       baths,
@@ -713,8 +720,10 @@ carElectricMirrors,
     motoFuel,
     motoTransmission,
     cellBrand,
-    cellModel,
-    deal,
+cellModel,
+cellCondition,
+cellColor,
+deal,
     rooms,
     baths,
     sqm,
@@ -859,9 +868,17 @@ carElectricMirrors,
       if (isMoto && !motoModel.trim()) return "Ingresa el modelo de la moto.";
       if (isMoto && !motoYear.trim()) return "Ingresa el año de la moto.";
 
-      if (isCellPhone && !cellBrand) return "Selecciona la marca del celular.";
-      if (isCellPhone && !cellModel.trim())
-        return "Ingresa el modelo del celular.";
+      if (isCellPhone && !cellBrand)
+  return "Selecciona la marca del celular.";
+
+if (isCellPhone && !cellModel.trim())
+  return "Ingresa el modelo del celular.";
+
+if (isCellPhone && !cellCondition)
+  return "Selecciona el estado del celular.";
+
+if (isCellPhone && !cellColor.trim())
+  return "Ingresa el color del celular.";
 
       if (isRealEstate) {
         if (!deal) return "Selecciona si es venta o arriendo.";
@@ -1115,11 +1132,13 @@ if (isMoto) {
       }
 
       if (isCellPhone) {
-        details.cellphone = {
-          brand: cellBrand,
-          model: cellModel || null,
-        };
-      }
+  details.cellphone = {
+    brand: cellBrand,
+    model: cellModel.trim() || null,
+    condition: cellCondition || null,
+    color: cellColor.trim() || null,
+  };
+}
 
       const normalizedPrice = String(price).replace(/\D/g, "");
 
@@ -1863,37 +1882,75 @@ if (!session) {
                 ) : null}
 
                 {isCellPhone ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="font-black text-slate-900">Datos del celular</div>
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="font-black text-slate-900">
+      Datos del celular
+    </div>
 
-                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Marca</label>
-                        <select
-                          value={cellBrand}
-                          onChange={(e) => setCellBrand(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                        >
-                          {CELLPHONE_BRANDS.map((b) => (
-                            <option key={b} value={b}>
-                              {b}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Marca
+        </label>
 
-                      <div>
-                        <label className="text-sm font-bold text-slate-700">Modelo</label>
-                        <input
-                          value={cellModel}
-                          onChange={(e) => setCellModel(e.target.value)}
-                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
-                          placeholder="Ej: iPhone 13, Galaxy S23..."
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
+        <select
+          value={cellBrand}
+          onChange={(e) => setCellBrand(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          {CELLPHONE_BRANDS.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Modelo
+        </label>
+
+        <input
+          value={cellModel}
+          onChange={(e) => setCellModel(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: iPhone 17 Pro, Galaxy S25..."
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Estado
+        </label>
+
+        <select
+          value={cellCondition}
+          onChange={(e) => setCellCondition(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="">Selecciona el estado</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="usado">Usado</option>
+          <option value="reacondicionado">Reacondicionado</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Color
+        </label>
+
+        <input
+          value={cellColor}
+          onChange={(e) => setCellColor(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: blanco, azul y naranja"
+        />
+      </div>
+    </div>
+  </div>
+) : null}
 
                 {!isCar && !isMoto && !isRealEstate && !isCellPhone ? (
                   <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm font-medium text-slate-600">

@@ -313,8 +313,22 @@ export default async function ListingDetail({ params }: PageProps) {
 
   const isRealEstate = listing.categorySlug === "inmobiliaria";
 
-  const car = details?.motor ?? null;
-  const re = details?.realEstate ?? null;
+const isCellPhone =
+  listing.categorySlug === "celulares" &&
+  listing.subcategorySlug === "celulares";
+
+const car = details?.motor ?? null;
+const re = details?.realEstate ?? null;
+const cellphone = details?.cellphone ?? null;
+
+const cellphoneCondition =
+  cellphone?.condition === "nuevo"
+    ? "Nuevo"
+    : cellphone?.condition === "usado"
+      ? "Usado"
+      : cellphone?.condition === "reacondicionado"
+        ? "Reacondicionado"
+        : null;
 
   const kmFormatted =
     car?.km !== null && car?.km !== undefined && car?.km !== ""
@@ -573,10 +587,48 @@ const showBusinessVerificationCta = Boolean(
         {details?.realEstate?.parking ? "Sí" : "No"}
       </span>
     </div>
+    </div>
+) : isCellPhone ? (
+  <div className="mt-5 grid grid-cols-2 overflow-hidden rounded-2xl border border-slate-200 bg-white md:mt-6 md:grid-cols-4">
+    <div className="flex flex-col items-center gap-1 border-b border-r border-slate-200 p-3 text-center md:border-b-0 md:p-4">
+      <span className="text-xs font-black text-slate-500">
+        Marca
+      </span>
+      <span className="text-xs font-black text-slate-700">
+        {cellphone?.brand || "—"}
+      </span>
+    </div>
+
+    <div className="flex flex-col items-center gap-1 border-b border-slate-200 p-3 text-center md:border-b-0 md:border-r md:p-4">
+      <span className="text-xs font-black text-slate-500">
+        Modelo
+      </span>
+      <span className="text-xs font-black text-slate-700">
+        {cellphone?.model || "—"}
+      </span>
+    </div>
+
+    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-3 text-center md:p-4">
+      <span className="text-xs font-black text-slate-500">
+        Estado
+      </span>
+      <span className="text-xs font-black text-slate-700">
+        {cellphoneCondition || "—"}
+      </span>
+    </div>
+
+    <div className="flex flex-col items-center gap-1 p-3 text-center md:p-4">
+      <span className="text-xs font-black text-slate-500">
+        Color
+      </span>
+      <span className="text-xs font-black text-slate-700">
+        {cellphone?.color || "—"}
+      </span>
+    </div>
   </div>
 ) : null}
 
-                <div className="mt-8 hidden gap-3 md:grid md:grid-cols-3">
+<div className="mt-8 hidden gap-3 md:grid md:grid-cols-3">
   {cleanPhone ? (
     <>
       <TrackedContactLink

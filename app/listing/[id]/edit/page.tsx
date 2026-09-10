@@ -33,7 +33,11 @@ export default function EditListingPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [phone, setPhone] = useState("");
+const [phone, setPhone] = useState("");
+
+const [isCellPhone, setIsCellPhone] = useState(false);
+const [cellCondition, setCellCondition] = useState("");
+const [cellColor, setCellColor] = useState("");
 
   const [images, setImages] = useState<EditableImage[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -80,6 +84,17 @@ export default function EditListingPage() {
           l.price !== null && l.price !== undefined ? String(l.price) : ""
         );
         setPhone(String(l.phone ?? ""));
+
+const listingIsCellPhone =
+  l.categorySlug === "celulares" &&
+  l.subcategorySlug === "celulares";
+
+setIsCellPhone(listingIsCellPhone);
+
+if (listingIsCellPhone) {
+  setCellCondition(String(l?.details?.cellphone?.condition ?? ""));
+  setCellColor(String(l?.details?.cellphone?.color ?? ""));
+}
 
         const detailImages =
           Array.isArray(l?.details?.images)
@@ -350,7 +365,17 @@ async function buildFinalImageUrls() {
     setFormError(null);
 
     try {
-      if (totalImages === 0) {
+  if (isCellPhone && !cellCondition) {
+    setFormError("Selecciona el estado del celular.");
+    return;
+  }
+
+  if (isCellPhone && !cellColor.trim()) {
+    setFormError("Ingresa el color del celular.");
+    return;
+  }
+
+  if (totalImages === 0) {
         setFormError("El anuncio debe tener al menos una imagen.");
         return;
       }
@@ -372,7 +397,9 @@ async function buildFinalImageUrls() {
           description: description.trim(),
           price: price.trim(),
           phone: phone.replace(/\D/g, "").slice(0, 10),
-          imageUrls: finalImages,
+imageUrls: finalImages,
+cellCondition: isCellPhone ? cellCondition : null,
+cellColor: isCellPhone ? cellColor.trim() : null,
         }),
       });
 
@@ -514,6 +541,46 @@ async function buildFinalImageUrls() {
               inputMode="numeric"
             />
           </div>
+
+{isCellPhone ? (
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <h2 className="text-sm font-black text-slate-900">
+      Datos del celular
+    </h2>
+
+    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Estado
+        </label>
+
+        <select
+          value={cellCondition}
+          onChange={(e) => setCellCondition(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+        >
+          <option value="">Selecciona el estado</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="usado">Usado</option>
+          <option value="reacondicionado">Reacondicionado</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="text-sm font-bold text-slate-700">
+          Color
+        </label>
+
+        <input
+          value={cellColor}
+          onChange={(e) => setCellColor(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4"
+          placeholder="Ej: blanco, azul y naranja"
+        />
+      </div>
+    </div>
+  </div>
+) : null}
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
