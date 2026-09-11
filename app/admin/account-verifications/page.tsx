@@ -10,6 +10,7 @@ import {
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { isAdminEmail } from "@/lib/admin";
 import AdminAccountVerificationActions from "@/components/AdminAccountVerificationActions";
 
 const WHATSAPP_PARTICULAR_MESSAGE =
@@ -45,7 +46,7 @@ export default async function AdminAccountVerificationsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
 
-  if (email !== "mr.papas001@gmail.com") {
+  if (!isAdminEmail(email)) {
     redirect("/");
   }
 

@@ -5,13 +5,14 @@ import { Building2, FileText } from "lucide-react";
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { isAdminEmail } from "@/lib/admin";
 import AdminBusinessVerificationActions from "@/components/AdminBusinessVerificationActions";
 
 export default async function AdminBusinessVerificationsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
 
-  if (email !== "mr.papas001@gmail.com") {
+  if (!isAdminEmail(email)) {
     redirect("/");
   }
 

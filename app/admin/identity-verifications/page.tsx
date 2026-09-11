@@ -5,13 +5,14 @@ import { FileText, IdCard } from "lucide-react";
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
+import { isAdminEmail } from "@/lib/admin";
 import AdminIdentityVerificationActions from "@/components/AdminIdentityVerificationActions";
 
 export default async function AdminIdentityVerificationsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase().trim();
 
-  if (email !== "mr.papas001@gmail.com") {
+  if (!isAdminEmail(email)) {
     redirect("/");
   }
 
