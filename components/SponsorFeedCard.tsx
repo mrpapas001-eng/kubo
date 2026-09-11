@@ -12,11 +12,15 @@ type SponsorItem = {
 
 // Sponsor card sized like a normal ListingCard so it integrates into the feed grid.
 export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
+  const isInternalLink = sponsor.ctaUrl
+    ? sponsor.ctaUrl.startsWith("/") || sponsor.ctaUrl.startsWith("#")
+    : false;
+
   return (
     <a
       href={sponsor.ctaUrl ?? "#"}
-      target="_blank"
-      rel="noreferrer"
+      target={isInternalLink ? undefined : "_blank"}
+      rel={isInternalLink ? undefined : "noreferrer"}
       className="group relative flex h-full flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">

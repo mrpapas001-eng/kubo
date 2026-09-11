@@ -16,12 +16,13 @@ export default function SponsoredCard({ sponsors, sponsor }: Props) {
   const mobileImageUrl = item?.mobileImageUrl ?? null;
   const ctaText = item?.ctaText ?? "Conocer más";
   const ctaUrl = item?.ctaUrl ?? "#";
+  const isInternalLink = ctaUrl.startsWith("/") || ctaUrl.startsWith("#");
 
   return (
     <a
       href={ctaUrl}
-      target="_blank"
-      rel="noreferrer"
+      target={isInternalLink ? undefined : "_blank"}
+      rel={isInternalLink ? undefined : "noreferrer"}
       className="group block h-full overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative flex h-full flex-col">

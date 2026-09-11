@@ -22,40 +22,16 @@ export default async function NewSponsorPage() {
     redirect("/");
   }
 
-  const businessRows = await prisma.listing.findMany({
-    where: {
-      isBusiness: true,
-      status: "active",
-      businessSlug: {
-        not: null,
-      },
-    },
+  const businesses = await prisma.business.findMany({
     select: {
-      businessSlug: true,
-      businessName: true,
+      id: true,
+      name: true,
+      slug: true,
     },
     orderBy: {
-      businessName: "asc",
+      name: "asc",
     },
   });
-
-  const businessMap = new Map<string, string>();
-
-  for (const row of businessRows) {
-    if (!row.businessSlug) continue;
-
-    businessMap.set(
-      row.businessSlug,
-      row.businessName || row.businessSlug
-    );
-  }
-
-  const businesses = Array.from(businessMap.entries()).map(
-    ([slug, name]) => ({
-      slug,
-      name,
-    })
-  );
 
   const listingRows = await prisma.listing.findMany({
     where: {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/data/categories";
 
 type BusinessOption = {
+  id: string;
   slug: string;
   name: string;
 };
@@ -419,7 +420,7 @@ export default function AdminSponsorForm({
           }
           className="mt-4 h-12 w-full rounded-2xl border border-blue-200 bg-white px-4 font-black text-slate-800"
         >
-          <option value="business">Página de empresa</option>
+          <option value="business">Página de empresa en Kubo</option>
           <option value="listing">Anuncio de Kubo</option>
           <option value="reels">Sección de Reels</option>
           <option value="external">Página web externa</option>
@@ -434,7 +435,7 @@ export default function AdminSponsorForm({
           >
             <option value="">Selecciona una empresa</option>
             {businesses.map((business) => (
-              <option key={business.slug} value={business.slug}>
+              <option key={business.id ?? business.slug} value={business.slug}>
                 {business.name}
               </option>
             ))}

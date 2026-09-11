@@ -35,14 +35,17 @@ export default function HomeSponsorMain({
   if (items.length === 0) return null;
 
   const sponsor = items[activeIndex % items.length];
+  const isInternalLink = sponsor.ctaUrl
+    ? sponsor.ctaUrl.startsWith("/") || sponsor.ctaUrl.startsWith("#")
+    : false;
 
   return (
     <section className="mt-6">
       <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
         <a
           href={sponsor.ctaUrl ?? "#"}
-          target="_blank"
-          rel="noreferrer"
+          target={isInternalLink ? undefined : "_blank"}
+          rel={isInternalLink ? undefined : "noreferrer"}
           className="group block"
         >
           {sponsor.imageUrl ? (
