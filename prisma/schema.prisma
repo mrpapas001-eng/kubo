@@ -110,7 +110,7 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listings       Listing[]
+  listings        Listing[]
   analyticsEvents ListingAnalyticsEvent[]
 
   @@index([ownerEmail])
@@ -259,20 +259,21 @@ model IdentityVerificationRequest {
 }
 
 model SponsorAd {
-  id           String   @id @default(cuid())
-  title        String
-  subtitle     String?
-  imageUrl     String?
-  ctaText      String?
-  ctaUrl       String?
-  type         String
-  placement    String
-  categorySlug String?
-  priority     Int      @default(0)
-  startAt      DateTime
-  endAt        DateTime
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  title          String
+  subtitle       String?
+  imageUrl       String?
+  mobileImageUrl String?
+  ctaText        String?
+  ctaUrl         String?
+  type           String
+  placement      String
+  categorySlug   String?
+  priority       Int      @default(0)
+  startAt        DateTime
+  endAt          DateTime
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
 
   @@index([placement])
   @@index([isActive])

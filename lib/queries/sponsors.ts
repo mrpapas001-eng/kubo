@@ -20,7 +20,7 @@ export async function getHomeSponsors(): Promise<HomeSponsors> {
   });
 
   return {
-    main: sponsors.filter((s) => s.placement === "home-main"),
+    main: sponsors.filter((s) => s.placement === "home-main").slice(0, 3),
     side: sponsors.filter((s) => s.placement === "home-side"),
     feed: sponsors.filter((s) => s.placement === "home-feed"),
   };
@@ -31,7 +31,7 @@ export async function getCategorySponsors(
 ): Promise<SponsorAd[]> {
   const now = new Date();
 
-  return prisma.sponsorAd.findMany({
+  const sponsors = await prisma.sponsorAd.findMany({
     where: {
       isActive: true,
       placement: "category",
@@ -41,6 +41,8 @@ export async function getCategorySponsors(
     },
     orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
   });
+
+  return sponsors.slice(0, 3);
 }
 
 export async function getCategoryFeedSponsors(

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CATEGORIES } from "@/data/categories";
 
 type BusinessOption = {
   slug: string;
@@ -18,6 +19,7 @@ type SponsorData = {
   title: string;
   subtitle: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   ctaText: string;
   ctaUrl: string;
   placement: string;
@@ -27,6 +29,17 @@ type SponsorData = {
   endAt: string;
   isActive: boolean;
 };
+
+const HOME_PLACEMENTS = ["home-main", "home-side", "home-feed"];
+const CATEGORY_PLACEMENTS = ["category", "category-feed"];
+
+const PLACEMENT_LABELS: Array<{ value: string; label: string }> = [
+  { value: "home-main", label: "Banner superior de la Home" },
+  { value: "home-side", label: "Lateral de la Home" },
+  { value: "home-feed", label: "Dentro de los anuncios de la Home" },
+  { value: "category", label: "Banner superior de una categoría" },
+  { value: "category-feed", label: "Dentro de los anuncios de una categoría" },
+];
 
 type Props = {
   sponsor: SponsorData;
@@ -63,6 +76,9 @@ export default function AdminSponsorForm({
   const [title, setTitle] = useState(sponsor.title);
   const [subtitle, setSubtitle] = useState(sponsor.subtitle);
   const [imageUrl, setImageUrl] = useState(sponsor.imageUrl);
+  const [mobileImageUrl, setMobileImageUrl] = useState(
+    sponsor.mobileImageUrl ?? ""
+  );
   const [ctaText, setCtaText] = useState(sponsor.ctaText);
   const [placement, setPlacement] = useState(sponsor.placement);
   const [categorySlug, setCategorySlug] = useState(sponsor.categorySlug);
@@ -97,6 +113,7 @@ export default function AdminSponsorForm({
 
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingMobileImage, setUploadingMobileImage] = useState(false);
   const [message, setMessage] = useState("");
 
   const finalCtaUrl = useMemo(() => {
@@ -163,6 +180,44 @@ export default function AdminSponsorForm({
     }
   }
 
+  async function uploadMobileSponsorImage(file: File) {
+    setUploadingMobileImage(true);
+    setMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "No se pudo subir la imagen.");
+      }
+
+      const uploadedUrl = Array.isArray(data.urls) ? data.urls[0] : null;
+
+      if (!uploadedUrl) {
+        throw new Error("No se recibió la URL de la imagen.");
+      }
+
+      setMobileImageUrl(uploadedUrl);
+      setMessage("Imagen para celular subida correctamente.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al subir la imagen."
+      );
+    } finally {
+      setUploadingMobileImage(false);
+    }
+  }
+
   async function saveSponsor() {
     setSaving(true);
     setMessage("");
@@ -181,11 +236,11 @@ export default function AdminSponsorForm({
           title,
           subtitle,
           imageUrl,
+          mobileImageUrl,
           ctaText,
           ctaUrl: finalCtaUrl,
           placement,
-          categorySlug:
-            placement === "category" || placement === "category-feed"
+          categorySlug: CATEGORY_PLACEMENTS.includes(placement)
               ? categorySlug
               : "",
           priority: Number(priority || 0),
@@ -262,7 +317,7 @@ export default function AdminSponsorForm({
 
       <div className="block">
         <span className="text-xs font-black uppercase text-slate-500">
-          Imagen del sponsor
+          Imagen horizontal para computador
         </span>
 
         <div className="mt-2 grid gap-3 md:grid-cols-[1fr_auto]">
@@ -300,6 +355,52 @@ export default function AdminSponsorForm({
             <img
               src={imageUrl}
               alt="Vista previa"
+              className="max-h-[260px] w-full object-contain"
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="block">
+        <span className="text-xs font-black uppercase text-slate-500">
+          Imagen para celular (opcional)
+        </span>
+
+        <div className="mt-2 grid gap-3 md:grid-cols-[1fr_auto]">
+          <input
+            value={mobileImageUrl}
+            onChange={(e) => setMobileImageUrl(e.target.value)}
+            placeholder="https://..."
+            className="h-12 w-full rounded-2xl border border-slate-200 px-4 font-medium outline-none focus:border-[#0f3c8c]"
+          />
+
+          <label className={`flex h-12 cursor-pointer items-center justify-center rounded-2xl bg-[#0f3c8c] px-5 font-black text-white hover:bg-[#0c2f6d] ${uploadingMobileImage ? "pointer-events-none opacity-50" : ""}`}>
+            {uploadingMobileImage ? "Subiendo..." : "Subir imagen"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              disabled={uploadingMobileImage}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  void uploadMobileSponsorImage(file);
+                }
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+        </div>
+
+        <p className="mt-2 text-xs font-medium text-slate-500">
+          Si no subes una imagen para celular, se usará la imagen para computador.
+        </p>
+
+        {mobileImageUrl ? (
+          <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+            <img
+              src={mobileImageUrl}
+              alt="Vista previa para celular"
               className="max-h-[260px] w-full object-contain"
             />
           </div>
@@ -395,14 +496,20 @@ export default function AdminSponsorForm({
 
           <select
             value={placement}
-            onChange={(e) => setPlacement(e.target.value)}
+            onChange={(e) => {
+              const nextPlacement = e.target.value;
+              setPlacement(nextPlacement);
+              if (HOME_PLACEMENTS.includes(nextPlacement)) {
+                setCategorySlug("");
+              }
+            }}
             className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-bold"
           >
-            <option value="home-main">Principal de Home</option>
-            <option value="home-side">Lateral de Home</option>
-            <option value="home-feed">Feed de Home</option>
-            <option value="category">Categoría</option>
-            <option value="category-feed">Feed de categoría</option>
+            {PLACEMENT_LABELS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -419,17 +526,23 @@ export default function AdminSponsorForm({
         </label>
       </div>
 
-      {placement === "category" || placement === "category-feed" ? (
+      {CATEGORY_PLACEMENTS.includes(placement) ? (
         <label className="block">
           <span className="text-xs font-black uppercase text-slate-500">
             Categoría
           </span>
-          <input
+          <select
             value={categorySlug}
             onChange={(e) => setCategorySlug(e.target.value)}
-            placeholder="motor"
-            className="mt-2 h-12 w-full rounded-2xl border border-slate-200 px-4 font-bold"
-          />
+            className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-bold"
+          >
+            <option value="">Selecciona una categoría</option>
+            {CATEGORIES.map((category) => (
+              <option key={category.slug} value={category.slug}>
+                {category.label}
+              </option>
+            ))}
+          </select>
         </label>
       ) : null}
 
