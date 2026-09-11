@@ -45,13 +45,17 @@ export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
-        <div className="absolute left-3 top-3 z-10 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-700 shadow-sm ring-1 ring-black/5 backdrop-blur">
+        <div className="absolute left-3 top-3 z-10 hidden rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-700 shadow-sm ring-1 ring-black/5 backdrop-blur md:block">
           PATROCINADO
         </div>
       </div>
 
       <div className="flex flex-1 flex-col space-y-2.5 p-3 md:space-y-3 md:p-4">
         <div className="space-y-1.5">
+          <span className="mb-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-[#0f3c8c] md:hidden">
+            PATROCINADO
+          </span>
+
           <h3 className="line-clamp-2 min-h-[40px] text-[15px] font-extrabold leading-snug text-slate-900 md:min-h-[48px] md:text-[18px]">
             {sponsor.title}
           </h3>
