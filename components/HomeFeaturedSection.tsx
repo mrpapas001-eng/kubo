@@ -180,19 +180,7 @@ if (selected) {
     ctaUrl: "#",
   };
 
-  const demoFeedSponsors =
-    feedSponsors?.length > 0
-      ? feedSponsors
-      : [
-          {
-            id: "feed-demo",
-            title: "Claro hogar",
-            subtitle: "Fibra óptica para tu hogar con mayor velocidad.",
-            imageUrl: "/placeholders/claro-demo.jpg",
-            ctaText: "Ver oferta",
-            ctaUrl: "#",
-          },
-        ];
+  const demoFeedSponsors = feedSponsors ?? [];
 
   async function loadMoreFromServer() {
     if (loadingMore || !hasMoreFromServer) return;
@@ -508,12 +496,17 @@ if (selected) {
 
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
             {extraListings.map((item, idx) => {
-              const sponsor =
-                demoFeedSponsors.length > 0 && (idx + 1) % 8 === 0
-                  ? demoFeedSponsors[
-                      Math.floor(idx / 8) % demoFeedSponsors.length
-                    ]
-                  : null;
+              // Conteo continuo: incluye los topListings para que el sponsor caiga después del anuncio 12, 24, 36...
+              const overallPosition = topListings.length + idx + 1;
+              const shouldInsertSponsor =
+                demoFeedSponsors.length > 0 && overallPosition % 12 === 0;
+
+              const sponsor = shouldInsertSponsor
+                ? demoFeedSponsors[
+                    Math.floor(overallPosition / 12 - 1) %
+                      demoFeedSponsors.length
+                  ]
+                : null;
 
               return [
                 <ListingCard key={`extra-${item?.id ?? idx}`} item={item} />,

@@ -4,10 +4,11 @@ import { ChevronLeft } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import MotorFilters from "@/components/MotorFilters";
 import { getListings } from "@/lib/queries/home";
-import { getCategorySponsors } from "@/lib/queries/sponsors";
+import { getCategorySponsors, getCategoryFeedSponsors } from "@/lib/queries/sponsors";
 import { CATEGORIES } from "@/data/categories";
 import BackButton from "@/components/BackButton";
 import HomeSponsorMain from "@/components/HomeSponsorMain";
+import SponsorFeedCard from "@/components/SponsorFeedCard";
 import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type PageProps = {
@@ -701,6 +702,7 @@ if (!category || !subcategory) {
   const subcategoryLabel = getSubcategoryLabel(subcategory);
 
   const categorySponsors = await getCategorySponsors(category.slug);
+  const categoryFeedSponsors = await getCategoryFeedSponsors(category.slug);
 
   const allListings = await getListings({
     categorySlug: slug,
@@ -1928,9 +1930,26 @@ listings = listings.sort((a, b) => {
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {listings.map((item, idx) => (
-                  <ListingCard key={`${item?.id ?? idx}`} item={item} />
-                ))}
+                {listings.flatMap((item, idx) => {
+                  const shouldInsertSponsor =
+                    categoryFeedSponsors.length > 0 && (idx + 1) % 12 === 0;
+
+                  const sponsor = shouldInsertSponsor
+                    ? categoryFeedSponsors[
+                        Math.floor(idx / 12) % categoryFeedSponsors.length
+                      ]
+                    : null;
+
+                  return [
+                    <ListingCard key={`${item?.id ?? idx}`} item={item} />,
+                    sponsor ? (
+                      <SponsorFeedCard
+                        key={`subcategory-feed-${sponsor.id}-${idx}`}
+                        sponsor={sponsor}
+                      />
+                    ) : null,
+                  ];
+                })}
               </div>
             </>
           )}
