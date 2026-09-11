@@ -1,26 +1,34 @@
 import { prisma } from "@/lib/db";
 
 export default async function sitemap() {
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NODE_ENV === "production"
+      ? "https://www.kuboanuncios.com"
+      : "http://localhost:3000")
+  ).replace(/\/+$/, "");
+
   const listings = await prisma.listing.findMany({
     select: { id: true },
   });
 
   const listingUrls = listings.map((item) => ({
-    url: `http://localhost:3000/listing/${item.id}`,
+    url: `${baseUrl}/listing/${item.id}`,
   }));
 
   return [
     {
-      url: "http://localhost:3000",
+      url: baseUrl,
     },
     {
-      url: "http://localhost:3000/buscar",
+      url: `${baseUrl}/buscar`,
     },
     {
-      url: "http://localhost:3000/categoria/motor",
+      url: `${baseUrl}/categoria/motor`,
     },
     {
-      url: "http://localhost:3000/categoria/inmobiliaria",
+      url: `${baseUrl}/categoria/inmobiliaria`,
     },
     ...listingUrls,
   ];
