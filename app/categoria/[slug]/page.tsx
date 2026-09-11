@@ -5,6 +5,7 @@ import { CATEGORIES } from "@/data/categories";
 import { getListings } from "@/lib/queries/home";
 import { getCategorySponsors, getCategoryFeedSponsors } from "@/lib/queries/sponsors";
 import HomeListingsClient from "@/components/HomeListingsClient";
+import HomeSponsorMain from "@/components/HomeSponsorMain";
 import BackButton from "@/components/BackButton";
 
 type PageProps = {
@@ -372,7 +373,6 @@ export default async function CategoryPage({ params }: PageProps) {
   const heroImage = getCategoryHeroImage(category.slug);
   const listings = await getListings({ categorySlug: category.slug, take: 12 });
   const categorySponsors = await getCategorySponsors(category.slug);
-  const categorySponsor = categorySponsors[0] ?? null;
   const categoryFeedSponsors = await getCategoryFeedSponsors(category.slug);
 
   const visibleListings = listings;
@@ -651,49 +651,10 @@ export default async function CategoryPage({ params }: PageProps) {
           </div>
 
           <div className="mt-6">
-            {categorySponsor ? (
-              <a
-                href={categorySponsor.ctaUrl ?? "#"}
-                target="_blank"
-                rel="noreferrer"
-                className="mb-6 block overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                {categorySponsor.imageUrl ? (
-                  <div className="relative w-full overflow-hidden bg-slate-100">
-                    <div className="relative aspect-[16/8] w-full sm:aspect-[16/7] md:aspect-[16/4]">
-                      <img
-                        src={categorySponsor.imageUrl}
-                        alt={categorySponsor.title || "Anuncio patrocinado"}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-
-                      <div className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white backdrop-blur-sm md:left-4 md:top-4 md:text-[11px]">
-                        Patrocinado
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-[#0f3c8c] px-6 py-8 text-white md:px-8">
-                    <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/70">
-                      Patrocinado
-                    </div>
-
-                    <h3 className="mt-2 text-2xl font-black">
-                      {categorySponsor.title}
-                    </h3>
-
-                    {categorySponsor.subtitle ? (
-                      <p className="mt-2 max-w-2xl text-sm text-white/80">
-                        {categorySponsor.subtitle}
-                      </p>
-                    ) : null}
-
-                    <div className="mt-5 inline-flex rounded-xl bg-white px-4 py-2 text-sm font-black text-[#0f3c8c]">
-                      {categorySponsor.ctaText || "Ver oferta"}
-                    </div>
-                  </div>
-                )}
-              </a>
+            {categorySponsors.length > 0 ? (
+              <div className="mb-6">
+                <HomeSponsorMain sponsors={categorySponsors} />
+              </div>
             ) : null}
 
             {listings.length === 0 ? (

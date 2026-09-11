@@ -4,8 +4,10 @@ import { ChevronLeft } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import MotorFilters from "@/components/MotorFilters";
 import { getListings } from "@/lib/queries/home";
+import { getCategorySponsors } from "@/lib/queries/sponsors";
 import { CATEGORIES } from "@/data/categories";
 import BackButton from "@/components/BackButton";
+import HomeSponsorMain from "@/components/HomeSponsorMain";
 import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 
 type PageProps = {
@@ -698,6 +700,8 @@ if (!category || !subcategory) {
   const categoryLabel = getCategoryLabel(category);
   const subcategoryLabel = getSubcategoryLabel(subcategory);
 
+  const categorySponsors = await getCategorySponsors(category.slug);
+
   const allListings = await getListings({
     categorySlug: slug,
     subcategorySlug: subslug,
@@ -1139,6 +1143,12 @@ listings = listings.sort((a, b) => {
             </div>
           ) : null}
         </div>
+
+        {categorySponsors.length > 0 ? (
+          <div className="mt-6">
+            <HomeSponsorMain sponsors={categorySponsors} />
+          </div>
+        ) : null}
 
         {isCar || isMoto || isPart ? (
           <MotorFilters

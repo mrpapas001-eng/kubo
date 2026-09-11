@@ -13,6 +13,7 @@ export default function SponsoredCard({ sponsors, sponsor }: Props) {
   const imageUrl =
     item?.imageUrl ??
     "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400";
+  const mobileImageUrl = item?.mobileImageUrl ?? null;
   const ctaText = item?.ctaText ?? "Conocer más";
   const ctaUrl = item?.ctaUrl ?? "#";
 
@@ -25,12 +26,17 @@ export default function SponsoredCard({ sponsors, sponsor }: Props) {
     >
       <div className="relative flex h-full flex-col">
         <div className="relative h-[220px] overflow-hidden bg-slate-100">
-          <img
-            src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-            loading="lazy"
-          />
+          <picture>
+            {mobileImageUrl ? (
+              <source media="(max-width: 767px)" srcSet={mobileImageUrl} />
+            ) : null}
+            <img
+              src={imageUrl}
+              alt={title}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
 
           <div className="absolute left-3 top-3 z-10 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-black tracking-wide text-slate-900 shadow-sm ring-1 ring-black/5 backdrop-blur">

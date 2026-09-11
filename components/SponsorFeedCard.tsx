@@ -5,6 +5,7 @@ type SponsorItem = {
   title: string;
   subtitle?: string | null;
   imageUrl?: string | null;
+  mobileImageUrl?: string | null;
   ctaText?: string | null;
   ctaUrl?: string | null;
 };
@@ -20,12 +21,20 @@ export default function SponsorFeedCard({ sponsor }: { sponsor: SponsorItem }) {
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[22px] bg-slate-100">
         {sponsor.imageUrl ? (
-          <img
-            src={sponsor.imageUrl}
-            alt={sponsor.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
-          />
+          <picture>
+            {sponsor.mobileImageUrl ? (
+              <source
+                media="(max-width: 767px)"
+                srcSet={sponsor.mobileImageUrl}
+              />
+            ) : null}
+            <img
+              src={sponsor.imageUrl}
+              alt={sponsor.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+          </picture>
         ) : (
           <div className="h-full w-full bg-[linear-gradient(135deg,#0f3c8c,#2563eb)]" />
         )}

@@ -8,6 +8,7 @@ type SponsorItem = {
   title: string;
   subtitle?: string | null;
   imageUrl?: string | null;
+  mobileImageUrl?: string | null;
   ctaText?: string | null;
   ctaUrl?: string | null;
 };
@@ -17,20 +18,7 @@ export default function HomeSponsorMain({
 }: {
   sponsors: SponsorItem[];
 }) {
-  const items =
-    Array.isArray(sponsors) && sponsors.length > 0
-      ? sponsors
-      : [
-          {
-            id: "sponsor-demo",
-            title: "Claro hogar",
-            subtitle:
-              "Internet Fibra Óptica para disfrutar más velocidad en tu hogar.",
-            imageUrl: "/placeholders/claro-demo.jpg",
-            ctaText: "Lo quiero",
-            ctaUrl: "#",
-          },
-        ];
+  const items = Array.isArray(sponsors) ? sponsors.slice(0, 3) : [];
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -39,7 +27,7 @@ export default function HomeSponsorMain({
 
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % items.length);
-    }, 6000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [items.length]);
@@ -60,11 +48,20 @@ export default function HomeSponsorMain({
           {sponsor.imageUrl ? (
             <div className="relative w-full overflow-hidden bg-slate-100">
               <div className="relative aspect-[16/8] w-full sm:aspect-[16/7] md:aspect-[16/4]">
-                <img
-                  src={sponsor.imageUrl}
-                  alt={sponsor.title}
-className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"                  loading="lazy"
-                />
+                <picture>
+                  {sponsor.mobileImageUrl ? (
+                    <source
+                      media="(max-width: 767px)"
+                      srcSet={sponsor.mobileImageUrl}
+                    />
+                  ) : null}
+                  <img
+                    src={sponsor.imageUrl}
+                    alt={sponsor.title}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"
+                    loading="lazy"
+                  />
+                </picture>
 
                 <div className="absolute left-2 top-2 z-10 md:left-4 md:top-4">
   <span className="inline-flex items-center rounded-full bg-black/45 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white backdrop-blur-sm md:px-3 md:py-1 md:text-[10px]">
