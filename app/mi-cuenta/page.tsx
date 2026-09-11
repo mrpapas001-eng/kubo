@@ -329,6 +329,42 @@ export default async function MiCuentaPage() {
             })}
           </div>
 
+          <section className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/60 px-5 py-4">
+            <h2 className="text-base font-black text-slate-900">
+              Ayuda y contacto
+            </h2>
+
+            <nav
+              aria-label="Ayuda y contacto"
+              className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold text-[#0f3c8c] sm:flex sm:flex-wrap sm:gap-x-4 sm:gap-y-2"
+            >
+              <Link
+                href="/contacto"
+                className="flex min-h-11 items-center rounded-xl border border-blue-100 bg-white px-3 py-2 hover:underline sm:min-h-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+              >
+                Contacto
+              </Link>
+              <Link
+                href="/seguridad"
+                className="flex min-h-11 items-center rounded-xl border border-blue-100 bg-white px-3 py-2 hover:underline sm:min-h-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+              >
+                Seguridad
+              </Link>
+              <Link
+                href="/terminos"
+                className="flex min-h-11 items-center rounded-xl border border-blue-100 bg-white px-3 py-2 hover:underline sm:min-h-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+              >
+                Términos
+              </Link>
+              <Link
+                href="/privacidad"
+                className="flex min-h-11 items-center rounded-xl border border-blue-100 bg-white px-3 py-2 hover:underline sm:min-h-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0"
+              >
+                Privacidad
+              </Link>
+            </nav>
+          </section>
+
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
             <div className="flex items-center gap-3">
               <UserRound className="h-5 w-5 text-[#0f3c8c]" />
