@@ -17,6 +17,7 @@ import {
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
 import { isAdminEmail } from "@/lib/admin";
+import BusinessAccessEmailButton from "@/components/BusinessAccessEmailButton";
 
 type Props = {
   params: Promise<{
@@ -268,6 +269,13 @@ export default async function AdminBusinessDetailPage({ params }: Props) {
 
                 <div className="text-sm font-medium text-slate-500">
                   {business.ownerEmail}
+                </div>
+
+                <div className="mt-3">
+                  <BusinessAccessEmailButton
+                    businessId={business.id}
+                    ownerEmail={business.ownerEmail}
+                  />
                 </div>
               </div>
 
