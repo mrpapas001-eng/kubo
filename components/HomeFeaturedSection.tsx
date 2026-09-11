@@ -496,16 +496,15 @@ if (selected) {
 
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
             {extraListings.map((item, idx) => {
-              // Conteo continuo: incluye los topListings para que el sponsor caiga después del anuncio 12, 24, 36...
               const overallPosition = topListings.length + idx + 1;
+              const sponsorSlotIndex = Math.floor(overallPosition / 12) - 1;
               const shouldInsertSponsor =
-                demoFeedSponsors.length > 0 && overallPosition % 12 === 0;
+                demoFeedSponsors.length > 0 &&
+                overallPosition % 12 === 0 &&
+                sponsorSlotIndex < 2;
 
               const sponsor = shouldInsertSponsor
-                ? demoFeedSponsors[
-                    Math.floor(overallPosition / 12 - 1) %
-                      demoFeedSponsors.length
-                  ]
+                ? demoFeedSponsors[sponsorSlotIndex % demoFeedSponsors.length]
                 : null;
 
               return [

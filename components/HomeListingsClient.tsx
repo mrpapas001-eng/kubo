@@ -484,9 +484,10 @@ useEffect(() => {
     return result;
   }, [listings, searchQuery, sortMode, selectedCity]);
 
-  const primarySponsor = sponsors.find((s) => isSponsorVisible(s)) ?? null;
-  const secondarySponsor =
-    sponsors.filter((s) => isSponsorVisible(s))[1] ?? null;
+  const visibleSponsors = sponsors.filter((s) => isSponsorVisible(s));
+  const primarySponsor = visibleSponsors[0] ?? null;
+  const secondarySponsor = visibleSponsors[1] ?? null;
+  const feedSponsorLimit = isHomeView ? 2 : 3;
 
   const firstGrid = isHomeView ? filteredListings.slice(0, 6) : filteredListings;
   const sideListing = isHomeView ? filteredListings[6] : null;
@@ -789,13 +790,15 @@ useEffect(() => {
         ) : (
   <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
     {filteredListings.flatMap((item, idx) => {
+      const sponsorSlotIndex = Math.floor((idx + 1) / 12) - 1;
       const shouldInsertSponsor =
         isCategoryView &&
-        sponsors.length > 0 &&
-        (idx + 1) % 12 === 0;
+        visibleSponsors.length > 0 &&
+        (idx + 1) % 12 === 0 &&
+        sponsorSlotIndex < feedSponsorLimit;
 
       const sponsor = shouldInsertSponsor
-        ? sponsors[Math.floor(idx / 12) % sponsors.length]
+        ? visibleSponsors[sponsorSlotIndex % visibleSponsors.length]
         : null;
 
       return [

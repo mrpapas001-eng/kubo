@@ -1931,12 +1931,15 @@ listings = listings.sort((a, b) => {
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {listings.flatMap((item, idx) => {
+                  const sponsorSlotIndex = Math.floor((idx + 1) / 12) - 1;
                   const shouldInsertSponsor =
-                    categoryFeedSponsors.length > 0 && (idx + 1) % 12 === 0;
+                    categoryFeedSponsors.length > 0 &&
+                    (idx + 1) % 12 === 0 &&
+                    sponsorSlotIndex < 2;
 
                   const sponsor = shouldInsertSponsor
                     ? categoryFeedSponsors[
-                        Math.floor(idx / 12) % categoryFeedSponsors.length
+                        sponsorSlotIndex % categoryFeedSponsors.length
                       ]
                     : null;
 
