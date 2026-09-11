@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 
-export const FEATURED_DAILY_LIMIT = 5;
+export const FEATURED_DAILY_LIMIT = 3;
 export const PREMIUM_DAILY_LIMIT = 2;
 
 // Lanzamiento: 15 días calendario en Colombia. Se puede cambiar sin tocar código.

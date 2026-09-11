@@ -582,6 +582,7 @@ cellColor: isCellPhone ? cellColor.trim() : null,
   </div>
 ) : null}
 
+
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>

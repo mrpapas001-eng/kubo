@@ -453,6 +453,24 @@ const showBusinessVerificationCta = Boolean(
   const motorTransmission = car?.transmission || "Mecánica";
   const motorYear = car?.year || "—";
 
+  const donationConditionLabel =
+    details?.kuboAyuda?.condition === "NEW"
+      ? "Nuevo"
+      : details?.kuboAyuda?.condition === "GOOD"
+        ? "Buen estado"
+        : details?.kuboAyuda?.condition === "USED_FUNCTIONAL"
+          ? "Usado funcional"
+          : null;
+
+  const donationDeliveryLabel =
+    details?.kuboAyuda?.deliveryMethod === "PICKUP"
+      ? "Lo recoge la persona"
+      : details?.kuboAyuda?.deliveryMethod === "DELIVERY"
+        ? "Puedo entregarlo"
+        : details?.kuboAyuda?.deliveryMethod === "ARRANGE"
+          ? "Acordar entrega"
+          : null;
+
   {
     return (
       <div className="min-h-screen bg-[#F8F9FB] px-4 py-6 md:px-6 md:py-10">
@@ -516,6 +534,12 @@ const showBusinessVerificationCta = Boolean(
                       {listing.subcategorySlug}
                     </span>
                   ) : null}
+
+                  {isDonation ? (
+                    <span className="rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-900">
+                      💛 DONACIÓN
+                    </span>
+                  ) : null}
                 </div>
 
                 <h1 className="text-2xl font-black leading-tight text-slate-900 md:text-4xl">
@@ -532,7 +556,29 @@ const showBusinessVerificationCta = Boolean(
   {formattedPrice}
 </div>
 
-{listing.categorySlug === "motor" ? (
+{isDonation ? (
+  <p className="mt-2 text-sm font-bold text-amber-700">
+    Este artículo se entrega gratuitamente a través de Kubo Ayuda.
+  </p>
+) : null}
+
+{isDonation ? (
+  <div className="mt-5 grid grid-cols-2 overflow-hidden rounded-2xl border border-slate-200 bg-white md:mt-6">
+    <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-3 text-center md:p-4">
+      <span className="text-xs font-black text-slate-500">Estado</span>
+      <span className="text-xs font-black text-slate-700">
+        {donationConditionLabel || "—"}
+      </span>
+    </div>
+
+    <div className="flex flex-col items-center gap-1 p-3 text-center md:p-4">
+      <span className="text-xs font-black text-slate-500">Entrega</span>
+      <span className="text-xs font-black text-slate-700">
+        {donationDeliveryLabel || "—"}
+      </span>
+    </div>
+  </div>
+) : listing.categorySlug === "motor" ? (
   <div className="mt-5 grid grid-cols-4 overflow-hidden rounded-2xl border border-slate-200 bg-white md:mt-6">
     <div className="flex flex-col items-center gap-1 border-r border-slate-200 p-2 text-center md:p-4">
       <Gauge className="h-5 w-5 text-slate-800 md:h-6 md:w-6" />
