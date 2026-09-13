@@ -5,8 +5,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
-
-const ADMIN_EMAIL = "mr.papas001@gmail.com";
+import { isAdminEmail } from "@/lib/admin";
 
 const MIME_BY_EXT: Record<string, string> = {
   pdf: "application/pdf",
@@ -39,7 +38,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "Debes iniciar sesión." }, { status: 403 });
   }
 
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email)) {
     return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 403 });
   }
 

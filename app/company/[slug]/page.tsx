@@ -18,18 +18,13 @@ import {
 import { prisma } from "@/lib/db";
 import { attachAccountVerification } from "@/lib/accountVerification";
 import ListingCard from "@/components/ListingCard";
+import { normalizeExternalUrl } from "@/lib/urlValidation";
 
 type PageProps = {
   params: Promise<{
     slug: string;
   }>;
 };
-
-function normalizeExternalUrl(url: string) {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `https://${url}`;
-}
 
 export default async function CompanyPage({ params }: PageProps) {
   const { slug } = await params;
@@ -67,9 +62,15 @@ export default async function CompanyPage({ params }: PageProps) {
   const phone = business.phone || "";
   const businessDescription =
     business.description || "Empresa en Kubo Anuncios.";
-  const businessWebsite = normalizeExternalUrl(business.website || "");
-  const businessInstagram = normalizeExternalUrl(business.instagram || "");
-  const businessFacebook = normalizeExternalUrl(business.facebook || "");
+  const businessWebsite = normalizeExternalUrl(business.website || "", "website");
+  const businessInstagram = normalizeExternalUrl(
+    business.instagram || "",
+    "instagram",
+  );
+  const businessFacebook = normalizeExternalUrl(
+    business.facebook || "",
+    "facebook",
+  );
   const businessWhatsapp = business.whatsapp || "";
 
   const totalViews = listings.reduce((sum, item) => {
@@ -290,7 +291,7 @@ export default async function CompanyPage({ params }: PageProps) {
                 <a
                   href={whatsappHref}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className={`mt-5 flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#10b981] px-5 text-sm font-black text-white hover:bg-[#0d966a] ${
                     !cleanWhatsapp ? "pointer-events-none opacity-50" : ""
                   }`}
@@ -311,7 +312,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       <a
                         href={businessWebsite}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer nofollow"
                         className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                       >
                         <span className="inline-flex items-center gap-3">
@@ -326,7 +327,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       <a
                         href={businessInstagram}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer nofollow"
                         className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                       >
                         <span className="inline-flex items-center gap-3">
@@ -341,7 +342,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       <a
                         href={businessFacebook}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer nofollow"
                         className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                       >
                         <span className="inline-flex items-center gap-3">

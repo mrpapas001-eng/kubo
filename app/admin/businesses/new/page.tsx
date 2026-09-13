@@ -12,6 +12,7 @@ import {
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/db";
 import { isAdminEmail } from "@/lib/admin";
+import { normalizeExternalUrl } from "@/lib/urlValidation";
 
 function makeSlug(value: string) {
   return value
@@ -51,9 +52,18 @@ export default async function NewBusinessPage() {
     const phone = String(formData.get("phone") || "").trim();
     const whatsapp = String(formData.get("whatsapp") || "").trim();
 
-    const website = String(formData.get("website") || "").trim();
-    const instagram = String(formData.get("instagram") || "").trim();
-    const facebook = String(formData.get("facebook") || "").trim();
+    const website = normalizeExternalUrl(
+      String(formData.get("website") || "").trim(),
+      "website",
+    );
+    const instagram = normalizeExternalUrl(
+      String(formData.get("instagram") || "").trim(),
+      "instagram",
+    );
+    const facebook = normalizeExternalUrl(
+      String(formData.get("facebook") || "").trim(),
+      "facebook",
+    );
 
     const city = String(formData.get("city") || "").trim();
     const address = String(formData.get("address") || "").trim();

@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/authOptions";
 import { attachAccountVerification } from "@/lib/accountVerification";
 import { isAdminEmail } from "@/lib/admin";
 import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
+import { normalizeExternalUrl } from "@/lib/urlValidation";
 
 const SMART_ORDER = VISIBILITY_PROMOTIONS_ENABLED
   ? [
@@ -596,12 +597,20 @@ export async function POST(req: Request) {
     const businessDescription =
       selectedBusiness?.description || bodyBusinessDescription;
 
-    const businessWebsite = selectedBusiness?.website || bodyBusinessWebsite;
+    const businessWebsite = normalizeExternalUrl(
+      selectedBusiness?.website || bodyBusinessWebsite,
+      "website",
+    );
 
-    const businessInstagram =
-      selectedBusiness?.instagram || bodyBusinessInstagram;
+    const businessInstagram = normalizeExternalUrl(
+      selectedBusiness?.instagram || bodyBusinessInstagram,
+      "instagram",
+    );
 
-    const businessFacebook = selectedBusiness?.facebook || bodyBusinessFacebook;
+    const businessFacebook = normalizeExternalUrl(
+      selectedBusiness?.facebook || bodyBusinessFacebook,
+      "facebook",
+    );
 
     const businessWhatsapp = selectedBusiness?.whatsapp
       ? String(selectedBusiness.whatsapp).replace(/\D/g, "").slice(0, 10)
