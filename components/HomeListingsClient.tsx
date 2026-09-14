@@ -212,12 +212,20 @@ export default function HomeListingsClient({
       setError(null);
 
       try {
-        const res = await fetch(
-          `/api/listings?take=12&skip=0&city=${encodeURIComponent(selectedCity)}&balanced=1`,
-          {
-            cache: "no-store",
-          }
-        );
+        // Usa sortMode en lugar de balanced cuando sea "recent"
+        const params = new URLSearchParams();
+        params.set("take", "12");
+        params.set("skip", "0");
+        params.set("city", selectedCity);
+        if (sortMode === "recent") {
+          params.set("sortMode", "recent");
+        } else {
+          params.set("balanced", "1");
+        }
+
+        const res = await fetch(`/api/listings?${params.toString()}`, {
+          cache: "no-store",
+        });
 
         const raw = await res.text();
         let data: any = null;
@@ -260,7 +268,7 @@ export default function HomeListingsClient({
     return () => {
       cancelled = true;
     };
-  }, [selectedCity, onCityChange, isCategoryView]);
+  }, [selectedCity, onCityChange, isCategoryView, sortMode]);
 
   async function loadMore() {
     if (isLoadingMore || isRefreshing || !hasMore) return;
@@ -268,16 +276,23 @@ export default function HomeListingsClient({
     setIsLoadingMore(true);
 
     try {
-      const base =
-  isCategoryView && categorySlug
-    ? `/api/listings?take=12&skip=${skip}&categorySlug=${encodeURIComponent(
-        categorySlug
-      )}`
-    : `/api/listings?take=12&skip=${skip}&city=${encodeURIComponent(
-        selectedCity
-      )}`;
+      const params = new URLSearchParams();
+      params.set("take", "12");
+      params.set("skip", String(skip));
 
-      const res = await fetch(base, {
+      if (isCategoryView && categorySlug) {
+        params.set("categorySlug", categorySlug);
+      } else {
+        params.set("city", selectedCity);
+        // Usa sortMode en lugar de balanced cuando sea "recent"
+        if (sortMode === "recent") {
+          params.set("sortMode", "recent");
+        } else {
+          params.set("balanced", "1");
+        }
+      }
+
+      const res = await fetch(`/api/listings?${params.toString()}`, {
         cache: "no-store",
       });
 

@@ -208,6 +208,7 @@ const cityParam = String(url.searchParams.get("city") ?? "").trim();
 const categoryParam = String(
   url.searchParams.get("categorySlug") ?? ""
 ).trim();
+const sortMode = String(url.searchParams.get("sortMode") ?? "").trim();
 
     const balanced = url.searchParams.get("balanced") === "1";
 
@@ -225,6 +226,37 @@ const categoryParam = String(
       ...(cityParam ? { city: cityParam } : {}),
       ...(categoryParam ? { categorySlug: categoryParam } : {}),
     };
+
+    // =====================================================
+    // ORDEN ESTRICTAMENTE CRONOLÓGICO (RECIENTES)
+    // =====================================================
+
+    if (sortMode === "recent") {
+      // Devuelve anuncios ordenados SOLO por createdAt descendente, sin mezcla de categorías
+      const items = await prisma.listing.findMany({
+        where,
+        orderBy: [
+          { createdAt: "desc" as const },
+          { id: "desc" as const },
+        ],
+        take,
+        skip,
+      });
+
+      const total = await prisma.listing.count({
+        where,
+      });
+
+      const itemsWithVerification = await attachAccountVerification(items);
+
+      return NextResponse.json({
+        ok: true,
+        items: itemsWithVerification,
+        nextSkip: skip + items.length,
+        hasMore: skip + items.length < total,
+        fallbackUsed: false,
+      });
+    }
 
     // =====================================================
     // HOME VARIADA

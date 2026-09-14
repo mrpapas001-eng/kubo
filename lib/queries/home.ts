@@ -60,86 +60,26 @@ export async function getHomeListings(
   const take = args.take ?? 12;
   const skip = args.skip ?? 0;
 
+  // Devuelve anuncios en orden estrictamente cronológico (createdAt desc)
+  // sin mezcla de categorías ni priorización por verificación/promociones.
+  // Consistente con sortMode=recent en la API.
   const listings = await prisma.listing.findMany({
     where: {
       status: "active",
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 250,
+    orderBy: [
+      { createdAt: "desc" as const },
+      { id: "desc" as const },
+    ],
+    take: take + skip,
   });
 
   const listingsWithVerification =
     await attachAccountVerification(listings);
 
-  const normalized = listingsWithVerification
+  return listingsWithVerification
     .map(normalizePromotionStatus)
-    .sort(sortListings);
-
-  // =====================================================
-  // PROMOCIONADOS PRIMERO
-  // =====================================================
-
-  const promoted = normalized.filter(
-  (item: any) =>
-    item.isPremium ||
-    item.isFeatured
-);
-
-  const promotedIds = new Set(
-    promoted.map((item: any) => item.id)
-  );
-
-  // =====================================================
-  // RESTO, AGRUPADO POR CATEGORÍA
-  // =====================================================
-
-  const regular = normalized.filter(
-    (item: any) => !promotedIds.has(item.id)
-  );
-
-  const groups = new Map<string, any[]>();
-
-  for (const item of regular) {
-    const category = String(
-      item.categorySlug ?? "otros"
-    );
-
-    if (!groups.has(category)) {
-      groups.set(category, []);
-    }
-
-    groups.get(category)!.push(item);
-  }
-
-  const mixedRegular: any[] = [];
-
-  while (
-    Array.from(groups.values()).some(
-      (items) => items.length > 0
-    )
-  ) {
-    for (const items of groups.values()) {
-      const next = items.shift();
-
-      if (next) {
-        mixedRegular.push(next);
-      }
-    }
-  }
-
-  // Promocionados conservan prioridad.
-  // Después vienen anuncios variados por categoría.
-  const finalListings = [
-    ...promoted,
-    ...mixedRegular,
-  ];
-
-  return finalListings.slice(
-    skip,
-    skip + take
-  );
+    .slice(skip, skip + take);
 }
 
 export async function getListings(args: GetListingsArgs = {}) {

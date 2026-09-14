@@ -114,6 +114,16 @@ return matchesCategory && matchesMin && matchesMax;
     });
 
     result.sort((a: any, b: any) => {
+      // Para "Recientes", ordenar SOLO por createdAt desc sin anteponer Premium/Featured
+      if (sortMode === "recent") {
+        const dateA = new Date(a?.createdAt ?? 0).getTime();
+        const dateB = new Date(b?.createdAt ?? 0).getTime();
+        if (dateA !== dateB) return dateB - dateA;
+        // Desempate por id desc
+        return String(b?.id ?? "").localeCompare(String(a?.id ?? ""));
+      }
+
+      // Para otros modos, priorizar por premium/featured
       const priorityDiff = getListingPriority(b) - getListingPriority(a);
       if (priorityDiff !== 0) return priorityDiff;
 
@@ -188,9 +198,17 @@ if (selected) {
     try {
       setLoadingMore(true);
 
-      const res = await fetch(
-        `/api/listings?take=12&skip=${allListings.length}&balanced=1`,
-      );
+      // Usa sortMode en lugar de balanced cuando sea "recent"
+      const params = new URLSearchParams();
+      params.set("take", "12");
+      params.set("skip", String(allListings.length));
+      if (sortMode === "recent") {
+        params.set("sortMode", "recent");
+      } else {
+        params.set("balanced", "1");
+      }
+
+      const res = await fetch(`/api/listings?${params.toString()}`);
 
       const data = await res.json();
 
