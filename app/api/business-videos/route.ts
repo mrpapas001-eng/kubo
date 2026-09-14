@@ -110,6 +110,7 @@ export async function GET(request: Request) {
             businessType: true,
             city: true,
             whatsapp: true,
+            phone: true,
             isVerified: true,
           },
         },

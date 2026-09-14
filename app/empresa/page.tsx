@@ -172,6 +172,21 @@ export default async function BusinessOwnerDashboardPage({
             <PeriodLink period="30d" current={period}>30 días</PeriodLink>
             <PeriodLink period="all" current={period}>Todo</PeriodLink>
           </div>
+
+          <Link
+            href="/empresa/videos"
+            className="mt-4 flex items-center justify-between gap-3 rounded-3xl border border-[#0f3c8c]/20 bg-[#e8f0ff] p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <div>
+              <div className="text-sm font-black text-[#0f3c8c]">Nuevo</div>
+              <div className="mt-1 text-lg font-black text-slate-900">
+                Promociona tu empresa con un video
+              </div>
+              <p className="mt-1 text-sm font-medium text-slate-500">
+                Sube un video vertical de 15 a 60 segundos para tu perfil de empresa.
+              </p>
+            </div>
+          </Link>
         </header>
 
         {businesses.map((business) => {

@@ -21,6 +21,11 @@ export type ReelItem = {
   href?: string;
   contactLabel?: string;
   contactUrl?: string;
+  // Campos opcionales usados por los videos de empresa (Fase 2 del MVP).
+  ctaLabel?: string;
+  description?: string;
+  businessName?: string;
+  location?: string;
 };
 
 type Props = {
@@ -333,9 +338,23 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
                           <div className="max-w-[240px] text-lg font-extrabold leading-tight text-white">
                             {reel.title}
                           </div>
-                          <div className="mt-2 text-sm text-white/75">
-                            Desliza hacia arriba o abajo para seguir viendo reels.
-                          </div>
+
+                          {reel.businessName ? (
+                            <div className="mt-1 text-sm font-bold text-white/90">
+                              {reel.businessName}
+                              {reel.location ? ` · ${reel.location}` : ""}
+                            </div>
+                          ) : null}
+
+                          {reel.description ? (
+                            <div className="mt-2 line-clamp-2 max-w-[260px] text-sm text-white/75">
+                              {reel.description}
+                            </div>
+                          ) : (
+                            <div className="mt-2 text-sm text-white/75">
+                              Desliza hacia arriba o abajo para seguir viendo reels.
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-xl">
@@ -351,7 +370,7 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
                           className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <ExternalLink className="h-4 w-4" />
-                          Ver anuncio
+                          {reel.ctaLabel ?? "Ver anuncio"}
                         </button>
 
                         <button

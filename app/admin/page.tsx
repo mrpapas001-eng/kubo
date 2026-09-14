@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   Building2,
+  Clapperboard,
   Eye,
   FileWarning,
   Flag,
@@ -114,6 +115,7 @@ export default async function AdminDashboardPage() {
     pendingBusiness,
     pendingAccountVerifications,
     pendingAidRequests,
+    pendingBusinessVideos,
     totalConversations,
     totalViews,
   ] = await Promise.all([
@@ -142,6 +144,9 @@ export default async function AdminDashboardPage() {
     prisma.aidRequest.count({
       where: { status: "PENDING" },
     }),
+    prisma.businessVideo.count({
+      where: { status: "PENDING" },
+    }),
     prisma.conversation.count(),
     prisma.listing.aggregate({
       _sum: { views: true },
@@ -153,7 +158,8 @@ export default async function AdminDashboardPage() {
     pendingIdentity +
     pendingBusiness +
     pendingAccountVerifications +
-    pendingAidRequests;
+    pendingAidRequests +
+    pendingBusinessVideos;
 
   const views = totalViews._sum.views ?? 0;
 
@@ -295,6 +301,15 @@ export default async function AdminDashboardPage() {
               icon={Heart}
               badge={pendingAidRequests}
               actionLabel="Gestionar solicitudes"
+            />
+
+            <AdminLink
+              href="/admin/business-videos"
+              title="Videos de empresas"
+              description="Revisa y aprueba videos promocionales antes de publicarlos en /videos."
+              icon={Clapperboard}
+              badge={pendingBusinessVideos}
+              actionLabel="Gestionar videos"
             />
           </div>
         </div>

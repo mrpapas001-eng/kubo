@@ -130,7 +130,7 @@ export default function Header() {
             </Link>
 
             <Link
-              href="/#reels"
+              href="/videos"
               className="inline-flex items-center gap-2 rounded-full bg-[#0f3c8c] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#0c2f6d]"
             >
               <Play className="h-4 w-4 fill-current" />
@@ -308,7 +308,7 @@ export default function Header() {
               </Link>
 
               <Link
-                href="/#reels"
+                href="/videos"
                 onClick={closeMenu}
                 className="rounded-xl bg-[#0f3c8c] px-3 py-2 text-[15px] font-bold text-white hover:bg-[#0c2f6d]"
               >
