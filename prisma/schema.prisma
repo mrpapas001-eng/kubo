@@ -112,6 +112,7 @@ model Business {
 
   listings        Listing[]
   analyticsEvents ListingAnalyticsEvent[]
+  video           BusinessVideo?
 
   @@index([ownerEmail])
   @@index([businessType])
@@ -222,6 +223,35 @@ model ListingReport {
   @@index([reporterEmail])
   @@index([status])
   @@index([createdAt])
+}
+
+enum BusinessVideoStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BusinessVideo {
+  id              String              @id @default(cuid())
+  businessId      String              @unique
+  videoUrl        String
+  thumbnailUrl    String?
+  description     String
+  categorySlug    String
+  city            String
+  durationSeconds Int
+  status          BusinessVideoStatus @default(PENDING)
+  adminNote       String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([city])
+  @@index([categorySlug])
 }
 
 model BusinessVerificationRequest {
