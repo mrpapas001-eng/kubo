@@ -309,7 +309,7 @@ export default function ReelsSection({ items = DEFAULT_REELS }: Props) {
                       loop
                       playsInline
                       muted={muted}
-                      preload="auto"
+                      preload="metadata"
                       poster={reel.image}
                     />
                   ) : (

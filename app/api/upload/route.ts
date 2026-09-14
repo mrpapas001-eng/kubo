@@ -13,7 +13,7 @@ const MAX_IMAGE_SIZE_MB = 8;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
 const MAX_VIDEO_FILES = 1;
-const MAX_VIDEO_SIZE_MB = 50;
+const MAX_VIDEO_SIZE_MB = 25;
 const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024;
 
 const MAX_DOCUMENT_FILES = 1;
@@ -62,7 +62,7 @@ async function saveFile(file: File, subfolder: string) {
   const ext = MIME_TO_EXT[file.type] || "bin";
   const filename = buildSafeFilename(ext);
 
-  if (subfolder === "images") {
+  if (subfolder === "images" || subfolder === "videos") {
     const blob = await put(`${subfolder}/${filename}`, file, {
       access: "public",
       addRandomSuffix: false,
