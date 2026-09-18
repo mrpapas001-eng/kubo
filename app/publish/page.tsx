@@ -785,71 +785,6 @@ deal,
 
   const finalCity = city === "Otra" ? manualCity.trim() : city;
 
-  const suggestedTitle = useMemo(() => {
-    if (isCar) {
-      const brand = toTitleCase(carBrand.replace("ELÉCTRICOS", "Eléctrico"));
-      const model = toTitleCase(carModel);
-      const year = String(carYear || "").trim();
-      return [brand, model, year].filter(Boolean).join(" ") || "Carro en excelente estado";
-    }
-
-    if (isMoto) {
-      const brand = toTitleCase(motoBrand.replace("ELÉCTRICAS", "Eléctrica"));
-      const model = toTitleCase(motoModel);
-      const year = String(motoYear || "").trim();
-      return [brand, model, year].filter(Boolean).join(" ") || "Moto en excelente estado";
-    }
-
-    if (isRealEstate) {
-      const sub =
-        subsForCategory.find((s) => s.slug === subcategory)?.label ?? "Inmueble";
-      const dealText = deal === "arriendo" ? "en arriendo" : "en venta";
-      const roomsText = rooms ? `${rooms} alcobas` : "";
-      return [sub, dealText, roomsText].filter(Boolean).join(" ");
-    }
-
-    if (isCellPhone) {
-      const brand = toTitleCase(cellBrand);
-      const model = toTitleCase(cellModel);
-      return [brand, model].filter(Boolean).join(" ") || "Celular en venta";
-    }
-
-    const catLabel =
-      CATEGORY_OPTIONS.find((c) => c.key === category)?.label ?? "Anuncio";
-
-    const subLabel =
-      subsForCategory.find((s) => s.slug === subcategory)?.label ??
-      toTitleCase(subcategory);
-
-    return `${catLabel}: ${subLabel || "Nuevo"}`;
-  }, [
-    isCar,
-    isMoto,
-    isRealEstate,
-    isCellPhone,
-    carBrand,
-    carModel,
-    carYear,
-    motoBrand,
-    motoModel,
-    motoYear,
-    cellBrand,
-    cellModel,
-    subcategory,
-    deal,
-    rooms,
-    category,
-    subsForCategory,
-  ]);
-
-  useEffect(() => {
-    if (!title.trim()) {
-      setTitle(suggestedTitle);
-    }
-  }, [suggestedTitle]);
-
-
-
   function validateStep(nextStep?: Step) {
     setError(null);
 
@@ -1972,33 +1907,6 @@ if (!session) {
                     placeholder="Ej: Chevrolet Onix 2020"
                     required
                   />
-
-                  <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <div className="text-[11px] font-extrabold uppercase text-slate-500">
-                      Título sugerido
-                    </div>
-                    <div className="mt-1 text-sm font-black text-slate-900">
-                      {suggestedTitle}
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setTitle(suggestedTitle)}
-                        className="h-9 rounded-xl bg-slate-900 px-4 text-sm font-black text-white"
-                      >
-                        Usar sugerido
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setTitle("")}
-                        className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700"
-                      >
-                        Restablecer
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
                 <div>
@@ -2399,7 +2307,7 @@ if (!session) {
                   </div>
 
                   <div className="mt-3 text-2xl font-black text-slate-900">
-                    {title || suggestedTitle}
+                    {title || "Sin título"}
                   </div>
 
                   <div className="mt-2 text-sm font-medium text-slate-500">
