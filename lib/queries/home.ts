@@ -102,7 +102,7 @@ export async function getListings(args: GetListingsArgs = {}) {
     .slice(skip, skip + take);
 }
 
-async function getListingReels() {
+async function getListingReels(maxListings?: number) {
   const listings = await prisma.listing.findMany({
     where: {
       status: "active",
@@ -110,6 +110,7 @@ async function getListingReels() {
     orderBy: {
       createdAt: "desc",
     },
+    ...(maxListings ? { take: maxListings } : {}),
   });
 
   const listingsWithVerification = await attachAccountVerification(listings);
@@ -152,7 +153,7 @@ async function getListingReels() {
 }
 
 export async function getHomeReels() {
-  const reels = await getListingReels();
+  const reels = await getListingReels(100);
   return reels.slice(0, 10);
 }
 
