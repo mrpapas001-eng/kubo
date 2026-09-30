@@ -18,6 +18,7 @@ export type ReelItem = {
   title: string;
   image: string;
   videoUrl?: string;
+  externalUrl?: string;
   badge?: string;
   href?: string;
   contactLabel?: string;
@@ -145,6 +146,11 @@ export default function ReelsSection({
     } catch {
       alert("Página no disponible todavía.");
     }
+  }
+
+  function openExternalReel(reel: ReelItem) {
+    if (!reel.externalUrl) return;
+    window.open(reel.externalUrl, "_blank", "noopener,noreferrer");
   }
 
   function handleContact(reel: ReelItem) {
@@ -396,11 +402,18 @@ export default function ReelsSection({
                         }}
                       />
                     ) : (
-                      <img
-                        src={reel.image}
-                        alt={reel.title}
-                        className="h-full w-full object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => openExternalReel(reel)}
+                        className="block h-full w-full"
+                        aria-label="Abrir reel original"
+                      >
+                        <img
+                          src={reel.image}
+                          alt={reel.title}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
                     )}
 
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -447,6 +460,15 @@ export default function ReelsSection({
                               ) : (
                                 <Pause className="h-5 w-5 fill-current" />
                               )}
+                            </button>
+                          ) : reel.externalUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => openExternalReel(reel)}
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-xl"
+                              aria-label="Abrir reel original"
+                            >
+                              <Play className="ml-0.5 h-5 w-5 fill-current" />
                             </button>
                           ) : null}
                         </div>
