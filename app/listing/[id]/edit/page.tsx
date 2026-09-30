@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 const MAX_IMAGES = 25;
+const MAX_REEL_SIZE_BYTES = 25 * 1024 * 1024;
+const ALLOWED_REEL_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 
 type EditableImage =
   | {
@@ -34,6 +36,8 @@ export default function EditListingPage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 const [phone, setPhone] = useState("");
+const [existingReelUrl, setExistingReelUrl] = useState("");
+const [reelFile, setReelFile] = useState<File | null>(null);
 
 const [isCellPhone, setIsCellPhone] = useState(false);
 const [cellCondition, setCellCondition] = useState("");
@@ -84,6 +88,7 @@ const [cellColor, setCellColor] = useState("");
           l.price !== null && l.price !== undefined ? String(l.price) : ""
         );
         setPhone(String(l.phone ?? ""));
+        setExistingReelUrl(String(l?.details?.reelUrl ?? ""));
 
 const listingIsCellPhone =
   l.categorySlug === "celulares" &&
@@ -358,6 +363,28 @@ async function buildFinalImageUrls() {
   return finalUrls;
 }
 
+async function buildFinalReelUrl() {
+  if (!reelFile) {
+    return existingReelUrl;
+  }
+
+  const formData = new FormData();
+  formData.append("video", reelFile);
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data?.ok || !data?.videoUrl) {
+    throw new Error(data?.error ?? "No se pudo subir el reel.");
+  }
+
+  return String(data.videoUrl).trim();
+}
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
 
@@ -381,6 +408,7 @@ async function buildFinalImageUrls() {
       }
 
       const finalImages = await buildFinalImageUrls();
+      const finalReelUrl = await buildFinalReelUrl();
 
       if (finalImages.length === 0) {
         setFormError("El anuncio debe tener al menos una imagen.");
@@ -400,6 +428,7 @@ async function buildFinalImageUrls() {
 imageUrls: finalImages,
 cellCondition: isCellPhone ? cellCondition : null,
 cellColor: isCellPhone ? cellColor.trim() : null,
+reelUrl: finalReelUrl,
         }),
       });
 
@@ -581,6 +610,80 @@ cellColor: isCellPhone ? cellColor.trim() : null,
     </div>
   </div>
 ) : null}
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <h2 className="text-sm font-black text-slate-900">
+              Reel o video corto
+            </h2>
+
+            <p className="mt-1 text-xs text-slate-500">
+              Sube el archivo directamente para que se reproduzca dentro del feed de Kubo.
+            </p>
+
+            {existingReelUrl && !reelFile ? (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+                {/\.(mp4|webm|mov)(\?|$)/i.test(existingReelUrl)
+                  ? "Este anuncio ya tiene un video cargado en Kubo. Puedes reemplazarlo."
+                  : "Este anuncio tiene un enlace externo. Para que se reproduzca automáticamente en Kubo, reemplázalo subiendo el archivo de video."}
+              </div>
+            ) : null}
+
+            <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-3">
+              <span className="min-w-0">
+                <span className="block text-sm font-black text-slate-800">
+                  {reelFile ? "Nuevo video seleccionado" : "Elegir video"}
+                </span>
+                <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">
+                  {reelFile ? reelFile.name : "MP4, WEBM o MOV · máximo 25 MB"}
+                </span>
+              </span>
+
+              <span className="shrink-0 rounded-lg bg-[#0f3c8c] px-3 py-2 text-xs font-black text-white">
+                Subir
+              </span>
+
+              <input
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime"
+                className="hidden"
+                onChange={(e) => {
+                  setFormError(null);
+                  const file = e.target.files?.[0] ?? null;
+
+                  if (!file) {
+                    setReelFile(null);
+                    return;
+                  }
+
+                  if (!ALLOWED_REEL_TYPES.includes(file.type)) {
+                    setFormError("El reel debe ser MP4, WEBM o MOV.");
+                    e.target.value = "";
+                    setReelFile(null);
+                    return;
+                  }
+
+                  if (file.size > MAX_REEL_SIZE_BYTES) {
+                    setFormError("El reel no puede superar 25 MB.");
+                    e.target.value = "";
+                    setReelFile(null);
+                    return;
+                  }
+
+                  setReelFile(file);
+                }}
+              />
+            </label>
+
+            {reelFile ? (
+              <button
+                type="button"
+                onClick={() => setReelFile(null)}
+                className="mt-2 text-xs font-black text-red-600"
+              >
+                Quitar nuevo video
+              </button>
+            ) : null}
+          </div>
 
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
