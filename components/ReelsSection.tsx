@@ -19,6 +19,7 @@ export type ReelItem = {
   image: string;
   videoUrl?: string;
   externalUrl?: string;
+  externalPlayerUrl?: string;
   badge?: string;
   href?: string;
   contactLabel?: string;
@@ -265,6 +266,8 @@ export default function ReelsSection({
 
   if (reels.length === 0) return null;
 
+  const activeReel = reels[activeIndex];
+
   const gallery = hideGallery ? null : (
     <section
       id="reels"
@@ -350,18 +353,20 @@ export default function ReelsSection({
             <X className="h-5 w-5" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => setMuted((prev) => !prev)}
-            className="absolute right-3 top-16 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur"
-            aria-label={muted ? "Activar sonido" : "Silenciar"}
-          >
-            {muted ? (
-              <VolumeX className="h-5 w-5" />
-            ) : (
-              <Volume2 className="h-5 w-5" />
-            )}
-          </button>
+          {activeReel?.videoUrl ? (
+            <button
+              type="button"
+              onClick={() => setMuted((prev) => !prev)}
+              className="absolute right-3 top-16 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur"
+              aria-label={muted ? "Activar sonido" : "Silenciar"}
+            >
+              {muted ? (
+                <VolumeX className="h-5 w-5" />
+              ) : (
+                <Volume2 className="h-5 w-5" />
+              )}
+            </button>
+          ) : null}
 
           <div
             ref={viewerRef}
@@ -400,6 +405,15 @@ export default function ReelsSection({
                           event.currentTarget.muted = muted;
                           event.currentTarget.play().catch(() => {});
                         }}
+                      />
+                    ) : reel.externalPlayerUrl && index === activeIndex ? (
+                      <iframe
+                        key={`${reel.id}-${activeIndex}`}
+                        src={reel.externalPlayerUrl}
+                        title={reel.title}
+                        className="h-full w-full border-0"
+                        allow="autoplay; encrypted-media; picture-in-picture; fullscreen; web-share"
+                        allowFullScreen
                       />
                     ) : (
                       <button
@@ -461,7 +475,7 @@ export default function ReelsSection({
                                 <Pause className="h-5 w-5 fill-current" />
                               )}
                             </button>
-                          ) : reel.externalUrl ? (
+                          ) : reel.externalPlayerUrl ? null : reel.externalUrl ? (
                             <button
                               type="button"
                               onClick={() => openExternalReel(reel)}
