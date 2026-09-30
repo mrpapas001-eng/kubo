@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { upload } from "@vercel/blob/client";
 import { ChevronLeft, ChevronRight, CheckCircle2, Sparkles } from "lucide-react";
 import { recommendCategory } from "@/lib/catalog/recommendCategory";
 import { KUBO_CITIES } from "@/app/data/cities";
@@ -1022,21 +1023,17 @@ if (contactUrl.trim()) {
       }
 
 if (reelFile) {
-        const fd = new FormData();
-        fd.append("video", reelFile);
+        const blob = await upload(
+          `reels/${Date.now()}-${reelFile.name}`,
+          reelFile,
+          {
+            access: "public",
+            handleUploadUrl: "/api/reel-upload",
+            multipart: true,
+          }
+        );
 
-        const up = await fetch("/api/upload", {
-          method: "POST",
-          body: fd,
-        });
-
-        const upData = await up.json();
-
-        if (!up.ok || !upData?.ok || !upData?.videoUrl) {
-          throw new Error(upData?.error ?? "No se pudo subir el reel.");
-        }
-
-        uploadedReelUrl = String(upData.videoUrl).trim();
+        uploadedReelUrl = String(blob.url).trim();
       }
 
 const details: any = {
