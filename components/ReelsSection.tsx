@@ -117,11 +117,15 @@ export default function ReelsSection({
     setViewerOpen(true);
   }
 
-  function closeViewer() {
+  function stopViewer() {
     videoRefs.current.forEach((video) => video?.pause());
     setViewerOpen(false);
     setMuted(true);
     setPaused(false);
+  }
+
+  function closeViewer() {
+    stopViewer();
 
     if (closeHref) {
       router.push(closeHref);
@@ -134,7 +138,7 @@ export default function ReelsSection({
       return;
     }
 
-    closeViewer();
+    stopViewer();
 
     try {
       router.push(reel.href);
