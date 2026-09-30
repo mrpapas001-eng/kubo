@@ -109,7 +109,7 @@ export async function getListings(args: GetListingsArgs = {}) {
     .slice(skip, skip + take);
 }
 
-async function getListingReels(maxListings?: number) {
+async function getListingReels(maxListings?: number, nativeOnly = false) {
   const listings = await prisma.listing.findMany({
     where: {
       status: "active",
@@ -132,7 +132,12 @@ async function getListingReels(maxListings?: number) {
             ? JSON.parse(listing.details)
             : listing.details;
 
-        return isNativeReelUrl(details?.reelUrl);
+        const reelUrl =
+          typeof details?.reelUrl === "string"
+            ? details.reelUrl.trim()
+            : "";
+
+        return Boolean(reelUrl) && (!nativeOnly || isNativeReelUrl(reelUrl));
       } catch {
         return false;
       }
@@ -142,6 +147,9 @@ async function getListingReels(maxListings?: number) {
         typeof listing.details === "string"
           ? JSON.parse(listing.details)
           : listing.details;
+
+      const reelUrl = String(details.reelUrl).trim();
+      const native = isNativeReelUrl(reelUrl);
 
       return {
         id: listing.id,
@@ -154,16 +162,17 @@ async function getListingReels(maxListings?: number) {
               ? "Premium reel"
               : "Reel",
         href: `/listing/${listing.id}`,
-        videoUrl: String(details.reelUrl).trim(),
+        videoUrl: native ? reelUrl : undefined,
+        externalUrl: native ? undefined : reelUrl,
       };
     });
 }
 
 export async function getHomeReels() {
-  const reels = await getListingReels(100);
+  const reels = await getListingReels(100, false);
   return reels.slice(0, 10);
 }
 
 export async function getAllReels() {
-  return getListingReels();
+  return getListingReels(undefined, false);
 }
