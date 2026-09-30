@@ -58,6 +58,7 @@ const CATEGORY_OPTIONS = [
   { slug: "celulares", label: "Celulares" },
   { slug: "electrodomesticos", label: "Electrodomésticos" },
   { slug: "hogar", label: "Hogar" },
+  { slug: "alimentos-bebidas", label: "Alimentos y bebidas" },
   { slug: "empleo", label: "Empleo" },
   { slug: "servicios", label: "Servicios" },
   { slug: "negocios", label: "Negocios" },
