@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { upload } from "@vercel/blob/client";
 import { ChevronLeft, ChevronRight, CheckCircle2, Sparkles } from "lucide-react";
 import { recommendCategory } from "@/lib/catalog/recommendCategory";
 import { KUBO_CITIES } from "@/app/data/cities";
@@ -513,7 +514,7 @@ const [cellColor, setCellColor] = useState<string>("");
   const [baths, setBaths] = useState<string>("");
   const [sqm, setSqm] = useState<string>("");
   const [parking, setParking] = useState<boolean>(false);
-const [reelUrl, setReelUrl] = useState("");
+const [reelFile, setReelFile] = useState<File | null>(null);
 
 const [sellerType, setSellerType] = useState<"PARTICULAR" | "EMPRESA">(
   "PARTICULAR"
@@ -643,7 +644,6 @@ if (draft.cellColor !== undefined) setCellColor(draft.cellColor);
       if (draft.baths !== undefined) setBaths(draft.baths);
       if (draft.sqm !== undefined) setSqm(draft.sqm);
       if (draft.parking !== undefined) setParking(draft.parking);
-      if (draft.reelUrl !== undefined) setReelUrl(draft.reelUrl);
     } catch {
       localStorage.removeItem(PUBLISH_DRAFT_KEY);
     }
@@ -694,7 +694,6 @@ carElectricMirrors,
       baths,
       sqm,
       parking,
-      reelUrl,
     };
 
     try {
@@ -742,7 +741,6 @@ deal,
     baths,
     sqm,
     parking,
-    reelUrl,
   ]);
 
   // limpiar URLs de preview al desmontar
@@ -997,6 +995,7 @@ if (contactUrl.trim()) {
 
     try {
       let uploadedUrls: string[] = [];
+      let uploadedReelUrl = "";
 
       if (imageFiles.length) {
         const filesToUpload = await Promise.all(
@@ -1023,12 +1022,26 @@ if (contactUrl.trim()) {
         }
       }
 
+if (reelFile) {
+        const blob = await upload(
+          `reels/${Date.now()}-${reelFile.name}`,
+          reelFile,
+          {
+            access: "public",
+            handleUploadUrl: "/api/reel-upload",
+            multipart: true,
+          }
+        );
+
+        uploadedReelUrl = String(blob.url).trim();
+      }
+
 const details: any = {
   images: uploadedUrls,
 };
 
-if (reelUrl && reelUrl.trim() !== "") {
-  details.reelUrl = reelUrl.trim();
+if (uploadedReelUrl) {
+  details.reelUrl = uploadedReelUrl;
 }
 
 if (isCar) {
@@ -2294,19 +2307,72 @@ if (!session) {
     Si no quieres mostrar un teléfono, pega aquí el enlace donde quieres recibir
     los contactos.
   </p>
-</div> 
+</div>
                 <div>
   <label className="text-sm font-bold text-slate-700">
-    Enlace del reel o video corto (opcional)
+    Reel o video corto (opcional)
   </label>
-  <input
-    value={reelUrl}
-    onChange={(e) => setReelUrl(e.target.value)}
-    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4"
-    placeholder="Ej: https://www.instagram.com/reel/..."
-  />
+
+  <label className="mt-2 flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition hover:border-[#0f3c8c] hover:bg-blue-50">
+    <span className="min-w-0">
+      <span className="block text-sm font-black text-slate-800">
+        {reelFile ? "Video seleccionado" : "Subir video"}
+      </span>
+      <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">
+        {reelFile ? reelFile.name : "MP4, WEBM o MOV · máximo 25 MB"}
+      </span>
+    </span>
+
+    <span className="shrink-0 rounded-lg bg-[#0f3c8c] px-3 py-2 text-xs font-black text-white">
+      Elegir
+    </span>
+
+    <input
+      type="file"
+      accept="video/mp4,video/webm,video/quicktime"
+      className="hidden"
+      onChange={(e) => {
+        setError(null);
+        const file = e.target.files?.[0] ?? null;
+
+        if (!file) {
+          setReelFile(null);
+          return;
+        }
+
+        const allowed = ["video/mp4", "video/webm", "video/quicktime"];
+
+        if (!allowed.includes(file.type)) {
+          setError("El reel debe ser MP4, WEBM o MOV.");
+          e.target.value = "";
+          setReelFile(null);
+          return;
+        }
+
+        if (file.size > 25 * 1024 * 1024) {
+          setError("El reel no puede superar 25 MB.");
+          e.target.value = "";
+          setReelFile(null);
+          return;
+        }
+
+        setReelFile(file);
+      }}
+    />
+  </label>
+
+  {reelFile ? (
+    <button
+      type="button"
+      onClick={() => setReelFile(null)}
+      className="mt-2 text-xs font-black text-red-600"
+    >
+      Quitar video
+    </button>
+  ) : null}
+
   <p className="mt-2 text-xs font-medium text-slate-500">
-    Puedes pegar un enlace de Instagram, TikTok, YouTube Shorts u otro video.
+    Súbelo directamente a Kubo para que se reproduzca automáticamente en el feed de reels.
   </p>
 </div>
               </div>
