@@ -20,6 +20,7 @@ import {
   Paperclip,
   Hammer,
   Sparkles,
+  UtensilsCrossed,
 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 
@@ -45,6 +46,7 @@ function getCategoryIcon(slug: string): IconType {
   if (slug === "papeleria-oficina") return Paperclip;
   if (slug === "herramientas-ferreteria") return Hammer;
   if (slug === "salud-belleza") return Sparkles;
+  if (slug === "alimentos-bebidas") return UtensilsCrossed;
   return ChevronRight;
 }
 
@@ -123,6 +125,10 @@ function getCategoryDescription(slug: string, label: string) {
 
   if (slug === "salud-belleza") {
     return "Maquillaje, cuidado personal, cabello, salud y bienestar.";
+  }
+
+  if (slug === "alimentos-bebidas") {
+    return "Salsas, panadería, carnes frías, lácteos, bebidas e insumos para restaurantes.";
   }
 
   return `Explora anuncios en ${label.toLowerCase()} con una experiencia clara y visual.`;
