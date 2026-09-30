@@ -38,6 +38,13 @@ function normalizePromotionStatus(listing: any) {
   };
 }
 
+function isNativeReelUrl(value: unknown) {
+  return (
+    typeof value === "string" &&
+    /^https:\/\/.+\.(mp4|webm|mov)(\?.*)?$/i.test(value.trim())
+  );
+}
+
 function sortListings(a: any, b: any) {
   if (a.businessVerified !== b.businessVerified) {
     return a.businessVerified ? -1 : 1;
@@ -125,7 +132,7 @@ async function getListingReels(maxListings?: number) {
             ? JSON.parse(listing.details)
             : listing.details;
 
-        return typeof details?.reelUrl === "string" && details.reelUrl.trim();
+        return isNativeReelUrl(details?.reelUrl);
       } catch {
         return false;
       }
@@ -147,7 +154,7 @@ async function getListingReels(maxListings?: number) {
               ? "Premium reel"
               : "Reel",
         href: `/listing/${listing.id}`,
-        videoUrl: details.reelUrl,
+        videoUrl: String(details.reelUrl).trim(),
       };
     });
 }
