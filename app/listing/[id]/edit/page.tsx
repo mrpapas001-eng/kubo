@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 
 const MAX_IMAGES = 25;
 const MAX_REEL_SIZE_BYTES = 25 * 1024 * 1024;
@@ -368,21 +369,17 @@ async function buildFinalReelUrl() {
     return existingReelUrl;
   }
 
-  const formData = new FormData();
-  formData.append("video", reelFile);
+  const blob = await upload(
+    `reels/${Date.now()}-${reelFile.name}`,
+    reelFile,
+    {
+      access: "public",
+      handleUploadUrl: "/api/reel-upload",
+      multipart: true,
+    }
+  );
 
-  const res = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || !data?.ok || !data?.videoUrl) {
-    throw new Error(data?.error ?? "No se pudo subir el reel.");
-  }
-
-  return String(data.videoUrl).trim();
+  return String(blob.url).trim();
 }
 
   async function handleSave(e: React.FormEvent) {
