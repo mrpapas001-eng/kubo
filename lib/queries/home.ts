@@ -54,15 +54,10 @@ function sortListings(a: any, b: any) {
   );
 }
 
-export async function getHomeListings(
-  args: GetHomeListingsArgs = {}
-) {
+export async function getHomeListings(args: GetHomeListingsArgs = {}) {
   const take = args.take ?? 12;
   const skip = args.skip ?? 0;
 
-  // Devuelve anuncios en orden estrictamente cronológico (createdAt desc)
-  // sin mezcla de categorías ni priorización por verificación/promociones.
-  // Consistente con sortMode=recent en la API.
   const listings = await prisma.listing.findMany({
     where: {
       status: "active",
@@ -88,11 +83,11 @@ export async function getListings(args: GetListingsArgs = {}) {
   const { categorySlug, subcategorySlug } = args;
 
   const listings = await prisma.listing.findMany({
-where: {
-  status: "active",
-  ...(categorySlug ? { categorySlug } : {}),
-  ...(subcategorySlug ? { subcategorySlug } : {}),
-},
+    where: {
+      status: "active",
+      ...(categorySlug ? { categorySlug } : {}),
+      ...(subcategorySlug ? { subcategorySlug } : {}),
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -107,16 +102,15 @@ where: {
     .slice(skip, skip + take);
 }
 
-export async function getHomeReels() {
-const listings = await prisma.listing.findMany({
-  where: {
-    status: "active",
-  },
-  orderBy: {
-    createdAt: "desc",
-  },
-  take: 100,
-});
+async function getListingReels() {
+  const listings = await prisma.listing.findMany({
+    where: {
+      status: "active",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const listingsWithVerification = await attachAccountVerification(listings);
 
@@ -135,7 +129,6 @@ const listings = await prisma.listing.findMany({
         return false;
       }
     })
-    .slice(0, 10)
     .map((listing: any) => {
       const details =
         typeof listing.details === "string"
@@ -146,15 +139,23 @@ const listings = await prisma.listing.findMany({
         id: listing.id,
         title: listing.title,
         image: listing.imageUrl || "/placeholders/listing.jpg",
-        badge: listing.accountVerificationType === "EMPRESA"
-          ? "Empresa verificada"
-          : listing.isPremium
-            ? "Premium reel"
-            : "Reel",
+        badge:
+          listing.accountVerificationType === "EMPRESA"
+            ? "Empresa verificada"
+            : listing.isPremium
+              ? "Premium reel"
+              : "Reel",
         href: `/listing/${listing.id}`,
         videoUrl: details.reelUrl,
-        contactLabel: "Ver reel",
-        contactUrl: details.reelUrl,
       };
     });
+}
+
+export async function getHomeReels() {
+  const reels = await getListingReels();
+  return reels.slice(0, 10);
+}
+
+export async function getAllReels() {
+  return getListingReels();
 }
