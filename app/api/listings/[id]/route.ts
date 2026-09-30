@@ -202,6 +202,24 @@ export async function PUT(req: Request, context: RouteContext) {
 
     const rawPrice = String(body?.price ?? "").replace(/\D/g, "");
     const price = rawPrice ? Number(rawPrice) : null;
+
+    const hasReelUrl = Object.prototype.hasOwnProperty.call(body, "reelUrl");
+    const reelUrl = String(body?.reelUrl ?? "").trim().slice(0, 2048);
+
+    if (
+      hasReelUrl &&
+      reelUrl &&
+      !/^https:\/\/.+\.(mp4|webm|mov)(\?.*)?$/i.test(reelUrl)
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "El reel debe ser un video subido directamente a Kubo.",
+        },
+        { status: 400 }
+      );
+    }
+
     const isCellPhone =
       existing.categorySlug === "celulares" &&
       existing.subcategorySlug === "celulares";
@@ -305,6 +323,12 @@ export async function PUT(req: Request, context: RouteContext) {
               condition: cellCondition,
               color: cellColor,
             },
+          }
+        : {}),
+
+      ...(hasReelUrl
+        ? {
+            reelUrl: reelUrl || null,
           }
         : {}),
     };
