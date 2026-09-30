@@ -109,6 +109,91 @@ export async function getListings(args: GetListingsArgs = {}) {
     .slice(skip, skip + take);
 }
 
+function getTikTokPostId(value: string) {
+  const match = value.match(/tiktok\.com\/[^\s?#]*\/video\/(\d+)/i);
+  return match?.[1] ?? null;
+}
+
+async function resolveTikTokPlayerUrl(value: string) {
+  let postId = getTikTokPostId(value);
+
+  if (!postId && /^https:\/\/(?:vt|vm)\.tiktok\.com\//i.test(value)) {
+    try {
+      const response = await fetch(value, {
+        redirect: "follow",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/153 Safari/537.36",
+        },
+        next: { revalidate: 86400 },
+      });
+
+      postId = getTikTokPostId(response.url);
+    } catch {}
+  }
+
+  if (!postId) {
+    try {
+      const response = await fetch(
+        `https://www.tiktok.com/oembed?url=${encodeURIComponent(value)}`,
+        { next: { revalidate: 86400 } }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const html = String(data?.html ?? "");
+        postId = html.match(/data-video-id=["'](\d+)["']/i)?.[1] ?? null;
+      }
+    } catch {}
+  }
+
+  if (!postId) return null;
+
+  return (
+    `https://www.tiktok.com/player/v1/${postId}` +
+    "?autoplay=1&loop=1&controls=1&play_button=0&rel=0&muted=1"
+  );
+}
+
+async function getExternalPlayerUrl(value: string) {
+  const url = value.trim();
+
+  if (/^https:\/\/(?:www\.)?facebook\.com\/(?:reel|watch|[^/]+\/videos)\//i.test(url)) {
+    return (
+      "https://www.facebook.com/plugins/video.php?href=" +
+      encodeURIComponent(url) +
+      "&show_text=false&autoplay=true&mute=true&width=500"
+    );
+  }
+
+  if (/^https:\/\/(?:www\.|vt\.|vm\.)?tiktok\.com\//i.test(url)) {
+    return resolveTikTokPlayerUrl(url);
+  }
+
+  const youtubeMatch = url.match(
+    /(?:youtube\.com\/shorts\/|youtu\.be\/)([A-Za-z0-9_-]{6,})/i
+  );
+
+  if (youtubeMatch?.[1]) {
+    const id = youtubeMatch[1];
+
+    return (
+      `https://www.youtube.com/embed/${id}` +
+      `?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${id}&controls=1`
+    );
+  }
+
+  const instagramMatch = url.match(
+    /instagram\.com\/(?:reel|reels)\/([A-Za-z0-9_-]+)/i
+  );
+
+  if (instagramMatch?.[1]) {
+    return `https://www.instagram.com/reel/${instagramMatch[1]}/embed/`;
+  }
+
+  return null;
+}
+
 async function getListingReels(maxListings?: number, nativeOnly = false) {
   const listings = await prisma.listing.findMany({
     where: {
@@ -122,7 +207,7 @@ async function getListingReels(maxListings?: number, nativeOnly = false) {
 
   const listingsWithVerification = await attachAccountVerification(listings);
 
-  return listingsWithVerification
+  const reelListings = listingsWithVerification
     .map(normalizePromotionStatus)
     .sort(sortListings)
     .filter((listing: any) => {
@@ -141,8 +226,10 @@ async function getListingReels(maxListings?: number, nativeOnly = false) {
       } catch {
         return false;
       }
-    })
-    .map((listing: any) => {
+    });
+
+  return Promise.all(
+    reelListings.map(async (listing: any) => {
       const details =
         typeof listing.details === "string"
           ? JSON.parse(listing.details)
@@ -150,6 +237,9 @@ async function getListingReels(maxListings?: number, nativeOnly = false) {
 
       const reelUrl = String(details.reelUrl).trim();
       const native = isNativeReelUrl(reelUrl);
+      const externalPlayerUrl = native
+        ? undefined
+        : (await getExternalPlayerUrl(reelUrl)) ?? undefined;
 
       return {
         id: listing.id,
@@ -164,8 +254,10 @@ async function getListingReels(maxListings?: number, nativeOnly = false) {
         href: `/listing/${listing.id}`,
         videoUrl: native ? reelUrl : undefined,
         externalUrl: native ? undefined : reelUrl,
+        externalPlayerUrl,
       };
-    });
+    })
+  );
 }
 
 export async function getHomeReels() {
