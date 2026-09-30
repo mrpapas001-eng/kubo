@@ -20,6 +20,7 @@ import {
   Paperclip,
   Hammer,
   Sparkles,
+  UtensilsCrossed,
 } from "lucide-react";
 
 const categories = [
@@ -28,6 +29,7 @@ const categories = [
   { slug: "celulares", name: "Celulares", icon: Smartphone },
   { slug: "electrodomesticos", name: "Electrodomésticos", icon: Monitor },
   { slug: "hogar", name: "Hogar", icon: Sofa },
+  { slug: "alimentos-bebidas", name: "Alimentos y bebidas", icon: UtensilsCrossed },
   { slug: "empleo", name: "Empleo", icon: Briefcase },
   { slug: "servicios", name: "Servicios", icon: Wrench },
   { slug: "negocios", name: "Negocios", icon: BarChart3 },

@@ -18,6 +18,7 @@ const CATEGORY_OPTIONS = [
   { value: "celulares", label: "Celulares" },
   { value: "empleo", label: "Empleo" },
   { value: "servicios", label: "Servicios" },
+  { value: "alimentos-bebidas", label: "Alimentos y bebidas" },
   { value: "negocios", label: "Negocios" },
   { value: "informatica", label: "Informática" },
   {

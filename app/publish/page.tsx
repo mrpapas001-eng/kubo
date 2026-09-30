@@ -29,7 +29,8 @@ type CategoryKey =
   | "juguetes"
   | "papeleria-oficina"
   | "herramientas-ferreteria"
-  | "salud-belleza";
+  | "salud-belleza"
+  | "alimentos-bebidas";
 
 type DealType = "venta" | "arriendo";
 
@@ -148,6 +149,19 @@ const CATEGORY_OPTIONS: Array<{
       { slug: "celulares", label: "Celulares" },
       { slug: "repuestos", label: "Repuestos" },
       { slug: "telefono-fijo", label: "Teléfono fijo" },
+    ],
+  },
+  {
+    key: "alimentos-bebidas",
+    label: "Alimentos y bebidas",
+    subs: [
+      { slug: "salsas-aderezos", label: "Salsas y aderezos" },
+      { slug: "carnes-frias", label: "Carnes frías" },
+      { slug: "panaderia", label: "Panadería" },
+      { slug: "lacteos", label: "Lácteos" },
+      { slug: "bebidas", label: "Bebidas" },
+      { slug: "insumos-restaurantes", label: "Insumos para restaurantes" },
+      { slug: "otros", label: "Otros alimentos" },
     ],
   },
   {

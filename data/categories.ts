@@ -51,6 +51,23 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
+    slug: "alimentos-bebidas",
+    label: "Alimentos y bebidas",
+    subcategories: [
+      { slug: "salsas-aderezos", label: "Salsas y aderezos", template: "PRODUCT" },
+      { slug: "carnes-frias", label: "Carnes frías", template: "PRODUCT" },
+      { slug: "panaderia", label: "Panadería", template: "PRODUCT" },
+      { slug: "lacteos", label: "Lácteos", template: "PRODUCT" },
+      { slug: "bebidas", label: "Bebidas", template: "PRODUCT" },
+      {
+        slug: "insumos-restaurantes",
+        label: "Insumos para restaurantes",
+        template: "PRODUCT",
+      },
+      { slug: "otros", label: "Otros alimentos", template: "PRODUCT" },
+    ],
+  },
+  {
     slug: "empleo",
     label: "Empleo",
     subcategories: [

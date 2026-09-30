@@ -41,6 +41,16 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
 
   celulares: ["celulares", "repuestos", "telefono-fijo"],
 
+  "alimentos-bebidas": [
+    "salsas-aderezos",
+    "carnes-frias",
+    "panaderia",
+    "lacteos",
+    "bebidas",
+    "insumos-restaurantes",
+    "otros",
+  ],
+
   empleo: ["ofrezco-empleo", "busco-empleo"],
 
   servicios: [
