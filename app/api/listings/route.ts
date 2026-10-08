@@ -162,6 +162,12 @@ const PUBLISH_CATEGORIES: Record<string, string[]> = {
     "organizacion",
     "jardin-y-terraza",
     "otros",
+    "lavadoras-secadoras",
+    "neveras-congeladores",
+    "estufas-hornos",
+    "microondas-freidoras",
+    "pequenos-electrodomesticos",
+    "otros-electrodomesticos",
   ],
 
   juguetes: [
