@@ -38,6 +38,13 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 const RULES: Rule[] = [
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],"electrodomestico"], category: "hogar", subcategory: "lavadoras-secadoras", weight: 12 },
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],"electrodomesticos"], category: "hogar", subcategory: "neveras-congeladores", weight: 12 },
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],null], category: "hogar", subcategory: "estufas-hornos", weight: 12 },
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],null], category: "hogar", subcategory: "microondas-freidoras", weight: 12 },
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],null], category: "hogar", subcategory: "pequenos-electrodomesticos", weight: 12 },
+  { terms: [["lavadora","lavadoras","secadora","secadoras"],["nevera","neveras","congelador","congeladores","refrigerador"],["estufa","estufas","horno","hornos"],["microondas","freidora de aire","air fryer"],["licuadora","batidora","cafetera","tostadora","aspiradora"],null], category: "hogar", subcategory: "otros-electrodomesticos", weight: 12 },
+
   // Frases específicas primero: deben ganar a palabras ambiguas.
   { terms: ["silla de ruedas", "silla ortopedica"], category: "salud-belleza", subcategory: "salud-y-bienestar", weight: 10 },
   { terms: ["silla para bebe", "silla de bebe", "silla comedor bebe", "silla alta bebe"], category: "bebes", subcategory: "alimentacion", weight: 10 },
