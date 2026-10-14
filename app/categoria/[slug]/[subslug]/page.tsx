@@ -57,6 +57,12 @@ function getSubcategoryHeroImage(slug: string, subslug: string) {
   }
 
 if (slug === "hogar") {
+    if (subslug === "neveras-congeladores") return "/categorias/electrodomesticos/neveras-congeladores.png";
+    if (subslug === "lavadoras-secadoras") return "/categorias/electrodomesticos/lavadoras-secadoras.png";
+    if (subslug === "estufas-hornos") return "/categorias/electrodomesticos/estufas-hornos.png";
+    if (subslug === "microondas-freidoras") return "/categorias/electrodomesticos/microondas-freidoras.png";
+    if (subslug === "pequenos-electrodomesticos") return "/categorias/electrodomesticos/pequenos-electrodomesticos.png";
+    if (subslug === "otros-electrodomesticos") return "/categorias/electrodomesticos/otros-electrodomesticos.png";
   if (subslug === "muebles-de-hogar") return "/hogar-muebles.jpg";
   if (subslug === "decoracion") return "/hogar-decoracion.jpg";
   if (subslug === "colchones") return "/hogar-colchones.jpg";
