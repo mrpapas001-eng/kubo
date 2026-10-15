@@ -20,6 +20,7 @@ import {
 import BackButton from "@/components/BackButton";
 import { recommendCategory } from "@/lib/catalog/recommendCategory";
 import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
+import { CATEGORIES } from "@/data/categories";
 
 type Props = {
   searchParams?: Promise<{
@@ -52,29 +53,10 @@ const CITIES = [
   "Madrid, Cundinamarca",
 ];
 
-const CATEGORY_OPTIONS = [
-  { slug: "motor", label: "Motor" },
-  { slug: "inmobiliaria", label: "Inmobiliaria" },
-  { slug: "celulares", label: "Celulares" },
-  { slug: "electrodomesticos", label: "Electrodomésticos" },
-  { slug: "hogar", label: "Hogar" },
-  { slug: "alimentos-bebidas", label: "Alimentos y bebidas" },
-  { slug: "empleo", label: "Empleo" },
-  { slug: "servicios", label: "Servicios" },
-  { slug: "negocios", label: "Negocios" },
-  { slug: "informatica", label: "Informática" },
-  { slug: "imagen-sonido", label: "Imagen y sonido" },
-  { slug: "juegos", label: "Juegos" },
-  { slug: "formacion", label: "Formación y libros" },
-  { slug: "deportes", label: "Deportes" },
-  { slug: "mascotas", label: "Mascotas" },
-  { slug: "bebes", label: "Bebés" },
-  { slug: "moda", label: "Moda y complementos" },
-  { slug: "juguetes", label: "Juguetes" },
-  { slug: "papeleria-oficina", label: "Papelería y Oficina" },
-  { slug: "herramientas-ferreteria", label: "Herramientas y Ferretería" },
-  { slug: "salud-belleza", label: "Salud y Belleza" },
-];
+const CATEGORY_OPTIONS = CATEGORIES.map((category) => ({
+  slug: category.slug,
+  label: category.label,
+}));
 
 const QUICK_CATEGORIES = [
   { slug: "", label: "Todas", icon: Grid3X3 },
