@@ -7,6 +7,7 @@ import { attachAccountVerification } from "@/lib/accountVerification";
 import { isAdminEmail } from "@/lib/admin";
 import { VISIBILITY_PROMOTIONS_ENABLED } from "@/lib/features";
 import { normalizeExternalUrl } from "@/lib/urlValidation";
+import { CATEGORIES } from "@/data/categories";
 
 const SMART_ORDER = VISIBILITY_PROMOTIONS_ENABLED
   ? [
@@ -20,192 +21,13 @@ const SMART_ORDER = VISIBILITY_PROMOTIONS_ENABLED
       { createdAt: "desc" as const },
     ];
 
-// Mismo catálogo de categorías/subcategorías usado por
-// app/publish/page.tsx (CATEGORY_OPTIONS).
-const PUBLISH_CATEGORIES: Record<string, string[]> = {
-  motor: ["carros", "motos", "repuestos", "remolques-traileres"],
-
-  inmobiliaria: [
-    "casa",
-    "apartamento",
-    "apartaestudio",
-    "local-comercial",
-    "finca",
-    "finca-vacacional",
-    "glamping-cabanas",
-    "lote",
-    "casa-campestre",
-    "bodega",
-    "otros-inmuebles",
-  ],
-
-  celulares: ["celulares", "repuestos", "telefono-fijo"],
-
-  "alimentos-bebidas": [
-    "salsas-aderezos",
-    "carnes-frias",
-    "panaderia",
-    "lacteos",
-    "bebidas",
-    "insumos-restaurantes",
-    "otros",
-  ],
-
-  empleo: ["ofrezco-empleo", "busco-empleo"],
-
-  servicios: [
-    "hogar",
-    "personas",
-    "empresas",
-    "electricos",
-    "energia-solar",
-    "motor",
-    "bicicleta",
-    "otros",
-  ],
-
-  negocios: [
-    "venta-de-negocios",
-    "traspasos",
-    "franquicias",
-    "arriendo-de-negocio",
-    "financiacion",
-  ],
-
-  informatica: [
-    "portatiles",
-    "todo-en-uno",
-    "escritorio",
-    "tablets",
-    "mac",
-    "accesorios",
-    "software",
-    "gaming",
-  ],
-
-  "imagen-sonido": ["fotografia", "imagen", "sonido", "musica"],
-
-  juegos: ["consolas", "videojuegos", "accesorios"],
-
-  formacion: [
-    "clases-particulares",
-    "libros",
-    "idiomas",
-    "cursos",
-    "autoescuelas",
-  ],
-
-  deportes: [
-    "bicicletas",
-    "futbol",
-    "gimnasio",
-    "running",
-    "camping",
-    "natacion",
-    "otros",
-  ],
-
-  mascotas: ["perros", "gatos", "caballos", "adopciones", "peces", "varios"],
-
-  bebes: [
-    "habitacion-bebes",
-    "camaras-de-vigilancia",
-    "coches-de-bebe",
-    "juguetes",
-    "higiene-y-cuidado",
-    "varios",
-  ],
-
-  electrodomesticos: [
-    "neveras",
-    "lavadoras",
-    "secadoras",
-    "cocinas",
-    "hornos",
-    "microondas",
-    "aires-acondicionados",
-    "pequenos-electrodomesticos",
-    "industrial",
-    "otros",
-  ],
-
-  moda: [
-    "moda-hombre",
-    "moda-mujer",
-    "perfumes",
-    "calzado",
-    "disfraces",
-    "joyeria-bisuteria",
-    "sex-shop",
-    "otros-articulos-de-moda",
-  ],
-
-  "regalos-celebraciones": [
-    "velas-y-velones",
-    "regalos",
-    "flores-y-detalles",
-    "decoracion-para-fiestas",
-    "pinateria",
-    "desayunos-y-sorpresas",
-    "globos",
-    "invitaciones-y-papeleria",
-    "articulos-religiosos",
-    "otros",
-  ],
-
-  hogar: [
-    "muebles-de-hogar",
-    "decoracion",
-    "colchones",
-    "iluminacion",
-    "menaje",
-    "organizacion",
-    "jardin-y-terraza",
-    "otros",
-    "lavadoras-secadoras",
-    "neveras-congeladores",
-    "estufas-hornos",
-    "microondas-freidoras",
-    "pequenos-electrodomesticos",
-    "otros-electrodomesticos",
-  ],
-
-  juguetes: [
-    "peluches",
-    "munecas-y-figuras",
-    "juegos-de-mesa",
-    "didacticos",
-    "aire-libre",
-    "otros",
-  ],
-
-  "papeleria-oficina": [
-    "utiles-escolares",
-    "cuadernos-y-papel",
-    "escritura-y-dibujo",
-    "oficina-y-archivo",
-    "arte-y-manualidades",
-    "otros",
-  ],
-
-  "herramientas-ferreteria": [
-    "herramientas-electricas",
-    "herramientas-manuales",
-    "construccion",
-    "jardineria",
-    "seguridad-industrial",
-    "otros",
-  ],
-
-  "salud-belleza": [
-    "maquillaje",
-    "cuidado-de-la-piel",
-    "cabello",
-    "aparatos-de-belleza",
-    "salud-y-bienestar",
-    "otros",
-  ],
-};
+// Catálogo único compartido con Home, categorías y publicación.
+const PUBLISH_CATEGORIES: Record<string, string[]> = Object.fromEntries(
+  CATEGORIES.map((category) => [
+    category.slug,
+    category.subcategories.map((sub) => sub.slug),
+  ])
+);
 
 const REAL_ESTATE_SUBS_REQUIRING_ROOMS = [
   "casa",

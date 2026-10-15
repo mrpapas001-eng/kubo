@@ -43,26 +43,18 @@ function getSubcategoryHeroImage(slug: string, subslug: string) {
   }
 
   if (slug === "electrodomesticos") {
-    if (subslug === "neveras") return "/electrodomesticos-neveras.jpg";
-    if (subslug === "lavadoras") return "/electrodomesticos-lavadoras.jpg";
-    if (subslug === "secadoras") return "/electrodomesticos-secadoras.jpg";
-    if (subslug === "cocinas") return "/electrodomesticos-cocinas.jpg";
-    if (subslug === "hornos") return "/electrodomesticos-hornos.jpg";
-    if (subslug === "microondas") return "/electrodomesticos-microondas.jpg";
-    if (subslug === "aires-acondicionados") return "/electrodomesticos-aires.jpg";
-    if (subslug === "pequenos-electrodomesticos") return "/electrodomesticos-pequenos.jpg";
-    if (subslug === "industrial") return "/electrodomesticos-industrial.jpg";
-    if (subslug === "otros") return "/electrodomesticos-hero.jpg";
-    return "/electrodomesticos-hero.jpg";
-  }
-
-if (slug === "hogar") {
     if (subslug === "neveras-congeladores") return "/categorias/electrodomesticos/neveras-congeladores.png";
     if (subslug === "lavadoras-secadoras") return "/categorias/electrodomesticos/lavadoras-secadoras.png";
     if (subslug === "estufas-hornos") return "/categorias/electrodomesticos/estufas-hornos.png";
     if (subslug === "microondas-freidoras") return "/categorias/electrodomesticos/microondas-freidoras.png";
+    if (subslug === "aires-acondicionados") return "/electrodomesticos-aires.jpg";
     if (subslug === "pequenos-electrodomesticos") return "/categorias/electrodomesticos/pequenos-electrodomesticos.png";
+    if (subslug === "industrial") return "/electrodomesticos-industrial.jpg";
     if (subslug === "otros-electrodomesticos") return "/categorias/electrodomesticos/otros-electrodomesticos.png";
+    return "/electrodomesticos-hero.jpg";
+  }
+
+if (slug === "hogar") {
   if (subslug === "muebles-de-hogar") return "/hogar-muebles.jpg";
   if (subslug === "decoracion") return "/hogar-decoracion.jpg";
   if (subslug === "colchones") return "/hogar-colchones.jpg";
