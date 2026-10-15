@@ -10,37 +10,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { HOME_CITIES } from "@/app/data/cities";
+import { CATEGORIES } from "@/data/categories";
 
 const CATEGORY_OPTIONS = [
   { value: "", label: "Todas las categorías" },
-  { value: "motor", label: "Motor" },
-  { value: "inmobiliaria", label: "Inmobiliaria" },
-  { value: "celulares", label: "Celulares" },
-  { value: "empleo", label: "Empleo" },
-  { value: "servicios", label: "Servicios" },
-  { value: "alimentos-bebidas", label: "Alimentos y bebidas" },
-  { value: "negocios", label: "Negocios" },
-  { value: "informatica", label: "Informática" },
-  {
-    value: "electrodomesticos",
-    label: "Electrodomésticos",
-  },
-  { value: "moda", label: "Moda" },
-  { value: "bebes", label: "Bebés" },
-  { value: "mascotas", label: "Mascotas" },
-  { value: "juguetes", label: "Juguetes" },
-  {
-    value: "papeleria-oficina",
-    label: "Papelería y Oficina",
-  },
-  {
-    value: "herramientas-ferreteria",
-    label: "Herramientas y Ferretería",
-  },
-  {
-    value: "salud-belleza",
-    label: "Salud y Belleza",
-  },
+  ...CATEGORIES.map((category) => ({
+    value: category.slug,
+    label: category.label,
+  })),
 ];
 
 type Props = {
