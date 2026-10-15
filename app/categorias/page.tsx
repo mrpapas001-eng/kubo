@@ -21,35 +21,39 @@ import {
   BookOpen,
   Image as ImageIcon,
   UtensilsCrossed,
+  Grid3X3,
 } from "lucide-react";
+import { CATEGORIES } from "@/data/categories";
 
-const categories = [
-  { slug: "motor", name: "Motor", icon: Car },
-  { slug: "inmobiliaria", name: "Inmobiliaria", icon: Home },
-  { slug: "celulares", name: "Celulares", icon: Smartphone },
-  { slug: "electrodomesticos", name: "Electrodomésticos", icon: Monitor },
-  { slug: "hogar", name: "Hogar", icon: Sofa },
-  { slug: "alimentos-bebidas", name: "Alimentos y bebidas", icon: UtensilsCrossed },
-  { slug: "empleo", name: "Empleo", icon: Briefcase },
-  { slug: "servicios", name: "Servicios", icon: Wrench },
-  { slug: "negocios", name: "Negocios", icon: BarChart3 },
-  { slug: "informatica", name: "Informática", icon: Laptop },
-  { slug: "imagen-sonido", name: "Imagen y sonido", icon: ImageIcon },
-  { slug: "formacion", name: "Formación y libros", icon: BookOpen },
-  { slug: "deportes", name: "Deportes", icon: Dumbbell },
-  { slug: "moda", name: "Moda y complementos", icon: Shirt },
-  { slug: "bebes", name: "Bebés", icon: Baby },
-  { slug: "mascotas", name: "Mascotas", icon: PawPrint },
-  { slug: "regalos-celebraciones", name: "Regalos y celebraciones", icon: Gift },
-  { slug: "juguetes", name: "Juguetes", icon: ToyBrick },
-  { slug: "papeleria-oficina", name: "Papelería y Oficina", icon: Paperclip },
-  {
-    slug: "herramientas-ferreteria",
-    name: "Herramientas y Ferretería",
-    icon: Hammer,
-  },
-  { slug: "salud-belleza", name: "Salud y Belleza", icon: Sparkles },
-];
+const categoryIcons: Record<string, typeof Car> = {
+  motor: Car,
+  inmobiliaria: Home,
+  celulares: Smartphone,
+  electrodomesticos: Monitor,
+  hogar: Sofa,
+  "alimentos-bebidas": UtensilsCrossed,
+  empleo: Briefcase,
+  servicios: Wrench,
+  negocios: BarChart3,
+  informatica: Laptop,
+  "imagen-sonido": ImageIcon,
+  formacion: BookOpen,
+  deportes: Dumbbell,
+  moda: Shirt,
+  bebes: Baby,
+  mascotas: PawPrint,
+  "regalos-celebraciones": Gift,
+  juguetes: ToyBrick,
+  "papeleria-oficina": Paperclip,
+  "herramientas-ferreteria": Hammer,
+  "salud-belleza": Sparkles,
+};
+
+const categories = CATEGORIES.map((category) => ({
+  slug: category.slug,
+  name: category.label,
+  icon: categoryIcons[category.slug] ?? Grid3X3,
+}));
 
 export default function CategoriasPage() {
   return (
