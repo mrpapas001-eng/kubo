@@ -24,6 +24,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "herramientas-ferreteria": "🛠️",
   "salud-belleza": "💄",
   hogar: "🛋️",
+  electrodomesticos: "🔌",
   celulares: "📱",
   motor: "🚗",
   inmobiliaria: "🏠",
@@ -38,20 +39,20 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 const RULES: Rule[] = [
-  { terms: ["lavadora","lavadoras","secadora","secadoras"], category: "hogar", subcategory: "lavadoras-secadoras", weight: 12 },
-  { terms: ["nevera","neveras","congelador","congeladores","refrigerador"], category: "hogar", subcategory: "neveras-congeladores", weight: 12 },
-  { terms: ["estufa","estufas","horno","hornos"], category: "hogar", subcategory: "estufas-hornos", weight: 12 },
-  { terms: ["microondas","freidora de aire","air fryer"], category: "hogar", subcategory: "microondas-freidoras", weight: 12 },
-  { terms: ["licuadora","batidora","cafetera","tostadora","aspiradora"], category: "hogar", subcategory: "pequenos-electrodomesticos", weight: 12 },
-  { terms: ["electrodomestico","electrodomesticos"], category: "hogar", subcategory: "otros-electrodomesticos", weight: 12 },
+  { terms: ["lavadora","lavadoras","secadora","secadoras"], category: "electrodomesticos", subcategory: "lavadoras-secadoras", weight: 12 },
+  { terms: ["nevera","neveras","congelador","congeladores","refrigerador"], category: "electrodomesticos", subcategory: "neveras-congeladores", weight: 12 },
+  { terms: ["estufa","estufas","horno","hornos"], category: "electrodomesticos", subcategory: "estufas-hornos", weight: 12 },
+  { terms: ["microondas","freidora de aire","air fryer"], category: "electrodomesticos", subcategory: "microondas-freidoras", weight: 12 },
+  { terms: ["licuadora","batidora","cafetera","tostadora","aspiradora"], category: "electrodomesticos", subcategory: "pequenos-electrodomesticos", weight: 12 },
+  { terms: ["electrodomestico","electrodomesticos"], category: "electrodomesticos", subcategory: "otros-electrodomesticos", weight: 12 },
 
   // Frases específicas primero: deben ganar a palabras ambiguas.
   { terms: ["silla de ruedas", "silla ortopedica"], category: "salud-belleza", subcategory: "salud-y-bienestar", weight: 10 },
-  { terms: ["silla para bebe", "silla de bebe", "silla comedor bebe", "silla alta bebe"], category: "bebes", subcategory: "alimentacion", weight: 10 },
+  { terms: ["silla para bebe", "silla de bebe", "silla comedor bebe", "silla alta bebe"], category: "bebes", subcategory: "alimentacion-lactancia", weight: 10 },
   { terms: ["silla gamer", "silla gaming", "silla de oficina", "silla escritorio"], category: "hogar", subcategory: "muebles-de-hogar", weight: 9 },
   { terms: ["carro de juguete", "carros de juguete", "pista de carros"], category: "juguetes", weight: 10 },
-  { terms: ["coche de bebe", "coche para bebe", "cochecito"], category: "bebes", subcategory: "coches", weight: 9 },
-  { terms: ["teclado musical"], category: "imagen-sonido", subcategory: "musica", weight: 9 },
+  { terms: ["coche de bebe", "coche para bebe", "cochecito"], category: "bebes", subcategory: "coches-de-bebe", weight: 9 },
+  { terms: ["teclado musical"], category: "imagen-sonido", subcategory: "instrumentos-musicales", weight: 9 },
   { terms: ["monitor de computador"], category: "informatica", weight: 9 },
 
   // Juguetes
@@ -147,7 +148,7 @@ const RULES: Rule[] = [
   },
   { terms: ["organizador", "organizadores", "caja organizadora", "perchero", "zapatero", "canasta de ropa"], category: "hogar", subcategory: "organizacion", weight: 4 },
   { terms: ["matera", "materas", "maceta", "macetas", "sombrilla de terraza", "mesa de jardin", "silla de jardin"], category: "hogar", subcategory: "jardin-y-terraza", weight: 5 },
-  { terms: ["ventilador", "licuadora", "microondas", "nevera", "refrigerador", "lavadora", "cafetera", "tostadora", "freidora de aire", "air fryer", "arrocera", "sanduchera", "plancha de ropa", "aspiradora"], category: "hogar", subcategory: "otros", weight: 4 },
+  { terms: ["ventilador", "licuadora", "microondas", "nevera", "refrigerador", "lavadora", "cafetera", "tostadora", "freidora de aire", "air fryer", "arrocera", "sanduchera", "plancha de ropa", "aspiradora"], category: "electrodomesticos", subcategory: "otros-electrodomesticos", weight: 4 },
 
   // Celulares
   { terms: ["iphone", "celular", "celulares", "smartphone", "telefono movil"], category: "celulares", subcategory: "celulares", weight: 5 },
@@ -165,15 +166,15 @@ const RULES: Rule[] = [
   { terms: ["portatil", "portatiles", "laptop", "computador portatil"], category: "informatica", weight: 5 },
   { terms: ["computador", "computadores", "pc gamer", "torre de computador", "computador de mesa"], category: "informatica", weight: 4 },
   { terms: ["impresora", "impresoras"], category: "informatica", subcategory: "impresoras", weight: 5 },
-  { terms: ["teclado", "mouse", "raton computador", "webcam", "audifonos gamer"], category: "informatica", subcategory: "perifericos", weight: 4 },
+  { terms: ["teclado", "mouse", "raton computador", "webcam", "audifonos gamer"], category: "informatica", subcategory: "accesorios", weight: 4 },
   { terms: ["memoria ram", "tarjeta grafica", "disco duro", "ssd", "procesador", "fuente de poder"], category: "informatica", subcategory: "componentes", weight: 5 },
   { terms: ["router", "modem", "repetidor wifi", "switch de red"], category: "informatica", subcategory: "redes", weight: 5 },
 
   // Imagen y sonido
-  { terms: ["televisor", "televisores", "smart tv", "pantalla de tv"], category: "imagen-sonido", subcategory: "imagen", weight: 5 },
-  { terms: ["parlante", "parlantes", "bafle", "bafles", "amplificador", "teatro en casa", "barra de sonido", "equipo de sonido"], category: "imagen-sonido", subcategory: "sonido", weight: 5 },
-  { terms: ["camara fotografica", "camara profesional", "gopro", "dron"], category: "imagen-sonido", subcategory: "fotografia", weight: 5 },
-  { terms: ["guitarra", "bateria musical", "piano", "violin", "ukelele"], category: "imagen-sonido", subcategory: "musica", weight: 5 },
+  { terms: ["televisor", "televisores", "smart tv", "pantalla de tv"], category: "imagen-sonido", subcategory: "televisores", weight: 5 },
+  { terms: ["parlante", "parlantes", "bafle", "bafles", "amplificador", "teatro en casa", "barra de sonido", "equipo de sonido"], category: "imagen-sonido", subcategory: "audio", weight: 5 },
+  { terms: ["camara fotografica", "camara profesional", "gopro", "dron"], category: "imagen-sonido", subcategory: "camaras-fotografia", weight: 5 },
+  { terms: ["guitarra", "bateria musical", "piano", "violin", "ukelele"], category: "imagen-sonido", subcategory: "instrumentos-musicales", weight: 5 },
 
   // Juegos gamer
   { terms: ["playstation", "play station", "xbox", "nintendo", "consola", "consolas", "nintendo switch"], category: "juegos", subcategory: "consolas", weight: 5 },
@@ -181,8 +182,8 @@ const RULES: Rule[] = [
 
   // Deportes
   { terms: ["bicicleta", "bicicletas", "cicla", "bici"], category: "deportes", subcategory: "bicicletas", weight: 5 },
-  { terms: ["caminadora", "eliptica", "pesas", "mancuernas", "trotadora", "barra olimpica", "banco de pesas"], category: "deportes", subcategory: "fitness", weight: 5 },
-  { terms: ["guayos", "balon de futbol", "raqueta", "patines", "casco bicicleta"], category: "deportes", subcategory: "equipos", weight: 5 },
+  { terms: ["caminadora", "eliptica", "pesas", "mancuernas", "trotadora", "barra olimpica", "banco de pesas"], category: "deportes", subcategory: "gimnasio-fitness", weight: 5 },
+  { terms: ["guayos", "balon de futbol", "raqueta", "patines", "casco bicicleta"], category: "deportes", subcategory: "otros", weight: 5 },
   { terms: ["camiseta deportiva", "licra deportiva", "ropa deportiva"], category: "deportes", subcategory: "ropa-deportiva", weight: 5 },
 
   // Mascotas
@@ -194,11 +195,11 @@ const RULES: Rule[] = [
   { terms: ["casa para perro", "guacal", "collar para perro", "correa para perro", "comida para perro", "comida para gato", "arenera", "rascador para gato"], category: "mascotas", subcategory: "accesorios", weight: 6 },
 
   // Bebés
-  { terms: ["cuna", "cunas", "corral para bebe"], category: "bebes", subcategory: "cunas", weight: 5 },
+  { terms: ["cuna", "cunas", "corral para bebe"], category: "bebes", subcategory: "cunas-habitacion", weight: 5 },
   { terms: ["ropa de bebe", "body bebe", "mameluco bebe"], category: "bebes", subcategory: "ropa", weight: 5 },
-  { terms: ["tetero", "teteros", "plato para bebe", "vaso entrenador"], category: "bebes", subcategory: "alimentacion", weight: 5 },
-  { terms: ["extractor de leche", "cojin de lactancia"], category: "bebes", subcategory: "lactancia", weight: 5 },
-  { terms: ["banera bebe", "toalla bebe"], category: "bebes", subcategory: "bano", weight: 5 },
+  { terms: ["tetero", "teteros", "plato para bebe", "vaso entrenador"], category: "bebes", subcategory: "alimentacion-lactancia", weight: 5 },
+  { terms: ["extractor de leche", "cojin de lactancia"], category: "bebes", subcategory: "alimentacion-lactancia", weight: 5 },
+  { terms: ["banera bebe", "toalla bebe"], category: "bebes", subcategory: "higiene-cuidado", weight: 5 },
   { terms: ["juguete bebe", "sonajero", "gimnasio para bebe"], category: "bebes", subcategory: "juguetes", weight: 5 },
 
   // Moda
