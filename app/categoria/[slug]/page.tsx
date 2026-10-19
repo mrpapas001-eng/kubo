@@ -128,6 +128,11 @@ if (categorySlug === "celulares") {
 }
 
   if (categorySlug === "electrodomesticos") {
+    if (subSlug === "neveras-congeladores") return "/categorias/electrodomesticos/neveras-congeladores.png";
+    if (subSlug === "lavadoras-secadoras") return "/categorias/electrodomesticos/lavadoras-secadoras.png";
+    if (subSlug === "estufas-hornos") return "/categorias/electrodomesticos/estufas-hornos.png";
+    if (subSlug === "microondas-freidoras") return "/categorias/electrodomesticos/microondas-freidoras.png";
+    if (subSlug === "otros-electrodomesticos") return "/categorias/electrodomesticos/otros-electrodomesticos.png";
     if (subSlug === "neveras") return "/electrodomesticos-neveras.jpg";
     if (subSlug === "lavadoras") return "/electrodomesticos-lavadoras.jpg";
     if (subSlug === "secadoras") return "/electrodomesticos-secadoras.jpg";
