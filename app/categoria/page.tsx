@@ -135,6 +135,8 @@ function getCategoryDescription(slug: string, label: string) {
 }
 
 function getCategoryImage(slug: string) {
+  if (slug === "alimentos-bebidas") return "/categorias/alimentos-bebidas/alimentos-bebidas-home.png";
+  if (slug === "hogar") return "/categorias/hogar/hogar-home.png";
   if (slug === "electrodomesticos") return "/electrodomesticos-hero.jpg";
   if (slug === "motor") return "/hilux.jpg";
   if (slug === "inmobiliaria") return "/inmobiliaria-hero.jpg";

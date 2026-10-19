@@ -21,6 +21,17 @@ type PageProps = {
 
 
 function getSubcategoryHeroImage(slug: string, subslug: string) {
+  if (slug === "alimentos-bebidas") {
+    if (subslug === "salsas-aderezos") return "/categorias/alimentos-bebidas/salsas-aderezos.png";
+    if (subslug === "carnes-frias") return "/categorias/alimentos-bebidas/carnes-frias.png";
+    if (subslug === "panaderia") return "/categorias/alimentos-bebidas/panaderia.png";
+    if (subslug === "lacteos") return "/categorias/alimentos-bebidas/lacteos.png";
+    if (subslug === "bebidas") return "/categorias/alimentos-bebidas/bebidas.png";
+    if (subslug === "insumos-restaurantes") return "/categorias/alimentos-bebidas/insumos-restaurantes.png";
+    if (subslug === "otros") return "/categorias/alimentos-bebidas/otros-alimentos.png";
+    return "/categorias/alimentos-bebidas/alimentos-bebidas-home.png";
+  }
+
   if (slug === "motor" && subslug === "carros") return "/hilux.jpg";
   if (slug === "motor" && subslug === "motos") return "/motos-hero.jpg";
   if (slug === "motor" && subslug === "repuestos") return "/repuestos-hero.jpg";

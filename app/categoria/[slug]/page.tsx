@@ -83,11 +83,12 @@ function getCategoryDescription(slug: string, label: string) {
 }
 
 function getCategoryHeroImage(slug: string) {
+  if (slug === "alimentos-bebidas") return "/categorias/alimentos-bebidas/alimentos-bebidas-home.png";
   if (slug === "motor") return "/hilux.jpg";
   if (slug === "inmobiliaria") return "/inmobiliaria-hero.jpg";
   if (slug === "celulares") return "/celulares-hero.jpg";
   if (slug === "electrodomesticos") return "/electrodomesticos-hero.jpg";
-  if (slug === "hogar") return "/hogar-hero.jpg";
+  if (slug === "hogar") return "/categorias/hogar/hogar-home.png";
   if (slug === "empleo") return "/empleo-hero.jpg";
   if (slug === "servicios") return "/servicios-hero.jpg";
   if (slug === "negocios") return "/negocios-hero.jpg";
@@ -103,6 +104,16 @@ function getCategoryHeroImage(slug: string) {
 }
 
 function getSubcategoryImage(categorySlug: string, subSlug: string) {
+  if (categorySlug === "alimentos-bebidas") {
+    if (subSlug === "salsas-aderezos") return "/categorias/alimentos-bebidas/salsas-aderezos.png";
+    if (subSlug === "carnes-frias") return "/categorias/alimentos-bebidas/carnes-frias.png";
+    if (subSlug === "panaderia") return "/categorias/alimentos-bebidas/panaderia.png";
+    if (subSlug === "lacteos") return "/categorias/alimentos-bebidas/lacteos.png";
+    if (subSlug === "bebidas") return "/categorias/alimentos-bebidas/bebidas.png";
+    if (subSlug === "insumos-restaurantes") return "/categorias/alimentos-bebidas/insumos-restaurantes.png";
+    if (subSlug === "otros") return "/categorias/alimentos-bebidas/otros-alimentos.png";
+  }
+
   if (categorySlug === "motor") {
     if (subSlug === "carros") return "/hilux.jpg";
     if (subSlug === "motos") return "/motos-hero.jpg";
