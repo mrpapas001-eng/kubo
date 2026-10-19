@@ -135,6 +135,7 @@ function getCategoryDescription(slug: string, label: string) {
 }
 
 function getCategoryImage(slug: string) {
+  if (slug === "electrodomesticos") return "/electrodomesticos-hero.jpg";
   if (slug === "motor") return "/hilux.jpg";
   if (slug === "inmobiliaria") return "/inmobiliaria-hero.jpg";
   if (slug === "celulares") return "/celulares-hero.jpg";
